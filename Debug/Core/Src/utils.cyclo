@@ -1,0 +1,5 @@
+../Core/Src/utils.c:16:6:TimestampIsReached	7
+../Core/Src/utils.c:37:13:AddTimestamp	1
+../Core/Src/utils.c:41:6:CreateLine	3
+../Core/Src/utils.c:67:5:_write	1
+../Core/Src/utils.c:72:6:SetVerboseLevel	1

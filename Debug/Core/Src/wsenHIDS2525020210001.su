@@ -1,0 +1,16 @@
+../Core/Src/wsenHIDS2525020210001.c:145:13:ReadRegister	24	static
+../Core/Src/wsenHIDS2525020210001.c:151:13:WriteRegister	24	static
+../Core/Src/wsenHIDS2525020210001.c:157:13:InitRegisters	8	static
+../Core/Src/wsenHIDS2525020210001.c:179:6:HIDS_ReadCalibrationRegisters	32	static
+../Core/Src/wsenHIDS2525020210001.c:185:6:HIDS_Init	16	static
+../Core/Src/wsenHIDS2525020210001.c:196:6:HIDS_SetAverage	16	static
+../Core/Src/wsenHIDS2525020210001.c:205:6:HIDS_SetInterruptMode	16	static
+../Core/Src/wsenHIDS2525020210001.c:212:6:HIDS_SetContinuousMode	8	static
+../Core/Src/wsenHIDS2525020210001.c:225:6:HIDS_SetOneShotMode	8	static
+../Core/Src/wsenHIDS2525020210001.c:237:6:HIDS_StartOneShotMeasurement	8	static
+../Core/Src/wsenHIDS2525020210001.c:241:6:HIDS_SetHeaterEnable	16	static
+../Core/Src/wsenHIDS2525020210001.c:248:6:HIDS_DeviceConnected	16	static
+../Core/Src/wsenHIDS2525020210001.c:254:6:HIDS_MeasurementReady	8	static
+../Core/Src/wsenHIDS2525020210001.c:262:6:HIDS_CalculateHumidityValue	48	static
+../Core/Src/wsenHIDS2525020210001.c:305:13:HIDS_CalculateTemperatureValue	16	static
+../Core/Src/wsenHIDS2525020210001.c:309:6:HIDS_GetMeasurementValues	16	static
