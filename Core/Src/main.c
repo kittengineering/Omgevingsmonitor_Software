@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "crc.h"
 #include "dma.h"
 #include "i2c.h"
 #include "i2s.h"
@@ -100,9 +99,8 @@ int main(void)
   MX_I2S2_Init();
   MX_USART4_UART_Init();
   MX_USART1_UART_Init();
-  MX_CRC_Init();
   /* USER CODE BEGIN 2 */
-  // General TODOs
+  // General TODO 's
 	/*
 	 * : Put SSID in EEPROM
 	 * : Turn on heater if humidity is too high
@@ -116,17 +114,18 @@ int main(void)
 	 */
 
   SetVerboseLevel(VERBOSE_ALL);
-  Gadget_Init(&hi2c1, &hi2s2, &hcrc);
-
-//  Meas_Start();
+  Gadget_Init(&hi2c1, &hi2s2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1){
 	  // Upkeep gadget
-
-
+    UpkeepGadget();
+    HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, 1);
+    HAL_Delay(500);
+    HAL_GPIO_WritePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin, 0);
+    HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

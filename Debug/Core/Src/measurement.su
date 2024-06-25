@@ -1,4 +1,4 @@
-../Core/Src/measurement.c:13:6:Meas_Init	24	static
-../Core/Src/measurement.c:19:6:Meas_Start	8	static
-../Core/Src/measurement.c:24:6:Meas_Upkeep	8	static
-../Core/Src/measurement.c:27:6:Meas_CanSleep	16	static
+../Core/Src/measurement.c:17:6:Meas_Init	16	static
+../Core/Src/measurement.c:22:6:Meas_Start	8	static
+../Core/Src/measurement.c:27:6:Meas_Upkeep	32	static
+../Core/Src/measurement.c:34:6:Meas_CanSleep	16	static

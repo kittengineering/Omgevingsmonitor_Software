@@ -1,4 +1,4 @@
-../Core/Src/measurement.c:13:6:Meas_Init	1
-../Core/Src/measurement.c:19:6:Meas_Start	1
-../Core/Src/measurement.c:24:6:Meas_Upkeep	1
-../Core/Src/measurement.c:27:6:Meas_CanSleep	1
+../Core/Src/measurement.c:17:6:Meas_Init	1
+../Core/Src/measurement.c:22:6:Meas_Start	1
+../Core/Src/measurement.c:27:6:Meas_Upkeep	2
+../Core/Src/measurement.c:34:6:Meas_CanSleep	1

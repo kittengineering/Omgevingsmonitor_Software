@@ -18,15 +18,13 @@ typedef enum {
 } SampleRates;
 
 typedef enum {
-  NR_SAMPLES_128 = 128<<2,  //<<2 = 32 bit per channel , 2 channels
-  NR_SAMPLES_256 = 256<<2,
-  NR_SAMPLES_512 = 512<<2,
-  NR_SAMPLES_1024 = 1024<<2,
-  NR_SAMPLES_2048 = 2048<<2,
-  NR_SAMPLES_4096 = 4096<<2
+  NR_SAMPLES_128 = 128 << 2, //<<2 = 32 bit per channel , 2 channels
+  NR_SAMPLES_256 = 256 << 2,
+  NR_SAMPLES_512 = 512 << 2,
+  NR_SAMPLES_1024 = 1024 << 2,
+  NR_SAMPLES_2048 = 2048 << 2,
+  NR_SAMPLES_4096 = 4096 << 2
 } NrOfSamples;
-
-
 
 void MIC_Init(I2S_HandleTypeDef* I2SHandle);
 void MIC_Start(uint32_t sampleRate, uint16_t nrSamples);

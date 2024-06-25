@@ -8,7 +8,10 @@
 #ifndef INC_HUMIDTEMP_H_
 #define INC_HUMIDTEMP_H_
 
-void HT_Init(I2C_HandleTypeDef* humTempI2c, CRC_HandleTypeDef* sensorCrc);
+#include "stm32l0xx_hal.h"
+#include <stdbool.h>
+
+void HT_Init(I2C_HandleTypeDef* humTempI2c);
 void HT_StartMeasurement(void);
 bool HT_GetMeasurementValues(float* humidity_perc, float* temperature);
 

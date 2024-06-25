@@ -11,7 +11,7 @@
 #include "stm32l0xx_hal.h"
 #include <stdbool.h>
 
-void Meas_Init(I2C_HandleTypeDef* humidTempI2c, I2S_HandleTypeDef* micI2s, CRC_HandleTypeDef* sensorCrc);
+void Meas_Init(I2C_HandleTypeDef* humidTempI2c, I2S_HandleTypeDef* micI2s);
 void Meas_Start(void);
 void Meas_Upkeep(void);
 bool Meas_CanSleep(int* duration_ms);
