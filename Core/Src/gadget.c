@@ -15,13 +15,11 @@
 //  return true;
 //}
 
-void Gadget_Init(I2C_HandleTypeDef* humidTempI2c, I2S_HandleTypeDef* micI2s) {
+void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   // Check battery power
   // Init sensor + peripherals
-  Meas_Init(humidTempI2c, micI2s);
-  Meas_Start();
+  Meas_Init(sensorI2C, micI2s);
   Info("Gadget initialised.");
-
 }
 
 void UpkeepGadget() {

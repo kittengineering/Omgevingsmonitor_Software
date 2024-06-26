@@ -17,6 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include <I2CSensors.h>
 #include "main.h"
 #include "dma.h"
 #include "i2c.h"
@@ -30,7 +31,6 @@
 #include "utils.h"
 #include "microphone.h"
 #include "measurement.h"
-#include "humidTemp.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

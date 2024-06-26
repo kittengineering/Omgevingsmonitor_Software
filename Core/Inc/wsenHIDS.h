@@ -11,20 +11,35 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define HIDS_I2C_ADDRESS 0x44
+#define HIDS_SERIAL_NUMBER_REG 0x89
+#define HIDS_SOFT_RESET_REG 0x94
+#define HIDS_BUFFER_LENGTH 24
+#define HIDS_MEASURE_BUFFER_LENGTH 6
+#define HIDS_SERIAL_BUFFER_LENGTH 6
+#define HIDS_SENSOR_WAIT_TIME_HIGH 9
+#define HIDS_SENSOR_WAIT_TIME_MEDIUM 5
+#define HIDS_SENSOR_WAIT_TIME_LOW 2
+#define HIDS_CRC_MSB_MASK 0x80
+#define HIDS_CRC_BIT_LENGTH 16
+#define HIDS_CRC_POLYNOMIAL 0x31 // CRC-8 polynomial: x^8 + x^5 + x^4 + 1
+#define HIDS_CRC_INIT_VALUE 0xff
+#define HIDS_POW_2_16_MINUS_1 65535.0
+#define HIDS_SENSOR_INITIAL_INTERVAL 1200
 
 typedef enum {
-  HIGH_PRECISION_1S_200MW = 0x39,
-  HIGH_PRECISION_100MS_200MW = 0x32,
-  HIGH_PRECISION_1S_110MW = 0x2F,
-  HIGH_PRECISION_100MS_110MW = 0x24,
-  HIGH_PRECISION_1S_20MW = 0x1E,
-  HIGH_PRECISION_100MS_20MW = 0x15
+  HHM_HighPrecision1S200MW = 0x39,
+  HHM_HighPrecision100MS200MW = 0x32,
+  HHM_HighPrecision1S110MW = 0x2F,
+  HHM_HighPrecision100MS110MW = 0x24,
+  HHM_HighPrecision1S20MW = 0x1E,
+  HHM_HighPrecision100MS20MW = 0x15
 } HIDSHeaterModes;
 
 typedef enum {
-  HIGH_PRECISION = 0xFD,
-  MEDIUM_PRECISION = 0xF6,
-  LOW_PRECISION = 0xE0
+  HMM_HighPrecision = 0xFD,
+  HMM_MediumPrecision = 0xF6,
+  HMM_LowPrecision = 0xE0
 } HIDSMeasureModes;
 
 typedef bool (*I2CReadCb)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);

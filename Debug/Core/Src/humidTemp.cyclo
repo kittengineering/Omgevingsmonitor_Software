@@ -1,9 +1,3 @@
-../Core/Src/humidTemp.c:30:6:HT_Init	1
-../Core/Src/humidTemp.c:35:13:I2C_ResetFlags	1
-../Core/Src/humidTemp.c:40:13:ReadI2C	6
-../Core/Src/humidTemp.c:54:13:WriteI2C	6
-../Core/Src/humidTemp.c:68:6:HT_StartMeasurement	1
-../Core/Src/humidTemp.c:72:6:HT_GetMeasurementValues	1
-../Core/Src/humidTemp.c:79:6:HAL_I2C_MasterRxCpltCallback	2
-../Core/Src/humidTemp.c:87:6:HAL_I2C_MasterTxCpltCallback	2
-../Core/Src/humidTemp.c:95:6:HAL_I2C_ErrorCallback	2
+../Core/Src/humidTemp.c:20:6:HT_Init	1
+../Core/Src/humidTemp.c:24:6:HT_StartMeasurement	1
+../Core/Src/humidTemp.c:28:6:HT_GetMeasurementValues	1

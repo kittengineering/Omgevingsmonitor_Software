@@ -11,7 +11,10 @@
 #include "stm32l0xx_hal.h"
 #include <stdbool.h>
 
-void HT_Init(I2C_HandleTypeDef* humTempI2c);
+typedef bool (*I2CReadCb)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
+typedef bool (*I2CWriteCB)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
+
+void HT_Init(I2CReadCb readFunction, I2CWriteCB writeFunction);
 void HT_StartMeasurement(void);
 bool HT_GetMeasurementValues(float* humidity_perc, float* temperature);
 

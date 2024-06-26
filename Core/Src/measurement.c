@@ -4,24 +4,30 @@
  *  Created on: Jun 10, 2024
  *      Author: Joris Blankestijn
  */
-
-#include "humidTemp.h"
-#include "measurement.h"
-#include "microphone.h"
 #include "stm32l0xx_hal.h"
 #include "utils.h"
 
-float humidity_perc = 0.0;
-float temperature = 0.0;
+#include "measurement.h"
+#include "I2CSensors.h"
+#include "microphone.h"
+#include "gasSensor.h"
+#include "humidTemp.h"
 
-void Meas_Init(I2C_HandleTypeDef* humidTempI2c, I2S_HandleTypeDef* micI2s){
-  HT_Init(humidTempI2c);
+// TODO context struct instead of seperate variables
+static float humidity_perc = 0.0;
+static float temperature = 0.0;
+
+void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
+//  HT_Init(humidTempI2c);
+  I2CSensors_Init(sensorI2C);
   //	MIC_Init(micI2s);
+//  Gas_Init(airQI2C);
 }
 
 void Meas_Start(void) {
   HT_StartMeasurement();
   //	MIC_Start(SAMPLE_RATE_48K, NR_SAMPLES_128);
+  Gas_StartMeasurement();
 }
 
 void Meas_Upkeep(void) {
@@ -31,4 +37,6 @@ void Meas_Upkeep(void) {
   }
 }
 
-bool Meas_CanSleep(int *duration_ms) { return false; }
+bool Meas_CanSleep(uint32_t* duration_ms) {
+  return TimestampIsReached(*duration_ms);
+}
