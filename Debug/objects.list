@@ -1,3 +1,4 @@
+"./Core/Src/ESP.o"
 "./Core/Src/I2CSensors.o"
 "./Core/Src/dma.o"
 "./Core/Src/gadget.o"

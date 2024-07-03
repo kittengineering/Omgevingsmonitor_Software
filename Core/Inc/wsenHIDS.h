@@ -28,18 +28,18 @@
 #define HIDS_SENSOR_INITIAL_INTERVAL 1200
 
 typedef enum {
-  HHM_HighPrecision1S200MW = 0x39,
-  HHM_HighPrecision100MS200MW = 0x32,
-  HHM_HighPrecision1S110MW = 0x2F,
-  HHM_HighPrecision100MS110MW = 0x24,
-  HHM_HighPrecision1S20MW = 0x1E,
-  HHM_HighPrecision100MS20MW = 0x15
+  HHM_HIGH_PRECISION_1S_200MW = 0x39,
+  HHM_HIGH_PRECISION_100MS_200MW = 0x32,
+  HHM_HIGH_PRECISION_1S_110MW = 0x2F,
+  HHM_HIGH_PRECISION_100MS_110MW = 0x24,
+  HHM_HIGH_PRECISION_1S_20MW = 0x1E,
+  HHM_HIGH_PRECISION_100MS_20MW = 0x15
 } HIDSHeaterModes;
 
 typedef enum {
-  HMM_HighPrecision = 0xFD,
-  HMM_MediumPrecision = 0xF6,
-  HMM_LowPrecision = 0xE0
+  HMM_HIGH_PRECISION = 0xFD,
+  HMM_MEDIUM_PRECISION = 0xF6,
+  HMM_LOW_PRECISION = 0xE0
 } HIDSMeasureModes;
 
 typedef bool (*I2CReadCb)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);

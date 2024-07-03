@@ -19,15 +19,17 @@ void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   // Check battery power
   // Init sensor + peripherals
   Meas_Init(sensorI2C, micI2s);
+  Meas_SetInterval(5000);
   Info("Gadget initialised.");
 }
 
 void UpkeepGadget() {
   // State machine implementation?
   /*
+   * Enough power?
+   * No -> measurements running? yes -> can finish measurements? No -> cancel measurements + data transfer, yes -> update measurement statemachine
    * Update measurement state machine
    *
-   * 	Process results <-> update measurements
    *
    * Update data transfer state machine
    * 	Idle
@@ -45,5 +47,17 @@ void UpkeepGadget() {
 //        return;
 //  }
   Meas_Upkeep();
+  // Check if measurements are still running.
+  if(Meas_GetState() == MEAS_STATE_START_MEASUREMENT) {
+    // Can finish measurements?
+    // Check for interval time remaining?
+    // Update measurement state machine
+  }
+  else {
+    // GO sleep
+    // TODO: implement timer for going to sleep for a certain time.
+    // Make sure you think about what if you don't have internet. Then you can't sync the clock.
+  }
+//  ESP_Send();
 }
 

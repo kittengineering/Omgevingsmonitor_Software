@@ -1,7 +1,3 @@
-../Core/Src/I2CSensors.c:30:6:I2CSensors_Init	1
-../Core/Src/I2CSensors.c:36:13:I2C_ResetFlags	1
-../Core/Src/I2CSensors.c:41:13:ReadI2C	6
-../Core/Src/I2CSensors.c:55:13:WriteI2C	6
-../Core/Src/I2CSensors.c:73:6:HAL_I2C_MasterRxCpltCallback	2
-../Core/Src/I2CSensors.c:81:6:HAL_I2C_MasterTxCpltCallback	2
-../Core/Src/I2CSensors.c:89:6:HAL_I2C_ErrorCallback	2
+../Core/Src/I2CSensors.c:24:6:I2CSensors_Init	1
+../Core/Src/I2CSensors.c:30:13:ReadI2C	2
+../Core/Src/I2CSensors.c:38:13:WriteI2C	2

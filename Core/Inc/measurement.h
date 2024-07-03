@@ -11,9 +11,17 @@
 #include "stm32l0xx_hal.h"
 #include <stdbool.h>
 
+typedef enum {
+    MEAS_STATE_INIT,
+    MEAS_STATE_START_MEASUREMENT,
+    MEAS_STATE_WAIT_FOR_COMPLETION,
+    MEAS_STATE_PROCESS_RESULTS
+} MeasurementState;
+
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s);
 void Meas_Start(void);
 void Meas_Upkeep(void);
-bool Meas_CanSleep(uint32_t* duration_ms);
+MeasurementState Meas_GetState(void);
+void Meas_SetInterval(uint32_t interval_ms);
 
 #endif /* INC_MEASUREMENT_H_ */

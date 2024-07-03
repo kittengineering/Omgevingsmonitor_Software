@@ -1,0 +1,13 @@
+../Core/Src/wsenHIDS.c:31:13:ReadRegister	24	static
+../Core/Src/wsenHIDS.c:40:13:WriteRegister	24	static
+../Core/Src/wsenHIDS.c:49:16:CalculateCRC	32	static
+../Core/Src/wsenHIDS.c:70:6:HIDS_EnableHeater	16	static
+../Core/Src/wsenHIDS.c:77:6:HIDS_Init	16	static
+../Core/Src/wsenHIDS.c:89:6:HIDS_StartMeasurement	8	static
+../Core/Src/wsenHIDS.c:96:6:HIDS_SetHeaterMode	16	static
+../Core/Src/wsenHIDS.c:100:13:CheckCRC	32	static
+../Core/Src/wsenHIDS.c:121:6:HIDS_DeviceConnected	24	static
+../Core/Src/wsenHIDS.c:132:6:HIDS_SetMeasurementMode	16	static
+../Core/Src/wsenHIDS.c:136:6:HIDS_MeasurementReady	8	static
+../Core/Src/wsenHIDS.c:143:6:HIDS_SoftReset	16	static
+../Core/Src/wsenHIDS.c:148:6:HIDS_GetMeasurementValues	40	static

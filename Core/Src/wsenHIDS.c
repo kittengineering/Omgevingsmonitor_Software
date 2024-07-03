@@ -14,10 +14,8 @@
 #include "utils.h"
 #include "stm32l0xx_hal.h"
 
-
-
-static HIDSMeasureModes MeasureMode = HMM_HighPrecision;
-static HIDSHeaterModes HeaterMode = HHM_HighPrecision1S200MW;
+static HIDSHeaterModes HeaterMode = HHM_HIGH_PRECISION_1S_200MW;
+static HIDSMeasureModes MeasureMode = HMM_HIGH_PRECISION;
 static I2CReadCb ReadFunction = NULL;
 static I2CWriteCB WriteFunction = NULL;
 
@@ -26,16 +24,16 @@ static uint8_t MeasureBuffer[HIDS_MEASURE_BUFFER_LENGTH] = {0};
 
 static uint32_t HIDSNextRunTime = HIDS_SENSOR_INITIAL_INTERVAL;
 static uint32_t HIDSInterval_ms = HIDS_SENSOR_INITIAL_INTERVAL;
-static uint32_t SensorNextRunTime = HIDS_SENSOR_WAIT_TIME_HIGH;
-static uint32_t SensorWaitTime_ms = HIDS_SENSOR_WAIT_TIME_HIGH;
+//static uint32_t SensorNextRunTime = HIDS_SENSOR_WAIT_TIME_HIGH;
+//static uint32_t SensorWaitTime_ms = HIDS_SENSOR_WAIT_TIME_HIGH;
 static bool MeasurementStarted = false;
 
 static void ReadRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
 	if (ReadFunction != NULL) {
 		ReadFunction(address, buffer, nrBytes);
 		// Adding the delay to wait for the sensor to be ready
-		SensorNextRunTime += GetCurrentHalTicks() + SensorWaitTime_ms;
-		while(!TimestampIsReached(SensorNextRunTime)) {;}
+//		SensorNextRunTime += GetCurrentHalTicks() + SensorWaitTime_ms;
+//		while(!TimestampIsReached(SensorNextRunTime)) {;}
 	}
 }
 
@@ -43,8 +41,9 @@ static void WriteRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
   if (WriteFunction != NULL) {
     WriteFunction(address, buffer, nrBytes);
     // Adding the delay to wait for the sensor to be ready
-    SensorNextRunTime += GetCurrentHalTicks() + SensorWaitTime_ms;
-    while(!TimestampIsReached(SensorNextRunTime)) {;}
+//    SensorNextRunTime += GetCurrentHalTicks() + SensorWaitTime_ms;
+//    while(!TimestampIsReached(SensorNextRunTime)) {;}
+  }
 }
 
 static uint8_t CalculateCRC(uint8_t* data, uint8_t length) {
