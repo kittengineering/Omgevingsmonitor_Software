@@ -53,10 +53,11 @@ void Meas_Upkeep(void) {
   case MEAS_STATE_START_MEASUREMENT:
     Meas_Start();
     Info("Measurements running.");
+    MeasState = MEAS_STATE_WAIT_FOR_COMPLETION;
     break;
 
   case MEAS_STATE_WAIT_FOR_COMPLETION:
-    if(MeasurementsDone()) {
+    if(MeasurementsDone() && TimestampIsReached(MeasurementTimestamp)) {
       Info("Measurements done.");
       MeasState = MEAS_STATE_PROCESS_RESULTS;
     }

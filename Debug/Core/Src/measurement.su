@@ -2,5 +2,5 @@
 ../Core/Src/measurement.c:31:6:Meas_Init	16	static
 ../Core/Src/measurement.c:38:6:Meas_Start	8	static
 ../Core/Src/measurement.c:45:6:Meas_Upkeep	32	static
-../Core/Src/measurement.c:78:6:Meas_SetInterval	16	static
-../Core/Src/measurement.c:82:18:Meas_GetState	8	static
+../Core/Src/measurement.c:79:6:Meas_SetInterval	16	static
+../Core/Src/measurement.c:83:18:Meas_GetState	8	static

@@ -48,16 +48,17 @@ void UpkeepGadget() {
 //  }
   Meas_Upkeep();
   // Check if measurements are still running.
-  if(Meas_GetState() == MEAS_STATE_START_MEASUREMENT) {
-    // Can finish measurements?
-    // Check for interval time remaining?
-    // Update measurement state machine
-  }
-  else {
-    // GO sleep
-    // TODO: implement timer for going to sleep for a certain time.
-    // Make sure you think about what if you don't have internet. Then you can't sync the clock.
-  }
+//  if(Meas_GetState() == MEAS_STATE_START_MEASUREMENT) {
+//    // Can finish measurements?
+//    // Check for interval time remaining?
+//    // Update measurement state machine
+//  }
+//  else {
+//    // GO sleep
+//    // TODO: implement timer for going to sleep for a certain time.
+//    // Make sure you think about what if you don't have internet. Then you can't sync the clock.
+//    // Use latest synced time as reference then.
+//  }
 //  ESP_Send();
 }
 

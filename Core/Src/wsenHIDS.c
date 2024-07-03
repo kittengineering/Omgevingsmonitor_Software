@@ -31,18 +31,12 @@ static bool MeasurementStarted = false;
 static void ReadRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
 	if (ReadFunction != NULL) {
 		ReadFunction(address, buffer, nrBytes);
-		// Adding the delay to wait for the sensor to be ready
-//		SensorNextRunTime += GetCurrentHalTicks() + SensorWaitTime_ms;
-//		while(!TimestampIsReached(SensorNextRunTime)) {;}
 	}
 }
 
 static void WriteRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
   if (WriteFunction != NULL) {
     WriteFunction(address, buffer, nrBytes);
-    // Adding the delay to wait for the sensor to be ready
-//    SensorNextRunTime += GetCurrentHalTicks() + SensorWaitTime_ms;
-//    while(!TimestampIsReached(SensorNextRunTime)) {;}
   }
 }
 
@@ -83,7 +77,8 @@ void HIDS_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
 	}
 	HIDS_SetMeasurementMode(MeasureMode);
 	HIDS_SetHeaterMode(HeaterMode);
-	HIDS_EnableHeater();
+//	HIDS_EnableHeater();
+	// TODO: Enable heater after measurement is done and humidity is above a certain percentage, use formula.
 }
 
 void HIDS_StartMeasurement(void) {
@@ -121,6 +116,7 @@ static bool CheckCRC(uint8_t* data) {
 bool HIDS_DeviceConnected(void) {
 	uint8_t serialReg = HIDS_SERIAL_NUMBER_REG;
 	WriteRegister(HIDS_I2C_ADDRESS, &serialReg, 1);
+	HAL_Delay(30);
 	ReadRegister(HIDS_I2C_ADDRESS, SerialBuffer, HIDS_SERIAL_BUFFER_LENGTH);
 
 	for (uint8_t i = 0; i < HIDS_SERIAL_BUFFER_LENGTH; i++) {
@@ -134,7 +130,11 @@ void HIDS_SetMeasurementMode(HIDSMeasureModes modeMeasure) {
 }
 
 bool HIDS_MeasurementReady(void) {
-  if(!MeasurementStarted || !TimestampIsReached(HIDSNextRunTime)){
+  if(!TimestampIsReached(HIDSNextRunTime)){
+    return false;
+  }
+  if(!MeasurementStarted){
+    HIDS_StartMeasurement();
     return false;
   }
   return true;
@@ -146,6 +146,8 @@ void HIDS_SoftReset(void){
 }
 
 bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
+  // TODO: fix measurement ready so it doesn't start new measurement from here, but from measurement.c
+
   if(!HIDS_MeasurementReady()) return false;
   MeasurementStarted = false;
   Info("=-=-=-=New values incoming.=-=-=-=");
