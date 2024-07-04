@@ -54,6 +54,7 @@ void UpkeepGadget() {
 //    // Update measurement state machine
 //  }
 //  else {
+//    // Before going to sleep check if humidity sensor needs to heat up.
 //    // GO sleep
 //    // TODO: implement timer for going to sleep for a certain time.
 //    // Make sure you think about what if you don't have internet. Then you can't sync the clock.

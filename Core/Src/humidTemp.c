@@ -13,16 +13,16 @@
 #include "utils.h"
 #include "wsenHIDS.h"
 
-static bool ReadI2C(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
-static bool WriteI2C(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
-
-
 void HT_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
   HIDS_Init(readFunction, writeFunction);
 }
 
-void HT_StartMeasurement(void){
+void HT_StartMeasurement() {
   HIDS_StartMeasurement();
+}
+
+void HT_SetMeasurementDuration(uint32_t duration) {
+  HIDS_SetMeasurementDuration(duration);
 }
 
 bool HT_GetMeasurementValues(float* humidity_perc, float* temperature) {

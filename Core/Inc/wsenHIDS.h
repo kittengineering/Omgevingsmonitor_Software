@@ -26,6 +26,7 @@
 #define HIDS_CRC_INIT_VALUE 0xff
 #define HIDS_POW_2_16_MINUS_1 65535.0
 #define HIDS_SENSOR_INITIAL_INTERVAL 1200
+#define HIDS_MAX_MEASUREMENTS 256
 
 typedef enum {
   HHM_HIGH_PRECISION_1S_200MW = 0x39,
@@ -48,6 +49,7 @@ typedef bool (*I2CWriteCB)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 void HIDS_Init(I2CReadCb readFunction, I2CWriteCB writeFunction);
 void HIDS_SetMeasurementMode(HIDSMeasureModes modeMeasure);
 void HIDS_StartMeasurement(void);
+void HIDS_SetMeasurementDuration(uint32_t duration);
 bool HIDS_MeasurementReady(void);
 bool HIDS_GetMeasurementValues(float* humidity, float* temperature);
 bool HIDS_DeviceConnected(void);

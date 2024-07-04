@@ -20,7 +20,6 @@ static I2C_HandleTypeDef* SensorI2C = NULL;
 static bool ReadI2C(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 static bool WriteI2C(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 
-// TODO remove states, handle in measure state machine instead.
 void I2CSensors_Init(I2C_HandleTypeDef* sensorI2C) {
     SensorI2C = sensorI2C;
     HT_Init(ReadI2C, WriteI2C);

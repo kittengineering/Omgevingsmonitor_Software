@@ -1,6 +1,6 @@
-../Core/Src/measurement.c:27:13:MeasurementsDone	1
-../Core/Src/measurement.c:31:6:Meas_Init	1
-../Core/Src/measurement.c:38:6:Meas_Start	1
-../Core/Src/measurement.c:45:6:Meas_Upkeep	8
-../Core/Src/measurement.c:79:6:Meas_SetInterval	1
-../Core/Src/measurement.c:83:18:Meas_GetState	1
+../Core/Src/measurement.c:31:13:MeasurementsDone	1
+../Core/Src/measurement.c:35:6:Meas_Init	1
+../Core/Src/measurement.c:41:6:Meas_Start	1
+../Core/Src/measurement.c:48:6:Meas_Upkeep	12
+../Core/Src/measurement.c:99:6:Meas_SetInterval	1
+../Core/Src/measurement.c:103:18:Meas_GetState	1

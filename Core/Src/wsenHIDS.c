@@ -24,9 +24,11 @@ static uint8_t MeasureBuffer[HIDS_MEASURE_BUFFER_LENGTH] = {0};
 
 static uint32_t HIDSNextRunTime = HIDS_SENSOR_INITIAL_INTERVAL;
 static uint32_t HIDSInterval_ms = HIDS_SENSOR_INITIAL_INTERVAL;
+static uint32_t MeasurementDuration = HIDS_SENSOR_INITIAL_INTERVAL;
+static bool MeasurementDone = false;
+
 //static uint32_t SensorNextRunTime = HIDS_SENSOR_WAIT_TIME_HIGH;
 //static uint32_t SensorWaitTime_ms = HIDS_SENSOR_WAIT_TIME_HIGH;
-static bool MeasurementStarted = false;
 
 static void ReadRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
 	if (ReadFunction != NULL) {
@@ -57,7 +59,8 @@ static uint8_t CalculateCRC(uint8_t* data, uint8_t length) {
       }
     }
   }
-  Info("CRC calculated value: 0x%X", crc);
+
+//  Debug("CRC calculated value: 0x%X", crc);
   return crc;
 }
 
@@ -82,10 +85,13 @@ void HIDS_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
 }
 
 void HIDS_StartMeasurement(void) {
-  if(MeasurementStarted) return;
-  HIDSNextRunTime += GetCurrentHalTicks() + HIDSInterval_ms;
-  MeasurementStarted = true;
+  HIDSNextRunTime = GetCurrentHalTicks() + HIDSInterval_ms;
   WriteRegister(HIDS_I2C_ADDRESS, &MeasureMode, 1);
+  MeasurementDone = false;
+}
+
+void HIDS_SetMeasurementDuration(uint32_t duration) {
+  MeasurementDuration = duration;
 }
 
 void HIDS_SetHeaterMode(HIDSHeaterModes modeHeater) {
@@ -133,10 +139,6 @@ bool HIDS_MeasurementReady(void) {
   if(!TimestampIsReached(HIDSNextRunTime)){
     return false;
   }
-  if(!MeasurementStarted){
-    HIDS_StartMeasurement();
-    return false;
-  }
   return true;
 }
 
@@ -146,11 +148,19 @@ void HIDS_SoftReset(void){
 }
 
 bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
-  // TODO: fix measurement ready so it doesn't start new measurement from here, but from measurement.c
-
+  if(MeasurementDone){
+    return true;
+  }
   if(!HIDS_MeasurementReady()) return false;
-  MeasurementStarted = false;
-  Info("=-=-=-=New values incoming.=-=-=-=");
+  uint32_t amountOfMeasurements = MeasurementDuration / HIDSInterval_ms;
+  static uint32_t measurements = 0;
+  float currentTemperature;
+  float currentHumidity;
+  static float temperatures[HIDS_MAX_MEASUREMENTS];
+  static float humidities[HIDS_MAX_MEASUREMENTS];
+
+  Debug("HT measurements: %d out of %d completed.", measurements + 1, amountOfMeasurements);
+//  Info("=-=-=-=New values incoming.=-=-=-=");
   ReadRegister(HIDS_I2C_ADDRESS, MeasureBuffer, HIDS_MEASURE_BUFFER_LENGTH);
 	if(!CheckCRC(MeasureBuffer)) {
 		Error("GetMeasurementValues CRC check failed.");
@@ -161,16 +171,43 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
 		return false;
 	}
 
-	// Humidity formula in percentage:
-	//  RH = ((-6 + 125 * SRH) / (2^16 - 1))
-	// Temperature formula in degrees Celsius:
-	//  T = ((-45 + (175 * ST) / (2^16 - 1)))
-	for(uint8_t i = 0; i < HIDS_MEASURE_BUFFER_LENGTH; i++) {
-	  Debug("Measurement buffer[%d]: %d", i, MeasureBuffer[i]);
-  }
-	*temperature = (((175 * (MeasureBuffer[0] << 8) | MeasureBuffer[1])) / HIDS_POW_2_16_MINUS_1);
-	*temperature += -45;
-	*humidity = ((125 * ((MeasureBuffer[3] << 8) | MeasureBuffer[4]) / HIDS_POW_2_16_MINUS_1));
-	*humidity += -6;
-	return true;
+//	for(uint8_t i = 0; i < HIDS_MEASURE_BUFFER_LENGTH; i++) {
+//	  Debug("Measurement buffer[%d]: %d", i, MeasureBuffer[i]);
+//  }
+
+  // Humidity formula in percentage:
+  //  RH = ((-6 + 125 * SRH) / (2^16 - 1))
+  // Temperature formula in degrees Celsius:
+  //  T = ((-45 + (175 * ST) / (2^16 - 1)))
+	currentTemperature = (((175 * (MeasureBuffer[0] << 8) | MeasureBuffer[1])) / HIDS_POW_2_16_MINUS_1);
+	currentTemperature += -45;
+	currentHumidity = ((125 * ((MeasureBuffer[3] << 8) | MeasureBuffer[4]) / HIDS_POW_2_16_MINUS_1));
+	currentHumidity += -6;
+
+	if(measurements < amountOfMeasurements) {
+	  temperatures[measurements] = currentTemperature;
+	  humidities[measurements] = currentHumidity;
+	  measurements++;
+	}
+
+	if (measurements >= amountOfMeasurements) {
+	  // Measurements done, calculating average and returning it.
+    float sumTemperature = 0.0;
+    float sumHumidity = 0.0;
+    for (uint32_t i = 0; i < measurements; i++) {
+        sumTemperature += temperatures[i];
+        sumHumidity += humidities[i];
+    }
+
+    *temperature = sumTemperature / measurements;
+    *humidity = sumHumidity / measurements;
+
+    measurements = 0;
+    MeasurementDone = true;
+    Debug("HT measurement is done.");
+    return true;
+	}
+	// Starting another measurement, still not done with all measurements.
+	HIDS_StartMeasurement();
+	return false;
 }
