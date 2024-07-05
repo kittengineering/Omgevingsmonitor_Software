@@ -61,5 +61,8 @@ void UpkeepGadget() {
 //    // Use latest synced time as reference then.
 //  }
 //  ESP_Send();
+  // If you don't have wifi don't do anything with the data.
+  // Use sleeping as interval between measuring.
+  // Before going to sleep make sure you de-init the sensors.
 }
 

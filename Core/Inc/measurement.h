@@ -11,9 +11,12 @@
 #include "stm32l0xx_hal.h"
 #include <stdbool.h>
 
+#define MEAS_MAX_RETRY_ATTEMPTS 3
+#define MEAS_MEASUREMENT_COUNT 4
+
 typedef enum {
     MEAS_STATE_INIT,
-    MEAS_STATE_START_MEASUREMENT,
+    MEAS_STATE_START_NEXT_MEASUREMENT,
     MEAS_STATE_WAIT_FOR_COMPLETION,
     MEAS_STATE_PROCESS_RESULTS
 } MeasurementState;

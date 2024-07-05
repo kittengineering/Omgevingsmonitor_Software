@@ -12,6 +12,10 @@
 #include <stdint.h>
 
 
+#define SGP_CRC_INIT_VALUE 0xff
+#define SGP_CRC_MSB_MASK 0x80
+#define SGP_CRC_POLYNOMIAL 0x31
+
 typedef bool (*I2CReadCb)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 typedef bool (*I2CWriteCB)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 

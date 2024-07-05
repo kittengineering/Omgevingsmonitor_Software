@@ -1,6 +1,7 @@
-../Core/Src/measurement.c:31:13:MeasurementsDone	8	static
-../Core/Src/measurement.c:35:6:Meas_Init	16	static
-../Core/Src/measurement.c:41:6:Meas_Start	8	static
-../Core/Src/measurement.c:48:6:Meas_Upkeep	32	static
-../Core/Src/measurement.c:99:6:Meas_SetInterval	16	static
-../Core/Src/measurement.c:103:18:Meas_GetState	8	static
+../Core/Src/measurement.c:57:6:Meas_Init	16	static
+../Core/Src/measurement.c:64:6:Meas_Start	8	static
+../Core/Src/measurement.c:71:6:StartNextMeasurement	8	static
+../Core/Src/measurement.c:80:6:Meas_Upkeep	32	static
+../Core/Src/measurement.c:145:6:Meas_SetEnabledSensors	16	static
+../Core/Src/measurement.c:152:6:Meas_SetInterval	16	static
+../Core/Src/measurement.c:156:18:Meas_GetState	8	static

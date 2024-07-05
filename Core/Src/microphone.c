@@ -104,7 +104,7 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
   Info("Status %d", status);
 }
 
-static void MIC_ProcessFFT(){
+static void MIC_ProcessFFT() {
   CalculateFFT();
 }
 bool MIC_MeasurementDone(void) { return DataReady; }
