@@ -88,8 +88,8 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   uint8_t offset = 0;
   // TODO: add functionality so that we can set the enabled measurements. This should be done from gadget.c
   Measurements[offset++] = (MeasurementInfo) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &Measurement.HT_measurementDone, MeasEnabled.HT_measurementEnabled};
-  Measurements[offset++] = (MeasurementInfo) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &Measurement.VOC_measurementDone, MeasEnabled.VOC_measurementEnabled};
-  Measurements[offset++] = (MeasurementInfo) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &Measurement.NO_measurementDone, MeasEnabled.NO_measurementEnabled};
+  Measurements[offset++] = (MeasurementInfo) {VOC_StartMeasurementWrapper, VOC_IsMeasurementDoneWrapper, &Measurement.VOC_measurementDone, MeasEnabled.VOC_measurementEnabled};
+  Measurements[offset++] = (MeasurementInfo) {NO_StartMeasurementWrapper, NO_IsMeasurementDoneWrapper, &Measurement.NO_measurementDone, MeasEnabled.NO_measurementEnabled};
   Measurements[offset++] = (MeasurementInfo){MIC_StartMeasurementWrapper, MIC_IsMeasurementDoneWrapper, &Measurement.MIC_measurementDone, MeasEnabled.MIC_measurementEnabled};
   //	MIC_Init(micI2s);
 }
