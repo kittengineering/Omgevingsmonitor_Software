@@ -1,7 +1,10 @@
-../Core/Src/measurement.c:57:6:Meas_Init	16	static
-../Core/Src/measurement.c:64:6:Meas_Start	8	static
-../Core/Src/measurement.c:71:6:StartNextMeasurement	8	static
-../Core/Src/measurement.c:80:6:Meas_Upkeep	32	static
-../Core/Src/measurement.c:145:6:Meas_SetEnabledSensors	16	static
-../Core/Src/measurement.c:152:6:Meas_SetInterval	16	static
-../Core/Src/measurement.c:156:18:Meas_GetState	8	static
+../Core/Src/measurement.c:54:13:HT_StartMeasurementWrapper	8	static
+../Core/Src/measurement.c:59:13:HT_IsMeasurementDoneWrapper	8	static
+../Core/Src/measurement.c:63:13:MIC_StartMeasurementWrapper	8	static
+../Core/Src/measurement.c:67:13:MIC_IsMeasurementDoneWrapper	8	static
+../Core/Src/measurement.c:72:6:Meas_Init	64	static
+../Core/Src/measurement.c:95:6:StartNextMeasurement	8	static
+../Core/Src/measurement.c:102:6:Meas_Upkeep	32	static
+../Core/Src/measurement.c:164:6:Meas_SetEnabledSensors	32	static
+../Core/Src/measurement.c:172:6:Meas_SetInterval	16	static
+../Core/Src/measurement.c:176:18:Meas_GetState	8	static

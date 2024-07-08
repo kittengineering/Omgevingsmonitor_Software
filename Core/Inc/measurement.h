@@ -22,7 +22,6 @@ typedef enum {
 } MeasurementState;
 
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s);
-void Meas_Start(void);
 void Meas_Upkeep(void);
 MeasurementState Meas_GetState(void);
 void Meas_SetInterval(uint32_t interval_ms);
