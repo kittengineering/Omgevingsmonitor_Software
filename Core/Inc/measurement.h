@@ -21,9 +21,18 @@ typedef enum {
     MEAS_STATE_PROCESS_RESULTS
 } MeasurementState;
 
+// TODO: add battery measurement
+typedef struct {
+    bool HT_measurementEnabled;
+    bool VOC_measurementEnabled;
+    bool NO_measurementEnabled;
+    bool MIC_measurementEnabled;
+} EnabledMeasurements;
+
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s);
 void Meas_Upkeep(void);
 MeasurementState Meas_GetState(void);
 void Meas_SetInterval(uint32_t interval_ms);
+void Meas_SetEnabledSensors(EnabledMeasurements enabled);
 
 #endif /* INC_MEASUREMENT_H_ */

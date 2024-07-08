@@ -32,12 +32,6 @@ typedef struct {
     bool enabled;
 } MeasurementInfo;
 
-typedef struct {
-    bool HT_measurementEnabled;
-    bool VOC_measurementEnabled;
-    bool NO_measurementEnabled;
-    bool MIC_measurementEnabled;
-} EnabledMeasurements;
 
 static MeasurementContext Measurement;
 static MeasurementInfo Measurements[MEAS_MEASUREMENT_COUNT];
@@ -45,7 +39,7 @@ static EnabledMeasurements MeasEnabled;
 static MeasurementState MeasState = MEAS_STATE_INIT;
 static uint32_t MeasurementTimestamp;
 static uint32_t TimeOutTimestamp;
-static uint32_t MeasurementDuration = 5000; // Standard interval in between checking if the measurements are done.
+static uint32_t MeasurementDuration = 2000; // Standard interval in between checking if the measurement is done.
 static uint32_t TimeOutInterval = 100;
 static uint8_t ErrorCount = 0;
 static uint8_t CurrentMeasurementIndex = 0;
@@ -55,9 +49,24 @@ static void HT_StartMeasurementWrapper(void) {
   HT_StartMeasurement();
 }
 
-
 static bool HT_IsMeasurementDoneWrapper(void) {
     return HT_GetMeasurementValues(&Measurement.humidityPerc, &Measurement.temperature);
+}
+
+static void VOC_StartMeasurementWrapper(void) {
+  // TODO: Implement VOC wrapper.
+}
+
+static bool VOC_IsMeasurementDoneWrapper(void) {
+  return true;
+}
+
+static void NO_StartMeasurementWrapper(void) {
+  // TODO: Implement NO wrapper.
+}
+
+static bool NO_IsMeasurementDoneWrapper(void) {
+  return true;
 }
 
 static void MIC_StartMeasurementWrapper(void) {
@@ -69,16 +78,18 @@ static bool MIC_IsMeasurementDoneWrapper(void) {
 }
 
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
-  // Initialize enabled measurements with standard values
+  // Initialise enabled measurements with standard values
   MeasEnabled.HT_measurementEnabled = true;
-  MeasEnabled.MIC_measurementEnabled = false;
   MeasEnabled.VOC_measurementEnabled = false;
   MeasEnabled.NO_measurementEnabled = false;
+  MeasEnabled.MIC_measurementEnabled = false;
   I2CSensors_Init(sensorI2C);
   HT_SetMeasurementDuration(MeasurementDuration);
   uint8_t offset = 0;
   // TODO: add functionality so that we can set the enabled measurements. This should be done from gadget.c
   Measurements[offset++] = (MeasurementInfo) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &Measurement.HT_measurementDone, MeasEnabled.HT_measurementEnabled};
+  Measurements[offset++] = (MeasurementInfo) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &Measurement.VOC_measurementDone, MeasEnabled.VOC_measurementEnabled};
+  Measurements[offset++] = (MeasurementInfo) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &Measurement.NO_measurementDone, MeasEnabled.NO_measurementEnabled};
   Measurements[offset++] = (MeasurementInfo){MIC_StartMeasurementWrapper, MIC_IsMeasurementDoneWrapper, &Measurement.MIC_measurementDone, MeasEnabled.MIC_measurementEnabled};
   //	MIC_Init(micI2s);
 }
@@ -156,6 +167,8 @@ void Meas_SetEnabledSensors(EnabledMeasurements enabled) {
   uint8_t offset = 0;
   MeasEnabled = enabled;
   Measurements[offset++].enabled = enabled.HT_measurementEnabled;
+  Measurements[offset++].enabled = enabled.VOC_measurementEnabled;
+  Measurements[offset++].enabled = enabled.NO_measurementEnabled;
   Measurements[offset++].enabled = enabled.MIC_measurementEnabled;
 
 }

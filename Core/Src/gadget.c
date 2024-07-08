@@ -15,11 +15,25 @@
 //  return true;
 //}
 
+
+static EnabledMeasurements SensorSetPower = {
+    .HT_measurementEnabled = true,
+    .VOC_measurementEnabled = true,
+    .NO_measurementEnabled = false,
+    .MIC_measurementEnabled = false
+};
+static EnabledMeasurements SensorSetBatt = {
+    .HT_measurementEnabled = true,
+    .VOC_measurementEnabled = true,
+    .NO_measurementEnabled = false,
+    .MIC_measurementEnabled = false
+};
+
 void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   // Check battery power
   // Init sensor + peripherals
   Meas_Init(sensorI2C, micI2s);
-  Meas_SetInterval(5000);
+  Meas_SetInterval(2000);
   Info("Gadget initialised.");
 }
 
@@ -59,10 +73,21 @@ void UpkeepGadget() {
 //    // TODO: implement timer for going to sleep for a certain time.
 //    // Make sure you think about what if you don't have internet. Then you can't sync the clock.
 //    // Use latest synced time as reference then.
+  // If no internet is available -> Don't do anything.
 //  }
 //  ESP_Send();
   // If you don't have wifi don't do anything with the data.
   // Use sleeping as interval between measuring.
   // Before going to sleep make sure you de-init the sensors.
+
+//  if(Meas_GetState() == MEAS_STATE_WAIT_FOR_COMPLETION) {
+//    // Can finish measurement?
+//  }
+//  if(GridPower) {
+//    Meas_SetEnabledSensors(SensorSetPower);
+//  }
+//  if(Battery) {
+//    Meas_SetEnabledSensors(SensorSetBatt);
+//  }
 }
 
