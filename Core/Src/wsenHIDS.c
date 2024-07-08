@@ -126,7 +126,7 @@ bool HIDS_DeviceConnected(void) {
 	ReadRegister(HIDS_I2C_ADDRESS, SerialBuffer, HIDS_SERIAL_BUFFER_LENGTH);
 
 	for (uint8_t i = 0; i < HIDS_SERIAL_BUFFER_LENGTH; i++) {
-		Info("Device serial ID[%d]: 0x%X", i, SerialBuffer[i]);
+		Info("HIDS_Device serial ID[%d]: 0x%X", i, SerialBuffer[i]);
 	}
 	return CheckCRC(SerialBuffer);
 }

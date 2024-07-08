@@ -44,7 +44,6 @@ static uint32_t TimeOutInterval = 100;
 static uint8_t ErrorCount = 0;
 static uint8_t CurrentMeasurementIndex = 0;
 
-
 static void HT_StartMeasurementWrapper(void) {
   HT_StartMeasurement();
 }
@@ -95,10 +94,7 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
 }
 
 void StartNextMeasurement(void) {
-  if(Measurements[CurrentMeasurementIndex].enabled) {
-    Measurements[CurrentMeasurementIndex].startFunc();
-  }
-  CurrentMeasurementIndex++;
+  Measurements[CurrentMeasurementIndex].startFunc();
 }
 
 void Meas_Upkeep(void) {
@@ -120,13 +116,15 @@ void Meas_Upkeep(void) {
       break;
 
   case MEAS_STATE_START_NEXT_MEASUREMENT:
-    if (CurrentMeasurementIndex < MEAS_MEASUREMENT_COUNT) {
-       StartNextMeasurement();
-       if (CurrentMeasurementIndex < MEAS_MEASUREMENT_COUNT) {
-           MeasState = MEAS_STATE_WAIT_FOR_COMPLETION;
-       } else {
-           MeasState = MEAS_STATE_PROCESS_RESULTS;
-       }
+    if (CurrentMeasurementIndex <= MEAS_MEASUREMENT_COUNT) {
+      if(Measurements[CurrentMeasurementIndex].enabled) {
+        StartNextMeasurement();
+        MeasState = MEAS_STATE_WAIT_FOR_COMPLETION;
+      }
+      else{
+        // Skipping measurement, since it's not enabled.
+        CurrentMeasurementIndex++;
+      }
    } else {
        MeasState = MEAS_STATE_PROCESS_RESULTS;
    }
@@ -139,11 +137,9 @@ void Meas_Upkeep(void) {
         MeasState = MEAS_STATE_INIT;
     } else if (Measurements[CurrentMeasurementIndex].doneFunc()) {
         *Measurements[CurrentMeasurementIndex].doneFlag = true;
-        Info("Measurement %d completed.", CurrentMeasurementIndex);
         CurrentMeasurementIndex++;
         MeasState = MEAS_STATE_START_NEXT_MEASUREMENT;
     } else if (TimestampIsReached(TimeOutTimestamp) && TimestampIsReached(MeasurementTimestamp)) {
-        Debug("Measurement %d not done yet after interval. Retrying.", CurrentMeasurementIndex);
         ErrorCount += 1;
         TimeOutTimestamp = HAL_GetTick() + TimeOutInterval;
     }

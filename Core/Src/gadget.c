@@ -61,8 +61,26 @@ void UpkeepGadget() {
 //        return;
 //  }
   Meas_Upkeep();
-  // Check if measurements are still running.
-//  if(Meas_GetState() == MEAS_STATE_START_MEASUREMENT) {
+  // Check if measurements aren't still running.
+
+  if(!EnoughPower){
+    if(Meas_GetState() == MEAS_STATE_INIT) {
+        Debug("Going into sleep mode.");
+      }
+  }
+  if(Meas_GetState() == MEAS_STATE_PROCESS_RESULTS) {
+    // Processing results
+    // Turning Radio on
+    // WIFI available?
+      // Yes -> Post sensor data to server.
+      // NO -> Check grid power available
+        // YES -> Use leds for status
+        // NO -> De-init sensors and Radio off.
+        // Go to sleep
+  }
+
+
+
 //    // Can finish measurements?
 //    // Check for interval time remaining?
 //    // Update measurement state machine
@@ -89,5 +107,6 @@ void UpkeepGadget() {
 //  if(Battery) {
 //    Meas_SetEnabledSensors(SensorSetBatt);
 //  }
+
 }
 
