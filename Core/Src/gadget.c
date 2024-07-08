@@ -32,6 +32,7 @@ static EnabledMeasurements SensorSetBatt = {
 void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   // Check battery power
   // Init sensor + peripherals
+  Meas_SetEnabledSensors(SensorSetPower);
   Meas_Init(sensorI2C, micI2s);
   Meas_SetInterval(2000);
   Info("Gadget initialised.");
@@ -63,11 +64,11 @@ void UpkeepGadget() {
   Meas_Upkeep();
   // Check if measurements aren't still running.
 
-  if(!EnoughPower){
-    if(Meas_GetState() == MEAS_STATE_INIT) {
-        Debug("Going into sleep mode.");
-      }
-  }
+//  if(!EnoughPower){
+//    if(Meas_GetState() == MEAS_STATE_INIT) {
+//        Debug("Going into sleep mode.");
+//      }
+//  }
   if(Meas_GetState() == MEAS_STATE_PROCESS_RESULTS) {
     // Processing results
     // Turning Radio on

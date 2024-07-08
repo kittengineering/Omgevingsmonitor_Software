@@ -74,10 +74,6 @@ void HIDS_EnableHeater(void) {
 void HIDS_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
 	ReadFunction = readFunction;
 	WriteFunction = writeFunction;
-	if(!HIDS_DeviceConnected()) {
-		Error("HIDS device not connected!");
-		return;
-	}
 	HIDS_SetMeasurementMode(MeasureMode);
 	HIDS_SetHeaterMode(HeaterMode);
 //	HIDS_EnableHeater();

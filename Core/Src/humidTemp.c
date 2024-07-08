@@ -29,3 +29,7 @@ bool HT_GetMeasurementValues(float* humidity_perc, float* temperature) {
   return HIDS_GetMeasurementValues(humidity_perc, temperature);
 }
 
+bool HT_DeviceConnected() {
+  return HIDS_DeviceConnected();
+}
+
