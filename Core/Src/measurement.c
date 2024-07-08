@@ -80,6 +80,11 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   // TODO: If sensor not found, then disable it and give error.
   if(MeasEnabled.HT_measurementEnabled || MeasEnabled.NO_measurementEnabled) {
     I2CSensors_Init(sensorI2C);
+    if(!HT_DeviceConnected()) {
+       Error("HT device not connected!");
+       MeasEnabled.HT_measurementEnabled = false;
+       return;
+     }
   }
   if(MeasEnabled.MIC_measurementEnabled) {
 //    MIC_Init(micI2s);
@@ -108,12 +113,8 @@ void Meas_Upkeep(void) {
       Measurement.NO_measurementDone = false;
       Measurement.MIC_measurementDone = false;
       CurrentMeasurementIndex = 0;
-      if(!HT_DeviceConnected()) {
-        Error("HT device not connected!");
-        MeasEnabled.HT_measurementEnabled = false;
-        return;
-      }
-      Info("Measurement interval: %d ms", MeasurementDuration);
+
+      Debug("Measurement interval: %d ms", MeasurementDuration);
       MeasurementTimestamp = HAL_GetTick() + MeasurementDuration;
       MeasState = MEAS_STATE_START_NEXT_MEASUREMENT;
       break;
@@ -124,7 +125,7 @@ void Meas_Upkeep(void) {
         StartNextMeasurement();
         MeasState = MEAS_STATE_WAIT_FOR_COMPLETION;
       }
-      else{
+      else {
         // Skipping measurement, since it's not enabled.
         CurrentMeasurementIndex++;
       }
@@ -150,7 +151,7 @@ void Meas_Upkeep(void) {
 
   case MEAS_STATE_PROCESS_RESULTS:
     Debug("Processing results.");
-    // TODO: Return values and let gadget handle with too high humidity
+    // TODO: Return values and let gadget handle with too high humidity and the sensor values
     Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", Measurement.humidityPerc, Measurement.temperature);
     MeasState = MEAS_STATE_INIT;
     break;
@@ -169,7 +170,6 @@ void Meas_SetEnabledSensors(EnabledMeasurements enabled) {
   Measurements[offset++].enabled = enabled.VOC_measurementEnabled;
   Measurements[offset++].enabled = enabled.NO_measurementEnabled;
   Measurements[offset++].enabled = enabled.MIC_measurementEnabled;
-
 }
 
 void Meas_SetInterval(uint32_t interval_ms) {

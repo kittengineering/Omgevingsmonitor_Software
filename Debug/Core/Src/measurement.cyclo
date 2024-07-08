@@ -6,9 +6,9 @@
 ../Core/Src/measurement.c:67:13:NO_IsMeasurementDoneWrapper	1
 ../Core/Src/measurement.c:71:13:MIC_StartMeasurementWrapper	1
 ../Core/Src/measurement.c:75:13:MIC_IsMeasurementDoneWrapper	1
-../Core/Src/measurement.c:79:6:Meas_Init	3
-../Core/Src/measurement.c:97:6:StartNextMeasurement	1
-../Core/Src/measurement.c:101:6:Meas_Upkeep	14
-../Core/Src/measurement.c:165:6:Meas_SetEnabledSensors	1
+../Core/Src/measurement.c:79:6:Meas_Init	4
+../Core/Src/measurement.c:102:6:StartNextMeasurement	1
+../Core/Src/measurement.c:106:6:Meas_Upkeep	13
+../Core/Src/measurement.c:166:6:Meas_SetEnabledSensors	1
 ../Core/Src/measurement.c:175:6:Meas_SetInterval	1
 ../Core/Src/measurement.c:179:18:Meas_GetState	1
