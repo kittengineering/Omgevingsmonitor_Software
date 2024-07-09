@@ -30,11 +30,11 @@ typedef struct {
     IsMeasurementDoneFunc doneFunc;
     bool* doneFlag;
     bool enabled;
-} MeasurementInfo;
+} MeasurementParameters;
 
 
-static MeasurementContext Measurement;
-static MeasurementInfo Measurements[MEAS_MEASUREMENT_COUNT];
+static MeasurementContext MeasurementCtx;
+static MeasurementParameters Measurements[MEAS_MEASUREMENT_COUNT];
 static EnabledMeasurements MeasEnabled;
 static MeasurementState MeasState = MEAS_STATE_INIT;
 static uint32_t MeasurementTimestamp;
@@ -49,7 +49,7 @@ static void HT_StartMeasurementWrapper(void) {
 }
 
 static bool HT_IsMeasurementDoneWrapper(void) {
-    return HT_GetMeasurementValues(&Measurement.humidityPerc, &Measurement.temperature);
+    return HT_GetMeasurementValues(&MeasurementCtx.humidityPerc, &MeasurementCtx.temperature);
 }
 
 static void VOC_StartMeasurementWrapper(void) {
@@ -77,6 +77,7 @@ static bool MIC_IsMeasurementDoneWrapper(void) {
 }
 
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
+  MeasState = MEAS_STATE_INIT;
   // TODO: If sensor not found, then disable it and give error.
   if(MeasEnabled.HT_measurementEnabled || MeasEnabled.NO_measurementEnabled) {
     I2CSensors_Init(sensorI2C);
@@ -93,10 +94,10 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
     // TODO: Add VOC init
   }
   uint8_t offset = 0;
-  Measurements[offset++] = (MeasurementInfo) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &Measurement.HT_measurementDone, MeasEnabled.HT_measurementEnabled};
-  Measurements[offset++] = (MeasurementInfo) {VOC_StartMeasurementWrapper, VOC_IsMeasurementDoneWrapper, &Measurement.VOC_measurementDone, MeasEnabled.VOC_measurementEnabled};
-  Measurements[offset++] = (MeasurementInfo) {NO_StartMeasurementWrapper, NO_IsMeasurementDoneWrapper, &Measurement.NO_measurementDone, MeasEnabled.NO_measurementEnabled};
-  Measurements[offset++] = (MeasurementInfo){MIC_StartMeasurementWrapper, MIC_IsMeasurementDoneWrapper, &Measurement.MIC_measurementDone, MeasEnabled.MIC_measurementEnabled};
+  Measurements[offset++] = (MeasurementParameters) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &MeasurementCtx.HT_measurementDone, MeasEnabled.HT_measurementEnabled};
+  Measurements[offset++] = (MeasurementParameters) {VOC_StartMeasurementWrapper, VOC_IsMeasurementDoneWrapper, &MeasurementCtx.VOC_measurementDone, MeasEnabled.VOC_measurementEnabled};
+  Measurements[offset++] = (MeasurementParameters) {NO_StartMeasurementWrapper, NO_IsMeasurementDoneWrapper, &MeasurementCtx.NO_measurementDone, MeasEnabled.NO_measurementEnabled};
+  Measurements[offset++] = (MeasurementParameters){MIC_StartMeasurementWrapper, MIC_IsMeasurementDoneWrapper, &MeasurementCtx.MIC_measurementDone, MeasEnabled.MIC_measurementEnabled};
 }
 
 void StartNextMeasurement(void) {
@@ -105,32 +106,36 @@ void StartNextMeasurement(void) {
 
 void Meas_Upkeep(void) {
   switch(MeasState) {
-  case MEAS_STATE_INIT:
-      Measurement.humidityPerc = 0;
-      Measurement.temperature = 0;
-      Measurement.HT_measurementDone = false;
-      Measurement.VOC_measurementDone = false;
-      Measurement.NO_measurementDone = false;
-      Measurement.MIC_measurementDone = false;
-      CurrentMeasurementIndex = 0;
+  case MEAS_STATE_OFF:
+    Debug("Measurements are turned off.");
+    break;
 
-      Debug("Measurement interval: %d ms", MeasurementDuration);
-      MeasurementTimestamp = HAL_GetTick() + MeasurementDuration;
-      MeasState = MEAS_STATE_START_NEXT_MEASUREMENT;
-      break;
+  case MEAS_STATE_INIT:
+    MeasurementCtx.humidityPerc = 0;
+    MeasurementCtx.temperature = 0;
+    MeasurementCtx.HT_measurementDone = false;
+    MeasurementCtx.VOC_measurementDone = false;
+    MeasurementCtx.NO_measurementDone = false;
+    MeasurementCtx.MIC_measurementDone = false;
+    CurrentMeasurementIndex = 0;
+
+    Debug("Measurement interval: %d ms", MeasurementDuration);
+    MeasurementTimestamp = HAL_GetTick() + MeasurementDuration;
+    MeasState = MEAS_STATE_START_NEXT_MEASUREMENT;
+    break;
 
   case MEAS_STATE_START_NEXT_MEASUREMENT:
     if (CurrentMeasurementIndex <= MEAS_MEASUREMENT_COUNT) {
       if(Measurements[CurrentMeasurementIndex].enabled) {
         StartNextMeasurement();
         MeasState = MEAS_STATE_WAIT_FOR_COMPLETION;
-      }
-      else {
+      } else {
         // Skipping measurement, since it's not enabled.
         CurrentMeasurementIndex++;
       }
    } else {
-       MeasState = MEAS_STATE_PROCESS_RESULTS;
+     // Done with all the enabled measurements, processing the results.
+     MeasState = MEAS_STATE_PROCESS_RESULTS;
    }
    break;
 
@@ -152,7 +157,7 @@ void Meas_Upkeep(void) {
   case MEAS_STATE_PROCESS_RESULTS:
     Debug("Processing results.");
     // TODO: Return values and let gadget handle with too high humidity and the sensor values
-    Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", Measurement.humidityPerc, Measurement.temperature);
+    Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
     MeasState = MEAS_STATE_INIT;
     break;
 
@@ -176,6 +181,21 @@ void Meas_SetInterval(uint32_t interval_ms) {
   MeasurementDuration = interval_ms;
 }
 
+static void Meas_TurnOff(void) {
+  MeasState = MEAS_STATE_OFF;
+  // Disabling all sensors
+  uint8_t offset = 0;
+  Measurements[offset++].enabled = false;
+  Measurements[offset++].enabled = false;
+  Measurements[offset++].enabled = false;
+  Measurements[offset++].enabled = false;
+}
+
 MeasurementState Meas_GetState(void) {
     return MeasState;
+}
+
+void Meas_DeInit(void) {
+  // TODO: Add de-init like the i2c, i2s and all the pins.
+  Meas_TurnOff();
 }

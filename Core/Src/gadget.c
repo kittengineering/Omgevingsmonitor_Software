@@ -41,10 +41,6 @@ void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
 void UpkeepGadget() {
   // State machine implementation?
   /*
-   * Enough power?
-   * No -> measurements running? yes -> can finish measurements? No -> cancel measurements + data transfer, yes -> update measurement statemachine
-   * Update measurement state machine
-   *
    *
    * Update data transfer state machine
    * 	Idle
@@ -57,11 +53,8 @@ void UpkeepGadget() {
    * 	Close connection
    * 	Disable ESP
    */
-//  if(ShouldSleep()){
-//        Sleep();
-//        return;
-//  }
   Meas_Upkeep();
+
   // Check if measurements aren't still running.
 
 //  if(!EnoughPower){
@@ -80,6 +73,7 @@ void UpkeepGadget() {
         // Go to sleep
   }
 
+  Meas_TurnOff();
 
 
 //    // Can finish measurements?

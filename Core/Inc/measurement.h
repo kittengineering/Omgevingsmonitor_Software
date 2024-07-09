@@ -18,7 +18,8 @@ typedef enum {
     MEAS_STATE_INIT,
     MEAS_STATE_START_NEXT_MEASUREMENT,
     MEAS_STATE_WAIT_FOR_COMPLETION,
-    MEAS_STATE_PROCESS_RESULTS
+    MEAS_STATE_PROCESS_RESULTS,
+    MEAS_STATE_OFF
 } MeasurementState;
 
 // TODO: add battery measurement
@@ -34,5 +35,6 @@ void Meas_Upkeep(void);
 MeasurementState Meas_GetState(void);
 void Meas_SetInterval(uint32_t interval_ms);
 void Meas_SetEnabledSensors(EnabledMeasurements enabled);
+void Meas_DeInit(void);
 
 #endif /* INC_MEASUREMENT_H_ */
