@@ -195,7 +195,10 @@ MeasurementState Meas_GetState(void) {
     return MeasState;
 }
 
-void Meas_DeInit(void) {
+void Meas_DeInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   // TODO: Add de-init like the i2c, i2s and all the pins.
   Meas_TurnOff();
+  HAL_I2C_DeInit(sensorI2C);
+  HAL_I2S_DeInit(micI2s);
+
 }

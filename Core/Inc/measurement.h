@@ -35,6 +35,6 @@ void Meas_Upkeep(void);
 MeasurementState Meas_GetState(void);
 void Meas_SetInterval(uint32_t interval_ms);
 void Meas_SetEnabledSensors(EnabledMeasurements enabled);
-void Meas_DeInit(void);
+void Meas_DeInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s);
 
 #endif /* INC_MEASUREMENT_H_ */

@@ -38,6 +38,13 @@ void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   Info("Gadget initialised.");
 }
 
+void Gadget_DeInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
+  // Turn radio off
+  // Turn off communication
+  Meas_DeInit(sensorI2C, micI2s);
+
+}
+
 void UpkeepGadget() {
   // State machine implementation?
   /*
@@ -73,7 +80,7 @@ void UpkeepGadget() {
         // Go to sleep
   }
 
-  Meas_TurnOff();
+
 
 
 //    // Can finish measurements?

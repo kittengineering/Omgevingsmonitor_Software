@@ -16,6 +16,7 @@
 #define SGP_CRC_BIT_LENGTH 8
 #define SGP_CRC_POLYNOMIAL 0x31 // CRC-8 polynomial: x^8 + x^5 + x^4 + 1
 #define SGP_CRC_INIT_VALUE 0xff
+#define SGP_CRC_SEGMENT 4
 #define LONG_COMMAND_BUFFER_LENGTH 8
 #define SHORT_COMMAND_BUFFER_LENGTH 2
 #define SENSOR_WAIT_DELAY 20
@@ -76,7 +77,7 @@ bool SGP_DeviceConnected(void) {
 
 static bool CheckCRC(uint8_t* data, uint8_t length) {
   // Checking crc per segment
-  for(uint8_t i = 0; i < length; i += 4) {
+  for(uint8_t i = 0; i < length; i += SGP_CRC_SEGMENT) {
     uint8_t crcData[2] = {data[i], data[i + 1]};
     uint8_t crc = data[i + 2];
 
