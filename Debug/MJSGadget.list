@@ -27,25 +27,25 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
  11 .ARM.attributes 00000028  00000000  00000000  0000e1ec  2**0
                   CONTENTS, READONLY
- 12 .debug_info   0001192c  00000000  00000000  0000e214  2**0
+ 12 .debug_info   0001191e  00000000  00000000  0000e214  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_abbrev 0000366f  00000000  00000000  0001fb40  2**0
+ 13 .debug_abbrev 0000366f  00000000  00000000  0001fb32  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_aranges 00000f28  00000000  00000000  000231b0  2**3
+ 14 .debug_aranges 00000f28  00000000  00000000  000231a8  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_rnglists 00000b7c  00000000  00000000  000240d8  2**0
+ 15 .debug_rnglists 00000b7c  00000000  00000000  000240d0  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_macro  00016e95  00000000  00000000  00024c54  2**0
+ 16 .debug_macro  00016e8f  00000000  00000000  00024c4c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0001916b  00000000  00000000  0003bae9  2**0
+ 17 .debug_line   00019167  00000000  00000000  0003badb  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0008111f  00000000  00000000  00054c54  2**0
+ 18 .debug_str    00081126  00000000  00000000  00054c42  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000086  00000000  00000000  000d5d73  2**0
+ 19 .comment      00000086  00000000  00000000  000d5d68  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  00004604  00000000  00000000  000d5dfc  2**2
+ 20 .debug_frame  00004604  00000000  00000000  000d5df0  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000006c  00000000  00000000  000da400  2**0
+ 21 .debug_line_str 0000006c  00000000  00000000  000da3f4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -6218,9 +6218,9 @@ void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
  80030cc:	0800c144 	.word	0x0800c144
 
 080030d0 <UpkeepGadget>:
+  // Turn radio off
   // Turn off communication
   Meas_DeInit(sensorI2C, micI2s);
-
 }
 
 void UpkeepGadget() {
@@ -7306,56 +7306,55 @@ int main(void)
 	 * : Add CLI via usb-c
 	 * : Network not found? Sleep
 	 */
-  uint32_t LedBlinkInterval = 500;
- 80036b6:	23fa      	movs	r3, #250	@ 0xfa
- 80036b8:	005b      	lsls	r3, r3, #1
- 80036ba:	603b      	str	r3, [r7, #0]
-  uint32_t LedBlinkTimestamp = HAL_GetTick() + LedBlinkInterval;
- 80036bc:	f001 fafc 	bl	8004cb8 <HAL_GetTick>
- 80036c0:	0002      	movs	r2, r0
- 80036c2:	683b      	ldr	r3, [r7, #0]
- 80036c4:	189b      	adds	r3, r3, r2
- 80036c6:	607b      	str	r3, [r7, #4]
+  uint32_t LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
+ 80036b6:	f001 faff 	bl	8004cb8 <HAL_GetTick>
+ 80036ba:	0003      	movs	r3, r0
+ 80036bc:	22fa      	movs	r2, #250	@ 0xfa
+ 80036be:	0092      	lsls	r2, r2, #2
+ 80036c0:	4694      	mov	ip, r2
+ 80036c2:	4463      	add	r3, ip
+ 80036c4:	607b      	str	r3, [r7, #4]
   SetVerboseLevel(VERBOSE_ALL);
- 80036c8:	2003      	movs	r0, #3
- 80036ca:	f000 ff4b 	bl	8004564 <SetVerboseLevel>
+ 80036c6:	2003      	movs	r0, #3
+ 80036c8:	f000 ff4c 	bl	8004564 <SetVerboseLevel>
   BinaryReleaseInfo();
- 80036ce:	f000 ff61 	bl	8004594 <BinaryReleaseInfo>
+ 80036cc:	f000 ff62 	bl	8004594 <BinaryReleaseInfo>
   Gadget_Init(&hi2c1, &hi2s2);
- 80036d2:	4a0e      	ldr	r2, [pc, #56]	@ (800370c <main+0x7c>)
- 80036d4:	4b0e      	ldr	r3, [pc, #56]	@ (8003710 <main+0x80>)
- 80036d6:	0011      	movs	r1, r2
- 80036d8:	0018      	movs	r0, r3
- 80036da:	f7ff fcd9 	bl	8003090 <Gadget_Init>
+ 80036d0:	4a0e      	ldr	r2, [pc, #56]	@ (800370c <main+0x7c>)
+ 80036d2:	4b0f      	ldr	r3, [pc, #60]	@ (8003710 <main+0x80>)
+ 80036d4:	0011      	movs	r1, r2
+ 80036d6:	0018      	movs	r0, r3
+ 80036d8:	f7ff fcda 	bl	8003090 <Gadget_Init>
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
 	  // Upkeep gadget
     UpkeepGadget();
- 80036de:	f7ff fcf7 	bl	80030d0 <UpkeepGadget>
+ 80036dc:	f7ff fcf8 	bl	80030d0 <UpkeepGadget>
     if(TimestampIsReached(LedBlinkTimestamp)) {
- 80036e2:	687b      	ldr	r3, [r7, #4]
- 80036e4:	0018      	movs	r0, r3
- 80036e6:	f000 fe6b 	bl	80043c0 <TimestampIsReached>
- 80036ea:	1e03      	subs	r3, r0, #0
- 80036ec:	d0f7      	beq.n	80036de <main+0x4e>
+ 80036e0:	687b      	ldr	r3, [r7, #4]
+ 80036e2:	0018      	movs	r0, r3
+ 80036e4:	f000 fe6c 	bl	80043c0 <TimestampIsReached>
+ 80036e8:	1e03      	subs	r3, r0, #0
+ 80036ea:	d0f7      	beq.n	80036dc <main+0x4c>
       HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
- 80036ee:	2380      	movs	r3, #128	@ 0x80
- 80036f0:	005b      	lsls	r3, r3, #1
- 80036f2:	4a08      	ldr	r2, [pc, #32]	@ (8003714 <main+0x84>)
- 80036f4:	0019      	movs	r1, r3
- 80036f6:	0010      	movs	r0, r2
- 80036f8:	f001 ff93 	bl	8005622 <HAL_GPIO_TogglePin>
-      LedBlinkTimestamp = HAL_GetTick() + LedBlinkInterval;
- 80036fc:	f001 fadc 	bl	8004cb8 <HAL_GetTick>
- 8003700:	0002      	movs	r2, r0
- 8003702:	683b      	ldr	r3, [r7, #0]
- 8003704:	189b      	adds	r3, r3, r2
- 8003706:	607b      	str	r3, [r7, #4]
+ 80036ec:	2380      	movs	r3, #128	@ 0x80
+ 80036ee:	005b      	lsls	r3, r3, #1
+ 80036f0:	4a08      	ldr	r2, [pc, #32]	@ (8003714 <main+0x84>)
+ 80036f2:	0019      	movs	r1, r3
+ 80036f4:	0010      	movs	r0, r2
+ 80036f6:	f001 ff94 	bl	8005622 <HAL_GPIO_TogglePin>
+      LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
+ 80036fa:	f001 fadd 	bl	8004cb8 <HAL_GetTick>
+ 80036fe:	0003      	movs	r3, r0
+ 8003700:	22fa      	movs	r2, #250	@ 0xfa
+ 8003702:	0092      	lsls	r2, r2, #2
+ 8003704:	4694      	mov	ip, r2
+ 8003706:	4463      	add	r3, ip
+ 8003708:	607b      	str	r3, [r7, #4]
     UpkeepGadget();
- 8003708:	e7e9      	b.n	80036de <main+0x4e>
- 800370a:	46c0      	nop			@ (mov r8, r8)
+ 800370a:	e7e7      	b.n	80036dc <main+0x4c>
  800370c:	200002f0 	.word	0x200002f0
  8003710:	2000020c 	.word	0x2000020c
  8003714:	50000800 	.word	0x50000800

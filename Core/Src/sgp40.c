@@ -11,17 +11,6 @@
 // sgp41_execute_conditioning command must be called from idle mode
 // before the master calls the first sgp41_measure_raw_signals command
 // Heat hotplate for 10 seconds then you can measure
-#define SGP_I2C_ADDRESS 0x59
-#define SGP_CRC_MSB_MASK 0x80
-#define SGP_CRC_BIT_LENGTH 8
-#define SGP_CRC_POLYNOMIAL 0x31 // CRC-8 polynomial: x^8 + x^5 + x^4 + 1
-#define SGP_CRC_INIT_VALUE 0xff
-#define SGP_CRC_SEGMENT 4
-#define LONG_COMMAND_BUFFER_LENGTH 8
-#define SGP_SHORT_COMMAND_BUFFER_LENGTH 2
-#define SGP_SERIAL_NUMBER_BUFFER_LENGTH 9
-#define SGP_SERIAL_NUMBER_SEGMENT_SIZE 3 // 2 bytes + 1 crc byte
-
 
 static bool CheckCRC(uint8_t* data, uint8_t dataLength, uint8_t segmentSize);
 static uint8_t CalculateCRC(uint8_t* data, uint8_t length);
@@ -29,10 +18,10 @@ static uint8_t CalculateCRC(uint8_t* data, uint8_t length);
 static I2CReadCb ReadFunction = NULL;
 static I2CWriteCB WriteFunction = NULL;
 //static uint8_t ExecuteConditioningBuffer[LONG_COMMAND_BUFFER_LENGTH] = {0x26, 0x12, 0x80, 0x00, 0xA2, 0x66, 0x66, 0x93};
-//static uint8_t MeasureRawSignalsBuffer[LONG_COMMAND_BUFFER_LENGTH] = {0x26, 0x19, 0x80, 0x00, 0xA2, 0x66, 0x93};
 //static uint8_t ExecuteSelfTestBuffer[SHORT_COMMAND_BUFFER_LENGTH] = {0x28, 0x0E};
-//static uint8_t TurnHeaterOffBuffer[SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x15};
+static uint8_t TurnHeaterOffBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x15};
 static uint8_t GetSerialNumberBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x82};
+static uint8_t MeasureRawSignalBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x26, 0x0f};
 //static uint8_t SoftResetBuffer[SHORT_COMMAND_BUFFER_LENGTH] = {0x00, 0x06};
 
 static uint8_t SGP_Buffer[SGP_SERIAL_NUMBER_BUFFER_LENGTH] = {0};
@@ -72,7 +61,6 @@ bool SGP_DeviceConnected(void) {
   }
   return CheckCRC(SGP_Buffer, SGP_SERIAL_NUMBER_BUFFER_LENGTH, SGP_SERIAL_NUMBER_SEGMENT_SIZE);
 
-//  return CheckCRC(SGP_TestBuffer, SGP_TEST_BUFFER_SIZE, SGP_TEST_SEGMENT_SIZE);
 }
 
 static bool CheckCRC(uint8_t* data, uint8_t dataLength, uint8_t segmentSize) {
@@ -111,4 +99,9 @@ static uint8_t CalculateCRC(uint8_t* data, uint8_t length) {
   }
   Info("SGP_CRC calculated value: 0x%X", crc);
   return crc;
+}
+
+bool SGP_SelfTest(void) {
+  // Implement the selftest so it runs for the first time (above the while loop)
+
 }

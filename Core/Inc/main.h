@@ -68,6 +68,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define SRC_VERSION "0.01"
+#define LED_BLINK_INTERVAL 1000
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -112,8 +112,7 @@ int main(void)
 	 * : Add CLI via usb-c
 	 * : Network not found? Sleep
 	 */
-  uint32_t LedBlinkInterval = 500;
-  uint32_t LedBlinkTimestamp = HAL_GetTick() + LedBlinkInterval;
+  uint32_t LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
   SetVerboseLevel(VERBOSE_ALL);
   BinaryReleaseInfo();
   Gadget_Init(&hi2c1, &hi2s2);
@@ -126,7 +125,7 @@ int main(void)
     UpkeepGadget();
     if(TimestampIsReached(LedBlinkTimestamp)) {
       HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
-      LedBlinkTimestamp = HAL_GetTick() + LedBlinkInterval;
+      LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
     }
 
     /* USER CODE END WHILE */

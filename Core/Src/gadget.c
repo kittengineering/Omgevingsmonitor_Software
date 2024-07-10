@@ -30,6 +30,7 @@ static EnabledMeasurements SensorSetBatt = {
 };
 
 void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
+  // TODO: Add gadget re-init. So it works after sleep mode again.
   // Check battery power
   // Init sensor + peripherals
   Meas_SetEnabledSensors(SensorSetPower);
@@ -42,6 +43,9 @@ void Gadget_DeInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   // Turn radio off
   // Turn off communication
   Meas_DeInit(sensorI2C, micI2s);
+}
+
+void Gadget_ReInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
 
 }
 

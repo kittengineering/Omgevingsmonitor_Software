@@ -1,3 +1,3 @@
 ../Core/Src/gadget.c:32:6:Gadget_Init	1
 ../Core/Src/gadget.c:41:6:Gadget_DeInit	1
-../Core/Src/gadget.c:48:6:UpkeepGadget	1
+../Core/Src/gadget.c:47:6:UpkeepGadget	1
