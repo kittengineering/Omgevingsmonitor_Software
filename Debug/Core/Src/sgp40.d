@@ -1,4 +1,4 @@
-Core/Src/sgp41.o: ../Core/Src/sgp41.c ../Core/Inc/sgp41.h \
+Core/Src/sgp40.o: ../Core/Src/sgp40.c ../Core/Inc/sgp40.h \
  ../Core/Inc/utils.h \
  C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal.h \
  ../Core/Inc/stm32l0xx_hal_conf.h \
@@ -29,7 +29,7 @@ Core/Src/sgp41.o: ../Core/Src/sgp41.c ../Core/Inc/sgp41.h \
  C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pwr_ex.h \
  C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart.h \
  C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart_ex.h
-../Core/Inc/sgp41.h:
+../Core/Inc/sgp40.h:
 ../Core/Inc/utils.h:
 C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal.h:
 ../Core/Inc/stm32l0xx_hal_conf.h:

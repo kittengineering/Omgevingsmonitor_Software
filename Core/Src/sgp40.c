@@ -4,7 +4,7 @@
  *  Created on: Jun 10, 2024
  *      Author: Joris Blankestijn
  */
-#include "sgp41.h"
+#include <sgp40.h>
 #include "utils.h"
 #include "stm32l0xx_hal.h"
 
@@ -37,32 +37,26 @@ static uint8_t GetSerialNumberBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0
 
 static uint8_t SGP_Buffer[SGP_SERIAL_NUMBER_BUFFER_LENGTH] = {0};
 
-#define SGP_TEST_BUFFER_SIZE 6
-#define SGP_TEST_SEGMENT_SIZE 3
-static uint8_t SGP_TestBuffer[SGP_TEST_BUFFER_SIZE] = {0xBE, 0xEF, 0x92, 0xBE, 0xEF, 0x92};
+//#define SGP_TEST_BUFFER_SIZE 6
+//#define SGP_TEST_SEGMENT_SIZE 3
+//static uint8_t SGP_TestBuffer[SGP_TEST_BUFFER_SIZE] = {0xBE, 0xEF, 0x92, 0xBE, 0xEF, 0x92};
 
 
 static void ReadRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
   if (ReadFunction != NULL) {
     ReadFunction(address, buffer, nrBytes);
-//    HAL_Delay(SENSOR_WAIT_DELAY);
   }
 }
 
 static void WriteRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
   if (WriteFunction != NULL) {
       WriteFunction(address, buffer, nrBytes);
-//      HAL_Delay(SENSOR_WAIT_DELAY);
   }
 }
 
 void SGP_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
   ReadFunction = readFunction;
   WriteFunction = writeFunction;
-  if(!SGP_DeviceConnected()) {
-    Error("SGP device not connected!");
-    return;
-  }
 }
 
 void SGP_StartMeasurement(void) {
@@ -73,8 +67,8 @@ bool SGP_DeviceConnected(void) {
   WriteRegister(SGP_I2C_ADDRESS, GetSerialNumberBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
   HAL_Delay(1); // 1ms delay for the sensor to respond (according to datasheet)
   ReadRegister(SGP_I2C_ADDRESS, SGP_Buffer, SGP_SERIAL_NUMBER_BUFFER_LENGTH);
-  for (uint8_t i = 0; i < 9; i++) {
-    Info("Device serial ID[%d]: 0x%X", i, SGP_Buffer[i]);
+  for (uint8_t i = 0; i < SGP_SERIAL_NUMBER_BUFFER_LENGTH; i++) {
+    Info("SGP_Device serial ID[%d]: 0x%X", i, SGP_Buffer[i]);
   }
   return CheckCRC(SGP_Buffer, SGP_SERIAL_NUMBER_BUFFER_LENGTH, SGP_SERIAL_NUMBER_SEGMENT_SIZE);
 
@@ -115,6 +109,6 @@ static uint8_t CalculateCRC(uint8_t* data, uint8_t length) {
       }
     }
   }
-  Info("CRC calculated value: 0x%X", crc);
+  Info("SGP_CRC calculated value: 0x%X", crc);
   return crc;
 }

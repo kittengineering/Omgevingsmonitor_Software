@@ -1,0 +1,7 @@
+../Core/Src/sgp40.c:45:13:ReadRegister	24	static
+../Core/Src/sgp40.c:51:13:WriteRegister	24	static
+../Core/Src/sgp40.c:57:6:SGP_Init	16	static
+../Core/Src/sgp40.c:62:6:SGP_StartMeasurement	8	static
+../Core/Src/sgp40.c:66:6:SGP_DeviceConnected	24	static
+../Core/Src/sgp40.c:78:13:CheckCRC	80	dynamic
+../Core/Src/sgp40.c:95:16:CalculateCRC	32	static

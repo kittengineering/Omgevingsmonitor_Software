@@ -67,7 +67,7 @@ void Error_Handler(void);
 #define Wireless_PG_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+#define SRC_VERSION "0.01"
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

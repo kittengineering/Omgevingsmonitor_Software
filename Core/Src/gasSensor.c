@@ -5,6 +5,7 @@
  *      Author: Joris Blankestijn
  */
 
+#include <sgp40.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -12,7 +13,6 @@
 
 #include "gasSensor.h"
 #include "stm32l0xx_it.h"
-#include "sgp41.h"
 #include "utils.h"
 
 void Gas_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {

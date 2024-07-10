@@ -5,8 +5,8 @@
  *      Author: Joris Blankestijn
  */
 
-#ifndef INC_SGP41_H_
-#define INC_SGP41_H_
+#ifndef INC_SGP40_H_
+#define INC_SGP40_H_
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -25,4 +25,4 @@ bool SGP_MeasurementReady(void);
 bool SGP_GetMeasurementValues(float* vocIndex, float* noXIndex);
 bool SGP_DeviceConnected(void);
 
-#endif /* INC_SGP41_H_ */
+#endif /* INC_SGP40_H_ */

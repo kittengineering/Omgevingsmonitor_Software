@@ -1,7 +1,0 @@
-../Core/Src/sgp41.c:45:13:ReadRegister	2
-../Core/Src/sgp41.c:52:13:WriteRegister	2
-../Core/Src/sgp41.c:59:6:SGP_Init	2
-../Core/Src/sgp41.c:68:6:SGP_StartMeasurement	1
-../Core/Src/sgp41.c:72:6:SGP_DeviceConnected	2
-../Core/Src/sgp41.c:84:13:CheckCRC	4
-../Core/Src/sgp41.c:101:16:CalculateCRC	4

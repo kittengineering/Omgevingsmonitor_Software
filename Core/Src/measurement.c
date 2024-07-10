@@ -37,11 +37,6 @@ static MeasurementContext MeasurementCtx;
 static MeasurementParameters Measurements[MEAS_MEASUREMENT_COUNT];
 static EnabledMeasurements MeasEnabled;
 static MeasurementState MeasState = MEAS_STATE_INIT;
-static uint32_t MeasurementTimestamp;
-static uint32_t TimeOutTimestamp;
-static uint32_t MeasurementDuration = 2000; // Standard interval in between checking if the measurement is done.
-static uint32_t TimeOutInterval = 100;
-static uint8_t ErrorCount = 0;
 static uint8_t CurrentMeasurementIndex = 0;
 
 static void HT_StartMeasurementWrapper(void) {
@@ -49,7 +44,7 @@ static void HT_StartMeasurementWrapper(void) {
 }
 
 static bool HT_IsMeasurementDoneWrapper(void) {
-    return HT_GetMeasurementValues(&MeasurementCtx.humidityPerc, &MeasurementCtx.temperature);
+  return HT_GetMeasurementValues(&MeasurementCtx.humidityPerc, &MeasurementCtx.temperature);
 }
 
 static void VOC_StartMeasurementWrapper(void) {
@@ -123,14 +118,11 @@ void Meas_Upkeep(void) {
     MeasurementCtx.NO_measurementDone = false;
     MeasurementCtx.MIC_measurementDone = false;
     CurrentMeasurementIndex = 0;
-
-    Debug("Measurement interval: %d ms", MeasurementDuration);
-    MeasurementTimestamp = HAL_GetTick() + MeasurementDuration;
     MeasState = MEAS_STATE_START_NEXT_MEASUREMENT;
     break;
 
   case MEAS_STATE_START_NEXT_MEASUREMENT:
-    if (CurrentMeasurementIndex <= MEAS_MEASUREMENT_COUNT) {
+    if (CurrentMeasurementIndex < MEAS_MEASUREMENT_COUNT) {
       if(Measurements[CurrentMeasurementIndex].enabled) {
         StartNextMeasurement();
         MeasState = MEAS_STATE_WAIT_FOR_COMPLETION;
@@ -145,17 +137,10 @@ void Meas_Upkeep(void) {
    break;
 
   case MEAS_STATE_WAIT_FOR_COMPLETION:
-    if (ErrorCount >= MEAS_MAX_RETRY_ATTEMPTS) {
-        Error("Measurement timeout reached, restarting measurement.");
-        ErrorCount = 0;
-        MeasState = MEAS_STATE_INIT;
-    } else if (Measurements[CurrentMeasurementIndex].doneFunc()) {
-        *Measurements[CurrentMeasurementIndex].doneFlag = true;
-        CurrentMeasurementIndex++;
-        MeasState = MEAS_STATE_START_NEXT_MEASUREMENT;
-    } else if (TimestampIsReached(TimeOutTimestamp) && TimestampIsReached(MeasurementTimestamp)) {
-        ErrorCount += 1;
-        TimeOutTimestamp = HAL_GetTick() + TimeOutInterval;
+    if (Measurements[CurrentMeasurementIndex].doneFunc()) {
+      *Measurements[CurrentMeasurementIndex].doneFlag = true;
+      CurrentMeasurementIndex++;
+      MeasState = MEAS_STATE_START_NEXT_MEASUREMENT;
     }
     break;
 
@@ -182,9 +167,6 @@ void Meas_SetEnabledSensors(EnabledMeasurements enabled) {
   Measurements[offset++].enabled = enabled.MIC_measurementEnabled;
 }
 
-void Meas_SetInterval(uint32_t interval_ms) {
-  MeasurementDuration = interval_ms;
-}
 
 static void Meas_TurnOff(void) {
   MeasState = MEAS_STATE_OFF;

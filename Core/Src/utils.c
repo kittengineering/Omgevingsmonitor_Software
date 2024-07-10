@@ -75,3 +75,11 @@ void SetVerboseLevel(VerboseLevel level) { CurrentVerboseLevel = level; }
 uint32_t GetCurrentHalTicks(void) {
   return HAL_GetTick();
 }
+
+void BinaryReleaseInfo() {
+  Info("=-=-=-=-=-=WOTS Gadget started.=-=-=-=-=-=");
+  Info("Build on: %s at %s", __DATE__, __TIME__);
+  // Format: YY'w'WWv
+  Info("Git: 24w28a");
+  Info("Software version: %s", SRC_VERSION);
+}

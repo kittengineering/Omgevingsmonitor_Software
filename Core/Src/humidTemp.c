@@ -33,3 +33,4 @@ bool HT_DeviceConnected() {
   return HIDS_DeviceConnected();
 }
 
+

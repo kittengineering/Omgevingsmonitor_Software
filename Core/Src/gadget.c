@@ -34,7 +34,7 @@ void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   // Init sensor + peripherals
   Meas_SetEnabledSensors(SensorSetPower);
   Meas_Init(sensorI2C, micI2s);
-  Meas_SetInterval(2000);
+//  Gadget_SetSleepDuration();
   Info("Gadget initialised.");
 }
 

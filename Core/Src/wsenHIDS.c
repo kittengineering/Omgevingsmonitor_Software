@@ -144,9 +144,7 @@ void HIDS_SoftReset(void){
 }
 
 bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
-  if(MeasurementDone){
-    return true;
-  }
+  if(MeasurementDone) return true;
   if(!HIDS_MeasurementReady()) return false;
   uint32_t amountOfMeasurements = MeasurementDuration / HIDSInterval_ms;
   static uint32_t measurements = 0;
@@ -159,10 +157,10 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
 //  Info("=-=-=-=New values incoming.=-=-=-=");
   ReadRegister(HIDS_I2C_ADDRESS, MeasureBuffer, HIDS_MEASURE_BUFFER_LENGTH);
 	if(!CheckCRC(MeasureBuffer)) {
-		Error("GetMeasurementValues CRC check failed.");
+		Error("HIDS measurements CRC check failed.");
 		Info("Measure buffer structure:");
 		for(uint8_t i = 0; i < HIDS_MEASURE_BUFFER_LENGTH; i++) {
-			Debug("Measurement buffer[%d]: %d", i, MeasureBuffer[i]);
+			Debug("HIDS_Measurement buffer[%d]: %d", i, MeasureBuffer[i]);
 		}
 		return false;
 	}
@@ -200,7 +198,7 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
 
     measurements = 0;
     MeasurementDone = true;
-    Debug("HT measurement is done.");
+    Debug("HIDS measurement is done.");
     return true;
 	}
 	// Starting another measurement, still not done with all measurements.

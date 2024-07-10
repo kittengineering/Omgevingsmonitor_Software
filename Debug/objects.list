@@ -10,7 +10,7 @@
 "./Core/Src/main.o"
 "./Core/Src/measurement.o"
 "./Core/Src/microphone.o"
-"./Core/Src/sgp41.o"
+"./Core/Src/sgp40.o"
 "./Core/Src/stm32l0xx_hal_msp.o"
 "./Core/Src/stm32l0xx_it.o"
 "./Core/Src/syscalls.o"

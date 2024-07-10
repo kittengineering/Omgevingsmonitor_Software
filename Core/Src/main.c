@@ -115,6 +115,7 @@ int main(void)
   uint32_t LedBlinkInterval = 500;
   uint32_t LedBlinkTimestamp = HAL_GetTick() + LedBlinkInterval;
   SetVerboseLevel(VERBOSE_ALL);
+  BinaryReleaseInfo();
   Gadget_Init(&hi2c1, &hi2s2);
   /* USER CODE END 2 */
 
@@ -122,7 +123,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
 	  // Upkeep gadget
-//    UpkeepGadget();
+    UpkeepGadget();
     if(TimestampIsReached(LedBlinkTimestamp)) {
       HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
       LedBlinkTimestamp = HAL_GetTick() + LedBlinkInterval;

@@ -25,6 +25,7 @@ bool TimestampIsReached(uint32_t timestamp);
 void CreateLine(VerboseLevel verboseLevel, char* tag, char* format, ...);
 void SetVerboseLevel(VerboseLevel level);
 uint32_t GetCurrentHalTicks(void);
+void BinaryReleaseInfo(void);
 
 #define Info(...)               CreateLine(VERBOSE_INFO, "I", __VA_ARGS__)
 #define Warning(...)            CreateLine(VERBOSE_MINIMAL, "W", __VA_ARGS__)

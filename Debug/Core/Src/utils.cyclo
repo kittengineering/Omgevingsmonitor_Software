@@ -4,3 +4,4 @@
 ../Core/Src/utils.c:68:5:_write	1
 ../Core/Src/utils.c:73:6:SetVerboseLevel	1
 ../Core/Src/utils.c:75:10:GetCurrentHalTicks	1
+../Core/Src/utils.c:79:6:BinaryReleaseInfo	1
