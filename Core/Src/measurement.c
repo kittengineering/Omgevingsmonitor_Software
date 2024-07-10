@@ -85,7 +85,12 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
        Error("HT device not connected!");
        MeasEnabled.HT_measurementEnabled = false;
        return;
-     }
+    }
+    if(!Gas_DeviceConnected()) {
+       Error("SGP device not connected!");
+       MeasEnabled.VOC_measurementEnabled = false;
+       return;
+    }
   }
   if(MeasEnabled.MIC_measurementEnabled) {
 //    MIC_Init(micI2s);

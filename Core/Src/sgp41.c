@@ -18,11 +18,12 @@
 #define SGP_CRC_INIT_VALUE 0xff
 #define SGP_CRC_SEGMENT 4
 #define LONG_COMMAND_BUFFER_LENGTH 8
-#define SHORT_COMMAND_BUFFER_LENGTH 2
-#define SENSOR_WAIT_DELAY 20
-static bool MeasurementStarted = false;
+#define SGP_SHORT_COMMAND_BUFFER_LENGTH 2
+#define SGP_SERIAL_NUMBER_BUFFER_LENGTH 9
+#define SGP_SERIAL_NUMBER_SEGMENT_SIZE 3 // 2 bytes + 1 crc byte
 
-static bool CheckCRC(uint8_t* data, uint8_t length);
+
+static bool CheckCRC(uint8_t* data, uint8_t dataLength, uint8_t segmentSize);
 static uint8_t CalculateCRC(uint8_t* data, uint8_t length);
 
 static I2CReadCb ReadFunction = NULL;
@@ -31,8 +32,14 @@ static I2CWriteCB WriteFunction = NULL;
 //static uint8_t MeasureRawSignalsBuffer[LONG_COMMAND_BUFFER_LENGTH] = {0x26, 0x19, 0x80, 0x00, 0xA2, 0x66, 0x93};
 //static uint8_t ExecuteSelfTestBuffer[SHORT_COMMAND_BUFFER_LENGTH] = {0x28, 0x0E};
 //static uint8_t TurnHeaterOffBuffer[SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x15};
-//static uint8_t GetSerialNumberBuffer[SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x82};
+static uint8_t GetSerialNumberBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x82};
 //static uint8_t SoftResetBuffer[SHORT_COMMAND_BUFFER_LENGTH] = {0x00, 0x06};
+
+static uint8_t SGP_Buffer[SGP_SERIAL_NUMBER_BUFFER_LENGTH] = {0};
+
+#define SGP_TEST_BUFFER_SIZE 6
+#define SGP_TEST_SEGMENT_SIZE 3
+static uint8_t SGP_TestBuffer[SGP_TEST_BUFFER_SIZE] = {0xBE, 0xEF, 0x92, 0xBE, 0xEF, 0x92};
 
 
 static void ReadRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
@@ -63,30 +70,32 @@ void SGP_StartMeasurement(void) {
 }
 
 bool SGP_DeviceConnected(void) {
-//  uint8_t serialReg = SERIAL_NUMBER_REG;
-//  WriteRegister(HIDS_I2C_ADDRESS, &serialReg, 1);
-//  ReadRegister(HIDS_I2C_ADDRESS, SerialBuffer, SERIAL_BUFFER_LENGTH);
-//
-//  for (uint8_t i = 0; i < SERIAL_BUFFER_LENGTH; i++) {
-//    Info("Device serial ID[%d]: 0x%X", i, SerialBuffer[i]);
-//  }
-//  return CheckCRC(SerialBuffer);
-  // TODO: Implement logic to read serial number
-  return false;
+  WriteRegister(SGP_I2C_ADDRESS, GetSerialNumberBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
+  HAL_Delay(1); // 1ms delay for the sensor to respond (according to datasheet)
+  ReadRegister(SGP_I2C_ADDRESS, SGP_Buffer, SGP_SERIAL_NUMBER_BUFFER_LENGTH);
+  for (uint8_t i = 0; i < 9; i++) {
+    Info("Device serial ID[%d]: 0x%X", i, SGP_Buffer[i]);
+  }
+  return CheckCRC(SGP_Buffer, SGP_SERIAL_NUMBER_BUFFER_LENGTH, SGP_SERIAL_NUMBER_SEGMENT_SIZE);
+
+//  return CheckCRC(SGP_TestBuffer, SGP_TEST_BUFFER_SIZE, SGP_TEST_SEGMENT_SIZE);
 }
 
-static bool CheckCRC(uint8_t* data, uint8_t length) {
-  // Checking crc per segment
-  for(uint8_t i = 0; i < length; i += SGP_CRC_SEGMENT) {
-    uint8_t crcData[2] = {data[i], data[i + 1]};
-    uint8_t crc = data[i + 2];
+static bool CheckCRC(uint8_t* data, uint8_t dataLength, uint8_t segmentSize) {
+  for (uint8_t i = 0; i < dataLength; i += segmentSize) {
+    uint8_t crcData[segmentSize];
 
-    if (CalculateCRC(crcData, 2) != crc) {
+    for (uint8_t j = 0; j < segmentSize; j++) {
+        crcData[j] = data[i + j];
+    }
+    uint8_t crc = data[i + segmentSize - 1];
+
+    if (CalculateCRC(crcData, segmentSize - 1) != crc) {
         Error("CRC check failed for segment: %d.", i + 1);
         return false;
     }
   }
-  return true;
+    return true;
 }
 
 static uint8_t CalculateCRC(uint8_t* data, uint8_t length) {

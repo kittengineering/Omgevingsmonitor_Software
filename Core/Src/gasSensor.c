@@ -27,3 +27,7 @@ bool Gas_GetMeasurementValues(float* vocIndex, float* noXIndex) {
   return SGP_GetMeasurementValues(vocIndex, noXIndex);
 }
 
+bool Gas_DeviceConnected(void) {
+  return SGP_DeviceConnected();
+}
+

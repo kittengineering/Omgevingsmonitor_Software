@@ -1,7 +1,7 @@
-../Core/Src/sgp41.c:37:13:ReadRegister	24	static
-../Core/Src/sgp41.c:44:13:WriteRegister	24	static
-../Core/Src/sgp41.c:51:6:SGP_Init	16	static
-../Core/Src/sgp41.c:60:6:SGP_StartMeasurement	8	static
-../Core/Src/sgp41.c:64:6:SGP_DeviceConnected	8	static
-../Core/Src/sgp41.c:77:13:CheckCRC	32	static
-../Core/Src/sgp41.c:91:16:CalculateCRC	32	static
+../Core/Src/sgp41.c:45:13:ReadRegister	24	static
+../Core/Src/sgp41.c:52:13:WriteRegister	24	static
+../Core/Src/sgp41.c:59:6:SGP_Init	16	static
+../Core/Src/sgp41.c:68:6:SGP_StartMeasurement	8	static
+../Core/Src/sgp41.c:72:6:SGP_DeviceConnected	24	static
+../Core/Src/sgp41.c:84:13:CheckCRC	80	dynamic
+../Core/Src/sgp41.c:101:16:CalculateCRC	32	static

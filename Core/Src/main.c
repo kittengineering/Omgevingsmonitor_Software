@@ -122,7 +122,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
 	  // Upkeep gadget
-    UpkeepGadget();
+//    UpkeepGadget();
     if(TimestampIsReached(LedBlinkTimestamp)) {
       HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
       LedBlinkTimestamp = HAL_GetTick() + LedBlinkInterval;

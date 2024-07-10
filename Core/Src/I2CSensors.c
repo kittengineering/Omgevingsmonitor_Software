@@ -5,13 +5,13 @@
  *      Author: Joris Blankestijn
  */
 
-#include <I2CSensors.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "utils.h"
 
+#include "I2CSensors.h"
 #include "humidTemp.h"
 #include "gasSensor.h"
 
