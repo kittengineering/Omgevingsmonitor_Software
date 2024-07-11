@@ -62,7 +62,6 @@ void SGP_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
 }
 
 void SGP_StartMeasurement(void) {
-  if(!SGP_MeasurementDone) return;
   WriteRegister(SGP_I2C_ADDRESS, MeasureRawSignalBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
   SGP_MeasurementDuration = GetCurrentHalTicks() + SGP_SENSOR_MEASURE_WAIT_TIME;
 }
@@ -78,48 +77,16 @@ bool SGP_MeasurementDone(void) {
 bool SGP_GetMeasurementValues(float* vocIndex) {
   // TODO: Modify so it works with the sgp instead.
   // TODO: Add the waiting time before starting another measurement
-  if(!SGP_MeasurementReady()) return false;
-  uint32_t amountOfMeasurements = MeasurementDuration / HIDSInterval_ms;
-  static uint32_t measurements = 0;
-//  float currentVOC;
-//  float currentHumidity;
-//  static float temperatures[HIDS_MAX_MEASUREMENTS];
-//  static float humidities[HIDS_MAX_MEASUREMENTS];
-
-  Debug("SGP measurements: %d out of %d completed.", measurements + 1, amountOfMeasurements);
-  ReadRegister(HIDS_I2C_ADDRESS, SGP_ReadBuffer, HIDS_MEASURE_BUFFER_LENGTH);
-  if(!CheckCRC(MeasureBuffer)) {
-    Error("HIDS measurements CRC check failed.");
-    Info("Measure buffer structure:");
-    for(uint8_t i = 0; i < HIDS_MEASURE_BUFFER_LENGTH; i++) {
-      Debug("SGP_Measurement buffer[%d]: %d", i, MeasureBuffer[i]);
+  if(!SGP_MeasurementDone()) return false;
+  ReadRegister(SGP_I2C_ADDRESS, SGP_ReadBuffer, SGP_MEASURE_BUFFER_RESPONSE_LENGTH);
+  if(!CheckCRC(SGP_ReadBuffer, SGP_MEASURE_BUFFER_RESPONSE_LENGTH, SGP_MEASURE_BUFFER_RESPONSE_LENGTH)) {
+    Error("SGP measurements CRC check failed.");
+    Info("SGP_Measure buffer structure:");
+    for(uint8_t i = 0; i < SGP_MEASURE_BUFFER_RESPONSE_LENGTH; i++) {
+      Debug("SGP_Measurement buffer[%d]: %d", i, SGP_ReadBuffer[i]);
     }
     return false;
   }
-
-  if(measurements < amountOfMeasurements) {
-    temperatures[measurements] = currentTemperature;
-    humidities[measurements] = currentHumidity;
-    measurements++;
-  }
-
-  if (measurements >= amountOfMeasurements) {
-    // Measurements done, calculating average and returning it.
-    float sumTemperature = 0.0;
-    float sumHumidity = 0.0;
-    for (uint32_t i = 0; i < measurements; i++) {
-        sumTemperature += temperatures[i];
-        sumHumidity += humidities[i];
-    }
-
-    *temperature = sumTemperature / measurements;
-    *humidity = sumHumidity / measurements;
-
-    measurements = 0;
-    Debug("SGP measurement is done.");
-    return true;
-  }
-  return false;
 }
 
 

@@ -23,8 +23,8 @@ void Gas_StartMeasurement(void){
   SGP_StartMeasurement();
 }
 
-bool Gas_GetMeasurementValues(float* vocIndex, float* noXIndex) {
-  return SGP_GetMeasurementValues(vocIndex, noXIndex);
+bool Gas_GetMeasurementValues(float* vocIndex) {
+  return SGP_GetMeasurementValues(vocIndex);
 }
 
 bool Gas_DeviceConnected(void) {

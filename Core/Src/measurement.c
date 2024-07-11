@@ -20,7 +20,7 @@ typedef struct {
     bool VOC_measurementDone;
     bool NO_measurementDone;
     bool MIC_measurementDone;
-    bool HT_measurementDone;
+    bool HT_measurementReady;
     bool VOC_measurementReady;
     bool NO_measurementReady;
     bool MIC_measurementReady;
@@ -98,7 +98,7 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   // TODO: Add 1 duty cycle variable.
   MeasState = MEAS_STATE_INIT;
   // TODO: If sensor not found, then disable it and give error.
-  if(MeasEnabled.HT_measurementEnabled || MeasEnabled.NO_measurementEnabled) {
+  if(MeasEnabled.HT_measurementEnabled || MeasEnabled.VOC_measurementEnabled) {
     I2CSensors_Init(sensorI2C);
     if(!HT_DeviceConnected()) {
        Error("HT device not connected!");
@@ -114,18 +114,59 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   if(MeasEnabled.MIC_measurementEnabled) {
 //    MIC_Init(micI2s);
   }
-  if(MeasEnabled.VOC_measurementEnabled) {
-    // TODO: Add VOC init
-  }
   uint8_t offset = 0;
   Measurements[offset++] = (MeasurementParameters) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, HT_IsMeasurementReadyWrapper, &MeasurementCtx.HT_measurementDone, &MeasurementCtx.HT_measurementReady, MeasEnabled.HT_measurementEnabled};
   Measurements[offset++] = (MeasurementParameters) {VOC_StartMeasurementWrapper, VOC_IsMeasurementDoneWrapper, VOC_IsMeasurementReadyWrapper, &MeasurementCtx.VOC_measurementDone, &MeasurementCtx.VOC_measurementReady, MeasEnabled.VOC_measurementEnabled};
   Measurements[offset++] = (MeasurementParameters) {NO_StartMeasurementWrapper, NO_IsMeasurementDoneWrapper, NO_IsMeasurementReadyWrapper, &MeasurementCtx.NO_measurementDone, &MeasurementCtx.NO_measurementReady, MeasEnabled.NO_measurementEnabled};
-  Measurements[offset++] = (MeasurementParameters){MIC_StartMeasurementWrapper, MIC_IsMeasurementDoneWrapper, MIC_IsMeasurementReadyWrapper, &MeasurementCtx.MIC_measurementDone, &MeasurementCtx.MIC_measurementReady, MeasEnabled.MIC_measurementEnabled};
+  Measurements[offset++] = (MeasurementParameters) {MIC_StartMeasurementWrapper, MIC_IsMeasurementDoneWrapper, MIC_IsMeasurementReadyWrapper, &MeasurementCtx.MIC_measurementDone, &MeasurementCtx.MIC_measurementReady, MeasEnabled.MIC_measurementEnabled};
 }
 
-void StartNextMeasurement(void) {
-  Measurements[CurrentMeasurementIndex].startFunc();
+void StartMeasurements(void) {
+  for(CurrentMeasurementIndex = 0; CurrentMeasurementIndex < MEAS_MEASUREMENT_COUNT; CurrentMeasurementIndex++) {
+    if(Measurements[CurrentMeasurementIndex].enabled) {
+      Measurements[CurrentMeasurementIndex].startFunc();
+    }
+  }
+}
+
+void ResetMeasurements(void) {
+  MeasurementCtx.humidityPerc = 0;
+  MeasurementCtx.temperature = 0;
+  MeasurementCtx.HT_measurementDone = false;
+  MeasurementCtx.VOC_measurementDone = false;
+  MeasurementCtx.NO_measurementDone = false;
+  MeasurementCtx.MIC_measurementDone = false;
+
+  MeasurementCtx.HT_measurementReady = false;
+  MeasurementCtx.VOC_measurementReady = false;
+  MeasurementCtx.NO_measurementReady = false;
+  MeasurementCtx.MIC_measurementReady = false;
+}
+
+bool MeasurementsCompleted(void) {
+  for(CurrentMeasurementIndex = 0; CurrentMeasurementIndex < MEAS_MEASUREMENT_COUNT; CurrentMeasurementIndex++) {
+    if(Measurements[CurrentMeasurementIndex].enabled) {
+      if(Measurements[CurrentMeasurementIndex].doneFunc()) {
+        *Measurements[CurrentMeasurementIndex].doneFlag = true;
+      }else {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool MeasurementsReady(void) {
+  for(CurrentMeasurementIndex = 0; CurrentMeasurementIndex < MEAS_MEASUREMENT_COUNT; CurrentMeasurementIndex++) {
+     if(Measurements[CurrentMeasurementIndex].enabled) {
+       if(Measurements[CurrentMeasurementIndex].readyFunc()) {
+         *Measurements[CurrentMeasurementIndex].readyFlag = true;
+       }else {
+         return false;
+       }
+     }
+   }
+   return true;
 }
 
 void Meas_Upkeep(void) {
@@ -135,44 +176,31 @@ void Meas_Upkeep(void) {
     break;
 
   case MEAS_STATE_INIT:
-    MeasurementCtx.humidityPerc = 0;
-    MeasurementCtx.temperature = 0;
-    MeasurementCtx.HT_measurementDone = false;
-    MeasurementCtx.VOC_measurementDone = false;
-    MeasurementCtx.NO_measurementDone = false;
-    MeasurementCtx.MIC_measurementDone = false;
-    CurrentMeasurementIndex = 0;
-    MeasState = MEAS_STATE_START_NEXT_MEASUREMENT;
+    ResetMeasurements();
+    MeasState = MEAS_STATE_START_MEASUREMENTS;
     break;
 
-  case MEAS_STATE_START_NEXT_MEASUREMENT:
-    if (CurrentMeasurementIndex < MEAS_MEASUREMENT_COUNT) {
-      if(Measurements[CurrentMeasurementIndex].enabled) {
-        StartNextMeasurement();
-        MeasState = MEAS_STATE_WAIT_FOR_COMPLETION;
-      } else {
-        // Skipping measurement, since it's not enabled.
-        CurrentMeasurementIndex++;
-      }
-   } else {
-     // Done with all the enabled measurements, processing the results.
-     MeasState = MEAS_STATE_PROCESS_RESULTS;
-   }
+  case MEAS_STATE_START_MEASUREMENTS:
+    StartMeasurements();
+    MeasState = MEAS_STATE_WAIT_FOR_COMPLETION;
    break;
 
   case MEAS_STATE_WAIT_FOR_COMPLETION:
-    if (Measurements[CurrentMeasurementIndex].doneFunc()) {
-      *Measurements[CurrentMeasurementIndex].doneFlag = true;
-      CurrentMeasurementIndex++;
-      MeasState = MEAS_STATE_START_NEXT_MEASUREMENT;
+    if(MeasurementsCompleted()) {
+      MeasState = MEAS_STATE_PROCESS_RESULTS;
     }
     break;
 
   case MEAS_STATE_PROCESS_RESULTS:
     Debug("Processing results.");
     // TODO: Return values and let gadget handle with too high humidity and the sensor values
+    // TODO: Check if all measurements are ready for the next measurement before switching states. Only check for the enabled measurements.
     Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
     MeasState = MEAS_STATE_INIT;
+    break;
+
+  case MEAS_STATE_WAIT_FOR_READY:
+
     break;
 
   default:

@@ -1,0 +1,13 @@
+../Core/Src/sgp40.c:47:13:ReadRegister	2
+../Core/Src/sgp40.c:53:13:WriteRegister	2
+../Core/Src/sgp40.c:59:6:SGP_Init	1
+../Core/Src/sgp40.c:64:6:SGP_StartMeasurement	1
+../Core/Src/sgp40.c:69:6:SGP_MeasurementDone	2
+../Core/Src/sgp40.c:77:6:SGP_GetMeasurementValues	4
+../Core/Src/sgp40.c:93:6:SGP_MeasurementReady	2
+../Core/Src/sgp40.c:101:6:SGP_DeviceConnected	2
+../Core/Src/sgp40.c:111:13:CheckCRC	4
+../Core/Src/sgp40.c:128:16:CalculateCRC	4
+../Core/Src/sgp40.c:149:6:SGP_StartSelfTest	2
+../Core/Src/sgp40.c:162:6:SGP_SelfTestDone	2
+../Core/Src/sgp40.c:170:6:SGP_SelfTestSuccessful	4

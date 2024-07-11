@@ -16,7 +16,7 @@ typedef bool (*I2CWriteCB)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 
 void Gas_Init(I2CReadCb readFunction, I2CWriteCB writeFunction);
 void Gas_StartMeasurement(void);
-bool Gas_GetMeasurementValues(float* vocIndex, float* noXIndex);
+bool Gas_GetMeasurementValues(float* vocIndex);
 bool Gas_DeviceConnected(void);
 
 #endif /* INC_GASSENSOR_H_ */
