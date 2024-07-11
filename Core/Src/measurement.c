@@ -20,18 +20,24 @@ typedef struct {
     bool VOC_measurementDone;
     bool NO_measurementDone;
     bool MIC_measurementDone;
+    bool HT_measurementDone;
+    bool VOC_measurementReady;
+    bool NO_measurementReady;
+    bool MIC_measurementReady;
 } MeasurementContext;
 
 typedef void (*StartMeasurementFunc)(void);
 typedef bool (*IsMeasurementDoneFunc)(void);
+typedef bool (*IsMeasurementReadyFunc)(void);
 
 typedef struct {
     StartMeasurementFunc startFunc;
     IsMeasurementDoneFunc doneFunc;
+    IsMeasurementReadyFunc readyFunc;
     bool* doneFlag;
+    bool* readyFlag;
     bool enabled;
 } MeasurementParameters;
-
 
 static MeasurementContext MeasurementCtx;
 static MeasurementParameters Measurements[MEAS_MEASUREMENT_COUNT];
@@ -47,12 +53,21 @@ static bool HT_IsMeasurementDoneWrapper(void) {
   return HT_GetMeasurementValues(&MeasurementCtx.humidityPerc, &MeasurementCtx.temperature);
 }
 
+static bool HT_IsMeasurementReadyWrapper(void) {
+//  return HT_GetMeasurementValues(&MeasurementCtx.humidityPerc, &MeasurementCtx.temperature);
+  return false;
+}
+
 static void VOC_StartMeasurementWrapper(void) {
   // TODO: Implement VOC wrapper.
 }
 
 static bool VOC_IsMeasurementDoneWrapper(void) {
   return true;
+}
+
+static bool VOC_IsMeasurementReadyWrapper(void) {
+  return false;
 }
 
 static void NO_StartMeasurementWrapper(void) {
@@ -63,6 +78,10 @@ static bool NO_IsMeasurementDoneWrapper(void) {
   return true;
 }
 
+static bool NO_IsMeasurementReadyWrapper(void) {
+  return false;
+}
+
 static void MIC_StartMeasurementWrapper(void) {
 //  MIC_Start(SAMPLE_RATE_48K, NR_SAMPLES_128);
 }
@@ -71,7 +90,12 @@ static bool MIC_IsMeasurementDoneWrapper(void) {
     return true;
 }
 
+static bool MIC_IsMeasurementReadyWrapper(void) {
+  return false;
+}
+
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
+  // TODO: Add 1 duty cycle variable.
   MeasState = MEAS_STATE_INIT;
   // TODO: If sensor not found, then disable it and give error.
   if(MeasEnabled.HT_measurementEnabled || MeasEnabled.NO_measurementEnabled) {
@@ -94,10 +118,10 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
     // TODO: Add VOC init
   }
   uint8_t offset = 0;
-  Measurements[offset++] = (MeasurementParameters) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &MeasurementCtx.HT_measurementDone, MeasEnabled.HT_measurementEnabled};
-  Measurements[offset++] = (MeasurementParameters) {VOC_StartMeasurementWrapper, VOC_IsMeasurementDoneWrapper, &MeasurementCtx.VOC_measurementDone, MeasEnabled.VOC_measurementEnabled};
-  Measurements[offset++] = (MeasurementParameters) {NO_StartMeasurementWrapper, NO_IsMeasurementDoneWrapper, &MeasurementCtx.NO_measurementDone, MeasEnabled.NO_measurementEnabled};
-  Measurements[offset++] = (MeasurementParameters){MIC_StartMeasurementWrapper, MIC_IsMeasurementDoneWrapper, &MeasurementCtx.MIC_measurementDone, MeasEnabled.MIC_measurementEnabled};
+  Measurements[offset++] = (MeasurementParameters) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, HT_IsMeasurementReadyWrapper, &MeasurementCtx.HT_measurementDone, &MeasurementCtx.HT_measurementReady, MeasEnabled.HT_measurementEnabled};
+  Measurements[offset++] = (MeasurementParameters) {VOC_StartMeasurementWrapper, VOC_IsMeasurementDoneWrapper, VOC_IsMeasurementReadyWrapper, &MeasurementCtx.VOC_measurementDone, &MeasurementCtx.VOC_measurementReady, MeasEnabled.VOC_measurementEnabled};
+  Measurements[offset++] = (MeasurementParameters) {NO_StartMeasurementWrapper, NO_IsMeasurementDoneWrapper, NO_IsMeasurementReadyWrapper, &MeasurementCtx.NO_measurementDone, &MeasurementCtx.NO_measurementReady, MeasEnabled.NO_measurementEnabled};
+  Measurements[offset++] = (MeasurementParameters){MIC_StartMeasurementWrapper, MIC_IsMeasurementDoneWrapper, MIC_IsMeasurementReadyWrapper, &MeasurementCtx.MIC_measurementDone, &MeasurementCtx.MIC_measurementReady, MeasEnabled.MIC_measurementEnabled};
 }
 
 void StartNextMeasurement(void) {
@@ -176,6 +200,7 @@ static void Meas_TurnOff(void) {
   Measurements[offset++].enabled = false;
   Measurements[offset++].enabled = false;
   Measurements[offset++].enabled = false;
+  // TODO: Add the turning off the heater for the sgp40
 }
 
 MeasurementState Meas_GetState(void) {

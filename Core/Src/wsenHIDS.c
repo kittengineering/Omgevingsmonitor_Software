@@ -22,9 +22,9 @@ static I2CWriteCB WriteFunction = NULL;
 static uint8_t SerialBuffer[HIDS_SERIAL_BUFFER_LENGTH] = {0};
 static uint8_t MeasureBuffer[HIDS_MEASURE_BUFFER_LENGTH] = {0};
 
-static uint32_t HIDSNextRunTime = HIDS_SENSOR_INITIAL_INTERVAL;
-static uint32_t HIDSInterval_ms = HIDS_SENSOR_INITIAL_INTERVAL;
-static uint32_t MeasurementDuration = HIDS_SENSOR_INITIAL_INTERVAL;
+static uint32_t HIDS_NextRunTime = HIDS_SENSOR_INITIAL_INTERVAL;
+static uint32_t HIDS_Interval_ms = HIDS_SENSOR_INITIAL_INTERVAL;
+static uint32_t HIDS_MeasurementDuration = HIDS_SENSOR_INITIAL_INTERVAL;
 static bool MeasurementDone = false;
 
 //static uint32_t SensorNextRunTime = HIDS_SENSOR_WAIT_TIME_HIGH;
@@ -81,13 +81,13 @@ void HIDS_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
 }
 
 void HIDS_StartMeasurement(void) {
-  HIDSNextRunTime = GetCurrentHalTicks() + HIDSInterval_ms;
+  HIDS_NextRunTime = GetCurrentHalTicks() + HIDS_Interval_ms;
   WriteRegister(HIDS_I2C_ADDRESS, &MeasureMode, 1);
   MeasurementDone = false;
 }
 
 void HIDS_SetMeasurementDuration(uint32_t duration) {
-  MeasurementDuration = duration;
+  HIDS_MeasurementDuration = duration;
 }
 
 void HIDS_SetHeaterMode(HIDSHeaterModes modeHeater) {
@@ -132,7 +132,7 @@ void HIDS_SetMeasurementMode(HIDSMeasureModes modeMeasure) {
 }
 
 bool HIDS_MeasurementReady(void) {
-  if(!TimestampIsReached(HIDSNextRunTime)){
+  if(!TimestampIsReached(HIDS_NextRunTime)){
     return false;
   }
   return true;
@@ -146,7 +146,7 @@ void HIDS_SoftReset(void){
 bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
   if(MeasurementDone) return true;
   if(!HIDS_MeasurementReady()) return false;
-  uint32_t amountOfMeasurements = MeasurementDuration / HIDSInterval_ms;
+  uint32_t amountOfMeasurements = HIDS_MeasurementDuration / HIDS_Interval_ms;
   static uint32_t measurements = 0;
   float currentTemperature;
   float currentHumidity;
