@@ -25,9 +25,10 @@
 #define SGP_SERIAL_NUMBER_SEGMENT_SIZE 3 // 2 bytes + 1 crc byte
 #define SGP_SENSOR_INTERVAL 1000
 #define SGP_SENSOR_MEASURE_WAIT_TIME 30 //30ms before the raw signal measurement is ready
-#define SGP_SELF_TEST_WAIT_TIME 320 // 320ms before the self test results are ready
+#define SGP_SELF_TEST_WAIT_TIME 320 // 320ms before the self test is ready
 #define SGP_SELF_TEST_RESPONSE_LENGTH 3
 #define SGP_SELF_TEST_SEGMENT_LENGTH 3 // 2 bytes + 1 crc byte
+#define SGP_SELF_TEST_SUCCESS 0x4d
 
 typedef bool (*I2CReadCb)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 typedef bool (*I2CWriteCB)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);

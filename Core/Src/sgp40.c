@@ -27,8 +27,8 @@ static uint8_t ExecuteSelfTestBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x28, 0
 static uint8_t TurnHeaterOffBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x15};
 static uint8_t GetSerialNumberBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x82};
 
-// Change measurebuffer so we get humidity and temp compensation
-static uint8_t MeasureRawSignalBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x26, 0x0f};
+static uint8_t MeasureRawSignalBufferCompensated[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x26, 0x0f};
+static uint8_t MeasureRawSignalBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x26, 0x0f, 0x80, 0x00, 0xA2, 0x66, 0x66, 0x93};
 static uint8_t SoftResetBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x00, 0x06};
 
 static uint8_t SGP_ReadBuffer[SGP_SERIAL_NUMBER_RESPONSE_LENGTH] = {0};
@@ -62,6 +62,7 @@ void SGP_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
 }
 
 void SGP_StartMeasurement(void) {
+  // TODO: Modify this buffer to use humidity compensation.
   WriteRegister(SGP_I2C_ADDRESS, MeasureRawSignalBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
   SGP_MeasurementDuration = GetCurrentHalTicks() + SGP_SENSOR_MEASURE_WAIT_TIME;
 }
@@ -87,6 +88,8 @@ bool SGP_GetMeasurementValues(float* vocIndex) {
     }
     return false;
   }
+  vocIndex = SGP_ReadBuffer[1];
+  return true;
 }
 
 
@@ -156,7 +159,6 @@ void SGP_StartSelfTest(void) {
   // the test was successful or not.
   // Exit measurement mode by turning heater off.
   //  If this command is called when the sensor is in idle mode, the sensor returns to idle mode after the test
-  return true;
 }
 
 bool SGP_SelfTestDone(void) {
@@ -178,8 +180,25 @@ bool SGP_SelfTestSuccessful(void) {
   }
   ReadRegister(SGP_I2C_ADDRESS, SGP_ReadBuffer, SGP_SELF_TEST_RESPONSE_LENGTH);
   if(CheckCRC(SGP_ReadBuffer, SGP_SELF_TEST_RESPONSE_LENGTH, SGP_SELF_TEST_SEGMENT_LENGTH)) {
-    Debug("Self test successful.");
-    return true;
+    if(SGP_ReadBuffer[1] == 0xD4) {
+      Debug("All self tests have [PASSED] successfully.");
+      return true;
+    }else {
+      Debug("One or more self tests have [FAILED].");
+    }
   }
   return false;
+}
+
+void SGP_TurnHeaterOff(void) {
+  // This command could take from 0.1 to 1ms.
+  WriteRegister(SGP_I2C_ADDRESS, TurnHeaterOffBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
+}
+
+void SGP_SoftReset(void) {
+  // Datasheet mentioned this was a general reset command, which is odd.
+  // But if something happens to the i2c bus, this might be the issue.
+  // Worth mentioning.
+  // This command could take from 0.1 to 1ms.
+  WriteRegister(SGP_I2C_ADDRESS, SoftResetBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
 }
