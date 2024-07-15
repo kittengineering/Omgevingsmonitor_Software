@@ -8,16 +8,6 @@
 #include "utils.h"
 #include "stm32l0xx_hal.h"
 
-
-// TODO: Add function -> Without humidity compensation
-// 0x26 0x0F 0x80 0x00 0xA2
-// 0x66 0x66 0x93
-
-// TODO: Add function -> With humidity compensation
-// Use humidity and temperature from other sensor
-// 0x26 0x0F 0xXX 0xXX 0xXX
-// 0xYY 0xYY 0xYY
-
 static bool CheckCRC(uint8_t* data, uint8_t dataLength, uint8_t segmentSize);
 static uint8_t CalculateCRC(uint8_t* data, uint8_t length);
 static I2CReadCb ReadFunction = NULL;
@@ -34,8 +24,11 @@ static uint8_t SoftResetBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x00, 0x06};
 static uint8_t SGP_ReadBuffer[SGP_SERIAL_NUMBER_RESPONSE_LENGTH] = {0};
 //static uint8_t SGP_WriteBuffer[SGP_SERIAL_NUMBER_BUFFER_LENGTH] = {0};
 
-static uint32_t SGP_NextRunTime = 0;
-static uint32_t SGP_MeasurementDuration = SGP_SENSOR_MEASURE_WAIT_TIME;
+static uint8_t SGP_AmountOfSamplesDone = 0;
+static uint8_t SGP_AmountOfSamples = 10;
+static uint32_t SGP_HeatUpTime = SGP_SENSOR_HEATUP_TIME;
+static uint32_t SGP_MeasurementDutyCycle = SGP_SENSOR_DUTYCYCLE;
+static uint32_t SGP_IdleTime = SGP_SENSOR_IDLE_TIME;
 static uint32_t SGP_SelfTestRunTime = SGP_SELF_TEST_WAIT_TIME;
 static bool SGP_SelfTestStarted = false;
 
@@ -64,41 +57,56 @@ void SGP_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
 void SGP_StartMeasurement(void) {
   // TODO: Modify this buffer to use humidity compensation.
   WriteRegister(SGP_I2C_ADDRESS, MeasureRawSignalBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
-  SGP_MeasurementDuration = GetCurrentHalTicks() + SGP_SENSOR_MEASURE_WAIT_TIME;
+  SGP_HeatUpTime = GetCurrentHalTicks() + SGP_SENSOR_HEATUP_TIME;
+}
+
+bool SGP_HeatedUp(void) {
+  if(!TimestampIsReached(SGP_HeatUpTime)) return false;
+  SGP_IdleTime = GetCurrentHalTicks() + SGP_SENSOR_IDLE_TIME;
+  return true;
+}
+
+bool SGP_MeasurementReady(void) {
+  if(!TimestampIsReached(SGP_IdleTime))return false;
+  Debug("SGP measurement is ready to be read.");
+  SGP_MeasurementDutyCycle = GetCurrentHalTicks() + SGP_SENSOR_DUTYCYCLE;
+  return true;
 }
 
 bool SGP_MeasurementDone(void) {
-  if(TimestampIsReached(SGP_MeasurementDuration)) {
-    Debug("SGP_Measurement is done.");
-    return true;
-  }
-  return false;
+  if(!TimestampIsReached(SGP_MeasurementDutyCycle)) return false;
+  Debug("SGP_Measurement idle time has passed.");
+  return true;
 }
 
 bool SGP_GetMeasurementValues(float* vocIndex) {
-  // TODO: Modify so it works with the sgp instead.
-  // TODO: Add the waiting time before starting another measurement
-  if(!SGP_MeasurementDone()) return false;
-  ReadRegister(SGP_I2C_ADDRESS, SGP_ReadBuffer, SGP_MEASURE_BUFFER_RESPONSE_LENGTH);
-  if(!CheckCRC(SGP_ReadBuffer, SGP_MEASURE_BUFFER_RESPONSE_LENGTH, SGP_MEASURE_BUFFER_RESPONSE_LENGTH)) {
-    Error("SGP measurements CRC check failed.");
-    Info("SGP_Measure buffer structure:");
-    for(uint8_t i = 0; i < SGP_MEASURE_BUFFER_RESPONSE_LENGTH; i++) {
-      Debug("SGP_Measurement buffer[%d]: %d", i, SGP_ReadBuffer[i]);
+  if(!SGP_HeatedUp()) {
+    // SGP is heated up, we ignore the output and start another measurement.
+    WriteRegister(SGP_I2C_ADDRESS, MeasureRawSignalBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
+  }
+  if(SGP_MeasurementReady()) {
+    // Measurement is ready to be read, also turning the heater off.
+    ReadRegister(SGP_I2C_ADDRESS, SGP_ReadBuffer, SGP_MEASURE_BUFFER_RESPONSE_LENGTH);
+    if(!CheckCRC(SGP_ReadBuffer, SGP_MEASURE_BUFFER_RESPONSE_LENGTH, SGP_MEASURE_BUFFER_RESPONSE_LENGTH)) {
+      Error("SGP measurements CRC check failed.");
+      Info("SGP_Measure buffer structure:");
+      for(uint8_t i = 0; i < SGP_MEASURE_BUFFER_RESPONSE_LENGTH; i++) {
+        Debug("SGP_Measurement buffer[%d]: %d", i, SGP_ReadBuffer[i]);
+      }
+      return false;
     }
-    return false;
+    SGP_TurnHeaterOff();
+    SGP_AmountOfSamplesDone += 1;
+    if(SGP_AmountOfSamplesDone >= SGP_AmountOfSamples) {
+      SGP_AmountOfSamplesDone = 0;
+      return true;
+    }
+    if(SGP_MeasurementDone()) {
+      // Starting next measurement
+      SGP_StartMeasurement();
+    }
   }
-  vocIndex = SGP_ReadBuffer[1];
-  return true;
-}
-
-
-bool SGP_MeasurementReady(void) {
-  if(!TimestampIsReached(SGP_NextRunTime)) {
-    return false;
-  }
-  Debug("SGP_Measurement is ready for the next measurement.");
-  return true;
+  return false;
 }
 
 bool SGP_DeviceConnected(void) {

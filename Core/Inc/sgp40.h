@@ -23,8 +23,9 @@
 #define SGP_MEASURE_BUFFER_LENGTH 6
 #define SGP_MEASURE_BUFFER_RESPONSE_LENGTH 3
 #define SGP_SERIAL_NUMBER_SEGMENT_SIZE 3 // 2 bytes + 1 crc byte
-#define SGP_SENSOR_INTERVAL 1000
-#define SGP_SENSOR_MEASURE_WAIT_TIME 30 //30ms before the raw signal measurement is ready
+#define SGP_SENSOR_DUTYCYCLE (SGP_SENSOR_HEATUP_TIME + SGP_SENSOR_IDLE_TIME) * (100 / 20) // Duty cycle of 20%
+#define SGP_SENSOR_HEATUP_TIME 170
+#define SGP_SENSOR_IDLE_TIME 30
 #define SGP_SELF_TEST_WAIT_TIME 320 // 320ms before the self test is ready
 #define SGP_SELF_TEST_RESPONSE_LENGTH 3
 #define SGP_SELF_TEST_SEGMENT_LENGTH 3 // 2 bytes + 1 crc byte
@@ -35,9 +36,9 @@ typedef bool (*I2CWriteCB)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 
 void SGP_Init(I2CReadCb readFunction, I2CWriteCB writeFunction);
 void SGP_StartMeasurement(void);
-bool SGP_MeasurementReady(void);
 bool SGP_GetMeasurementValues(float* vocIndex);
 bool SGP_DeviceConnected(void);
 bool SGP_SelfTest(void);
+void SGP_SoftReset(void);
 
 #endif /* INC_SGP40_H_ */

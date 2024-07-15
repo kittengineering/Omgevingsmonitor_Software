@@ -132,7 +132,7 @@ void HIDS_SetMeasurementMode(HIDSMeasureModes modeMeasure) {
 }
 
 bool HIDS_MeasurementReady(void) {
-  if(!TimestampIsReached(HIDS_NextRunTime)){
+  if(!TimestampIsReached(HIDS_NextRunTime)) {
     return false;
   }
   return true;
@@ -144,6 +144,7 @@ void HIDS_SoftReset(void){
 }
 
 bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
+  // TODO: Store last measurement humidity for sgp40 measurement.
   if(MeasurementDone) return true;
   if(!HIDS_MeasurementReady()) return false;
   uint32_t amountOfMeasurements = HIDS_MeasurementDuration / HIDS_Interval_ms;
