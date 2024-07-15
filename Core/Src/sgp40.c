@@ -18,7 +18,7 @@ static uint8_t TurnHeaterOffBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x1
 static uint8_t GetSerialNumberBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x82};
 
 static uint8_t MeasureRawSignalBufferCompensated[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x26, 0x0f};
-static uint8_t MeasureRawSignalBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x26, 0x0f, 0x80, 0x00, 0xA2, 0x66, 0x66, 0x93};
+static uint8_t MeasureRawSignalBuffer[SGP_LONG_COMMAND_BUFFER_LENGTH] = {0x26, 0x0f, 0x80, 0x00, 0xA2, 0x66, 0x66, 0x93};
 static uint8_t SoftResetBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x00, 0x06};
 
 static uint8_t SGP_ReadBuffer[SGP_SERIAL_NUMBER_RESPONSE_LENGTH] = {0};
@@ -36,7 +36,6 @@ static bool SGP_SelfTestStarted = false;
 //#define SGP_TEST_SEGMENT_SIZE 3
 //static uint8_t SGP_TestBuffer[SGP_TEST_BUFFER_SIZE] = {0xBE, 0xEF, 0x92, 0xBE, 0xEF, 0x92};
 
-// TODO: Look into adding the humidity compensation from our HT sensor.
 static void ReadRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
   if (ReadFunction != NULL) {
     ReadFunction(address, buffer, nrBytes);
@@ -60,23 +59,29 @@ void SGP_StartMeasurement(void) {
   SGP_HeatUpTime = GetCurrentHalTicks() + SGP_SENSOR_HEATUP_TIME;
 }
 
-bool SGP_HeatedUp(void) {
+static bool SGP_HeatedUp(void) {
   if(!TimestampIsReached(SGP_HeatUpTime)) return false;
   SGP_IdleTime = GetCurrentHalTicks() + SGP_SENSOR_IDLE_TIME;
   return true;
 }
 
-bool SGP_MeasurementReady(void) {
+static bool SGP_MeasurementReady(void) {
   if(!TimestampIsReached(SGP_IdleTime))return false;
   Debug("SGP measurement is ready to be read.");
   SGP_MeasurementDutyCycle = GetCurrentHalTicks() + SGP_SENSOR_DUTYCYCLE;
   return true;
 }
 
-bool SGP_MeasurementDone(void) {
+static bool SGP_MeasurementDone(void) {
   if(!TimestampIsReached(SGP_MeasurementDutyCycle)) return false;
   Debug("SGP_Measurement idle time has passed.");
   return true;
+}
+
+
+void SGP_TurnHeaterOff(void) {
+  // This command could take from 0.1 to 1ms.
+  WriteRegister(SGP_I2C_ADDRESS, TurnHeaterOffBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
 }
 
 bool SGP_GetMeasurementValues(float* vocIndex) {
@@ -172,6 +177,7 @@ void SGP_StartSelfTest(void) {
 bool SGP_SelfTestDone(void) {
   if(TimestampIsReached(SGP_SelfTestRunTime)) {
     SGP_SelfTestStarted = false;
+    SGP_TurnHeaterOff();
     return true;
   }
   return false;
@@ -183,24 +189,18 @@ bool SGP_SelfTestSuccessful(void) {
     SGP_StartSelfTest();
     return false;
   }
-  if(!SGP_SelfTestDone()) {
-    return false;
-  }
+  if(!SGP_SelfTestDone()) return false;
   ReadRegister(SGP_I2C_ADDRESS, SGP_ReadBuffer, SGP_SELF_TEST_RESPONSE_LENGTH);
   if(CheckCRC(SGP_ReadBuffer, SGP_SELF_TEST_RESPONSE_LENGTH, SGP_SELF_TEST_SEGMENT_LENGTH)) {
-    if(SGP_ReadBuffer[1] == 0xD4) {
+    if(SGP_ReadBuffer[1] == SGP_SELF_TEST_SUCCESS) {
       Debug("All self tests have [PASSED] successfully.");
       return true;
     }else {
       Debug("One or more self tests have [FAILED].");
+      return false;
     }
   }
   return false;
-}
-
-void SGP_TurnHeaterOff(void) {
-  // This command could take from 0.1 to 1ms.
-  WriteRegister(SGP_I2C_ADDRESS, TurnHeaterOffBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
 }
 
 void SGP_SoftReset(void) {

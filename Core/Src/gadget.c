@@ -20,13 +20,13 @@ static EnabledMeasurements SensorSetPower = {
     .HT_measurementEnabled = true,
     .VOC_measurementEnabled = true,
     .NO_measurementEnabled = false,
-    .MIC_measurementEnabled = false
+    .MIC_measurementEnabled = true
 };
 static EnabledMeasurements SensorSetBatt = {
     .HT_measurementEnabled = true,
     .VOC_measurementEnabled = true,
     .NO_measurementEnabled = false,
-    .MIC_measurementEnabled = false
+    .MIC_measurementEnabled = true
 };
 
 void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
