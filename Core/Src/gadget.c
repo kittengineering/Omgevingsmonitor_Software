@@ -16,6 +16,13 @@
 //}
 
 
+static EnabledMeasurements SensorSetTest = {
+    .HT_measurementEnabled = false,
+    .VOC_measurementEnabled = true,
+    .NO_measurementEnabled = false,
+    .MIC_measurementEnabled = false
+};
+
 static EnabledMeasurements SensorSetPower = {
     .HT_measurementEnabled = true,
     .VOC_measurementEnabled = true,
@@ -33,7 +40,7 @@ void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   // TODO: Add gadget re-init. So it works after sleep mode again.
   // Check battery power
   // Init sensor + peripherals
-  Meas_SetEnabledSensors(SensorSetPower);
+  Meas_SetEnabledSensors(SensorSetTest);
   Meas_Init(sensorI2C, micI2s);
 //  Gadget_SetSleepDuration();
   Info("Gadget initialised.");

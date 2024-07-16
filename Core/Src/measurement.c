@@ -16,6 +16,7 @@
 typedef struct {
     float humidityPerc;
     float temperature;
+    float vocIndex;
     bool HT_measurementDone;
     bool VOC_measurementDone;
     bool NO_measurementDone;
@@ -24,7 +25,6 @@ typedef struct {
 
 typedef void (*StartMeasurementFunc)(void);
 typedef bool (*IsMeasurementDoneFunc)(void);
-typedef bool (*IsMeasurementReadyFunc)(void);
 
 typedef struct {
     StartMeasurementFunc startFunc;
@@ -48,11 +48,11 @@ static bool HT_IsMeasurementDoneWrapper(void) {
 }
 
 static void VOC_StartMeasurementWrapper(void) {
-  // TODO: Implement VOC wrapper.
+  Gas_StartMeasurement();
 }
 
 static bool VOC_IsMeasurementDoneWrapper(void) {
-  return true;
+  return Gas_GetMeasurementValues(vocIndex);
 }
 
 static void NO_StartMeasurementWrapper(void) {
@@ -72,19 +72,16 @@ static bool MIC_IsMeasurementDoneWrapper(void) {
 }
 
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
-  // TODO: Add 1 duty cycle variable.
   MeasState = MEAS_STATE_INIT;
   if(MeasEnabled.HT_measurementEnabled || MeasEnabled.VOC_measurementEnabled) {
     I2CSensors_Init(sensorI2C);
     if(!HT_DeviceConnected()) {
        Error("HT device not connected!");
        MeasEnabled.HT_measurementEnabled = false;
-       return;
     }
     if(!Gas_DeviceConnected()) {
        Error("SGP device not connected!");
        MeasEnabled.VOC_measurementEnabled = false;
-       return;
     }
   }
   if(MeasEnabled.MIC_measurementEnabled) {
@@ -108,6 +105,7 @@ void StartMeasurements(void) {
 void ResetMeasurements(void) {
   MeasurementCtx.humidityPerc = 0;
   MeasurementCtx.temperature = 0;
+  MeasurementCtx.vocIndex = 0;
   MeasurementCtx.HT_measurementDone = false;
   MeasurementCtx.VOC_measurementDone = false;
   MeasurementCtx.NO_measurementDone = false;
@@ -182,7 +180,6 @@ static void Meas_TurnOff(void) {
   Measurements[offset++].enabled = false;
   Measurements[offset++].enabled = false;
   Measurements[offset++].enabled = false;
-  // TODO: Add the turning off the heater for the sgp40
 }
 
 MeasurementState Meas_GetState(void) {

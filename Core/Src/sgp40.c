@@ -54,7 +54,6 @@ void SGP_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
 }
 
 void SGP_StartMeasurement(void) {
-  // TODO: Modify this buffer to use humidity compensation.
   WriteRegister(SGP_I2C_ADDRESS, MeasureRawSignalBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
   SGP_HeatUpTime = GetCurrentHalTicks() + SGP_SENSOR_HEATUP_TIME;
 }
@@ -158,13 +157,13 @@ static uint8_t CalculateCRC(uint8_t* data, uint8_t length) {
       }
     }
   }
-  Info("SGP_CRC calculated value: 0x%X", crc);
+//  Info("SGP_CRC calculated value: 0x%X", crc);
   return crc;
 }
 
 void SGP_StartSelfTest(void) {
   if(SGP_SelfTestStarted) return;
-  // Implement the self test so it runs for the first time (above the while loop)
+  // TODO: Implement the self test so it runs for the first time (above the while loop)
   WriteRegister(SGP_I2C_ADDRESS, ExecuteSelfTestBuffer, SGP_SHORT_COMMAND_BUFFER_LENGTH);
   SGP_SelfTestRunTime = GetCurrentHalTicks() + SGP_SELF_TEST_WAIT_TIME;
   SGP_SelfTestStarted = true;

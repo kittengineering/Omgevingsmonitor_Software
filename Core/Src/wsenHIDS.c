@@ -132,10 +132,7 @@ void HIDS_SetMeasurementMode(HIDSMeasureModes modeMeasure) {
 }
 
 bool HIDS_MeasurementReady(void) {
-  if(!TimestampIsReached(HIDS_NextRunTime)) {
-    return false;
-  }
-  return true;
+  return TimestampIsReached(HIDS_NextRunTime);
 }
 
 void HIDS_SoftReset(void){
@@ -155,7 +152,6 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
   static float humidities[HIDS_MAX_MEASUREMENTS];
 
   Debug("HT measurements: %d out of %d completed.", measurements + 1, amountOfMeasurements);
-//  Info("=-=-=-=New values incoming.=-=-=-=");
   ReadRegister(HIDS_I2C_ADDRESS, MeasureBuffer, HIDS_MEASURE_BUFFER_LENGTH);
 	if(!CheckCRC(MeasureBuffer)) {
 		Error("HIDS measurements CRC check failed.");

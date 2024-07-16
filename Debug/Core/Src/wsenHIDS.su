@@ -10,5 +10,5 @@
 ../Core/Src/wsenHIDS.c:118:6:HIDS_DeviceConnected	24	static
 ../Core/Src/wsenHIDS.c:130:6:HIDS_SetMeasurementMode	16	static
 ../Core/Src/wsenHIDS.c:134:6:HIDS_MeasurementReady	8	static
-../Core/Src/wsenHIDS.c:141:6:HIDS_SoftReset	16	static
-../Core/Src/wsenHIDS.c:146:6:HIDS_GetMeasurementValues	64	static
+../Core/Src/wsenHIDS.c:138:6:HIDS_SoftReset	16	static
+../Core/Src/wsenHIDS.c:143:6:HIDS_GetMeasurementValues	64	static
