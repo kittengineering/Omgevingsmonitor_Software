@@ -9,9 +9,9 @@
 ../Core/Src/measurement.c:74:6:Meas_Init	96	static
 ../Core/Src/measurement.c:97:6:StartMeasurements	8	static
 ../Core/Src/measurement.c:105:6:ResetMeasurements	8	static
-../Core/Src/measurement.c:114:6:MeasurementsCompleted	8	static
-../Core/Src/measurement.c:127:6:Meas_Upkeep	32	static
-../Core/Src/measurement.c:164:6:Meas_SetEnabledSensors	32	static
-../Core/Src/measurement.c:174:13:Meas_TurnOff	16	static
-../Core/Src/measurement.c:184:18:Meas_GetState	8	static
-../Core/Src/measurement.c:188:6:Meas_DeInit	16	static
+../Core/Src/measurement.c:115:6:MeasurementsCompleted	8	static
+../Core/Src/measurement.c:128:6:Meas_Upkeep	8	static
+../Core/Src/measurement.c:166:6:Meas_SetEnabledSensors	32	static
+../Core/Src/measurement.c:176:13:Meas_TurnOff	16	static
+../Core/Src/measurement.c:186:18:Meas_GetState	8	static
+../Core/Src/measurement.c:190:6:Meas_DeInit	16	static

@@ -16,7 +16,7 @@
 typedef struct {
     float humidityPerc;
     float temperature;
-    float vocIndex;
+    int32_t vocIndex;
     bool HT_measurementDone;
     bool VOC_measurementDone;
     bool NO_measurementDone;
@@ -52,7 +52,7 @@ static void VOC_StartMeasurementWrapper(void) {
 }
 
 static bool VOC_IsMeasurementDoneWrapper(void) {
-  return Gas_GetMeasurementValues(vocIndex);
+  return Gas_GetMeasurementValues(&MeasurementCtx.vocIndex);
 }
 
 static void NO_StartMeasurementWrapper(void) {
@@ -64,11 +64,11 @@ static bool NO_IsMeasurementDoneWrapper(void) {
 }
 
 static void MIC_StartMeasurementWrapper(void) {
-//  MIC_Start(SAMPLE_RATE_48K, NR_SAMPLES_128);
+  MIC_Start(SAMPLE_RATE_48K, NR_SAMPLES_128);
 }
 
 static bool MIC_IsMeasurementDoneWrapper(void) {
-    return true;
+    return false;
 }
 
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
@@ -85,7 +85,7 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
     }
   }
   if(MeasEnabled.MIC_measurementEnabled) {
-//    MIC_Init(micI2s);
+    MIC_Init(micI2s);
   }
   uint8_t offset = 0;
   Measurements[offset++] = (MeasurementParameters) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &MeasurementCtx.HT_measurementDone, MeasEnabled.HT_measurementEnabled};
@@ -149,9 +149,10 @@ void Meas_Upkeep(void) {
 
   case MEAS_STATE_PROCESS_RESULTS:
     Debug("Processing results.");
+    Debug("SGP40 index value: %d", MeasurementCtx.vocIndex);
     // TODO: Return values and let gadget handle with too high humidity and the sensor values
     // TODO: Check if all measurements are ready for the next measurement before switching states. Only check for the enabled measurements.
-    Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
+//    Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
     MeasState = MEAS_STATE_INIT;
     break;
 

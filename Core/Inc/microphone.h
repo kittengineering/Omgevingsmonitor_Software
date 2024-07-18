@@ -32,4 +32,5 @@ bool MIC_MeasurementDone(void);
 float MIC_GetDB(void);
 void MIC_GetSample(void);
 
+
 #endif /* INC_MICROPHONE_H_ */

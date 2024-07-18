@@ -18,7 +18,7 @@
 
 static EnabledMeasurements SensorSetTest = {
     .HT_measurementEnabled = false,
-    .VOC_measurementEnabled = true,
+    .VOC_measurementEnabled = false,
     .NO_measurementEnabled = false,
     .MIC_measurementEnabled = false
 };
@@ -36,12 +36,13 @@ static EnabledMeasurements SensorSetBatt = {
     .MIC_measurementEnabled = true
 };
 
-void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
+void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, UART_HandleTypeDef* espUart) {
   // TODO: Add gadget re-init. So it works after sleep mode again.
   // Check battery power
   // Init sensor + peripherals
   Meas_SetEnabledSensors(SensorSetTest);
   Meas_Init(sensorI2C, micI2s);
+  ESP_Init(espUart);
 //  Gadget_SetSleepDuration();
   Info("Gadget initialised.");
 }
@@ -80,16 +81,17 @@ void UpkeepGadget() {
 //        Debug("Going into sleep mode.");
 //      }
 //  }
-  if(Meas_GetState() == MEAS_STATE_PROCESS_RESULTS) {
-    // Processing results
-    // Turning Radio on
-    // WIFI available?
-      // Yes -> Post sensor data to server.
-      // NO -> Check grid power available
-        // YES -> Use leds for status
-        // NO -> De-init sensors and Radio off.
-        // Go to sleep
-  }
+//  if(Meas_GetState() == MEAS_STATE_PROCESS_RESULTS) {
+//    // Processing results
+//    // Turning Radio on
+//    // WIFI available?
+//      // Yes -> Post sensor data to server.
+//      // NO -> Check grid power available
+//        // YES -> Use leds for status
+//        // NO -> De-init sensors and Radio off.
+//        // Go to sleep
+//  }
+
 
 
 

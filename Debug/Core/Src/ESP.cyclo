@@ -1,0 +1,3 @@
+../Core/Src/ESP.c:12:6:ESP_Init	1
+../Core/Src/ESP.c:16:13:ESP_Send	1
+../Core/Src/ESP.c:21:13:ESP_Receive	1

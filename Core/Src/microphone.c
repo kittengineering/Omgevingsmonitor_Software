@@ -22,7 +22,8 @@
 
 static I2S_HandleTypeDef* I2SHandle = NULL;
 
-static uint16_t AudioRxBuffer[AUDIO_RX_BUFFER] = {0};
+//static uint16_t AudioRxBuffer[AUDIO_RX_BUFFER] = {0};
+static uint16_t AudioRxBuffer[128] = {0};
 static float32_t FFTResult[NR_SAMPLES_128];
 
 static uint32_t StartTime = 0;
@@ -90,16 +91,16 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
     return;
   }
 
-  UpdateSampleRate(sampleRate);
+//  UpdateSampleRate(sampleRate);
 
   StartTime = HAL_GetTick();
   StartupDoneTime = StartTime + 20;
   StartUpDone = false;
   DataReady = false;
 
-  HAL_StatusTypeDef status =
-      HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer,
-                          AUDIO_RX_BUFFER >> 1); //>>1 because reading half word
+  HAL_StatusTypeDef status = HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer, 256);
+//      HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer,
+//                          AUDIO_RX_BUFFER >> 1); //>>1 because reading half word
 
   Info("Status %d", status);
 }
@@ -107,13 +108,18 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
 static void MIC_ProcessFFT() {
   CalculateFFT();
 }
+
 bool MIC_MeasurementDone(void) { return DataReady; }
 
 void MIC_Print(void) {
-  // TODO: Implement to FFT instead of printing
+//  Info("New samples");
+//  for (uint8_t i = 0; i < AUDIO_RX_BUFFER; i += 2) {
+//    uint32_t sample = ConvertAudio(&AudioRxBuffer[i]);
+//    Info("0x%08x", sample);
+//  }
   Info("New samples");
-  for (uint8_t i = 0; i < AUDIO_RX_BUFFER; i += 2) {
-    uint32_t sample = ConvertAudio(&AudioRxBuffer[i]);
+  for (uint8_t i = 0; i < 128; i += 2) {
+    uint16_t sample = &AudioRxBuffer[i];
     Info("0x%08x", sample);
   }
 }
@@ -150,4 +156,12 @@ float MIC_GetDB(void) {
     dBValue = 20.0f * log10f(rms);
 
     return dBValue;
+}
+
+
+void MIC_GetSample(void) {
+  if(MIC_MeasurementDone()) {
+    MIC_Print();
+    MIC_Start(16000, 128);
+  }
 }

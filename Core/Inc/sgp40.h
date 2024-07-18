@@ -36,7 +36,7 @@ typedef bool (*I2CWriteCB)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 
 void SGP_Init(I2CReadCb readFunction, I2CWriteCB writeFunction);
 void SGP_StartMeasurement(void);
-bool SGP_GetMeasurementValues(float* vocIndex);
+bool SGP_GetMeasurementValues(int32_t* vocIndex);
 bool SGP_DeviceConnected(void);
 bool SGP_SelfTest(void);
 void SGP_SoftReset(void);

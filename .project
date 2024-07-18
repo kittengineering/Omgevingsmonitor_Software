@@ -136,10 +136,4 @@
 			<locationURI>PARENT-5-PROJECT_LOC/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_uart_ex.c</locationURI>
 		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>STM32CubeRepo</name>
-			<value>file:/C:/Users/joris/STM32Cube/Repository</value>
-		</variable>
-	</variableList>
 </projectDescription>

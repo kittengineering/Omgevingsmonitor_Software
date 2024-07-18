@@ -12,8 +12,9 @@
 #include "measurement.h"
 #include "stm32l0xx_hal.h"
 #include "utils.h"
+#include "ESP.h"
 
-void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s);
+void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, UART_HandleTypeDef* espUart);
 void UpkeepGadget(void);
 
 #endif /* INC_GADGET_H_ */

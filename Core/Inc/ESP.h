@@ -10,8 +10,9 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "stm32l0xx_hal.h"
 
-//void ESP_Init(UART_HandleTypeDef* sensorUart);
+void ESP_Init(UART_HandleTypeDef* espUart);
 void ESP_Reset(void);
 void ESP_Sleep(void);
 
