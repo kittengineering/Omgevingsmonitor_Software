@@ -15,6 +15,7 @@
 #include "microphone.h"
 #include "stm32l0xx_hal.h"
 #include "utils.h"
+#define CORTEX_M0
 #include "arm_math.h"
 #include "arm_const_structs.h"
 
