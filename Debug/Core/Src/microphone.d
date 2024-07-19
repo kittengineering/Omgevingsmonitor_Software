@@ -32,40 +32,8 @@ Core/Src/microphone.o: ../Core/Src/microphone.c ../Core/Inc/gpio.h \
  C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart.h \
  C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart_ex.h \
  ../Core/Inc/microphone.h ../Core/Inc/utils.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_math.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_math_types.h \
- C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/CMSIS/Include/cmsis_compiler.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_math_memory.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/none.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_math_types.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/utils.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/basic_math_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_math_memory.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/none.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/utils.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/interpolation_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/bayes_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/statistics_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/basic_math_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/fast_math_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/matrix_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/complex_math_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/statistics_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/controller_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/support_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/distance_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/matrix_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/svm_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/svm_defines.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/fast_math_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/transform_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/complex_math_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/filtering_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/support_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/quaternion_math_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/window_functions.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_const_structs.h \
- C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_common_tables.h
+ ../Drivers/CMSIS/DSP/arm_math.h ../Drivers/CMSIS/DSP/arm_const_structs.h \
+ ../Drivers/CMSIS/DSP/arm_math.h ../Drivers/CMSIS/DSP/arm_common_tables.h
 ../Core/Inc/gpio.h:
 ../Core/Inc/main.h:
 C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal.h:
@@ -101,37 +69,7 @@ C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HA
 C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart_ex.h:
 ../Core/Inc/microphone.h:
 ../Core/Inc/utils.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_math.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_math_types.h:
-C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/CMSIS/Include/cmsis_compiler.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_math_memory.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/none.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_math_types.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/utils.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/basic_math_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_math_memory.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/none.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/utils.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/interpolation_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/bayes_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/statistics_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/basic_math_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/fast_math_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/matrix_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/complex_math_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/statistics_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/controller_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/support_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/distance_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/matrix_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/svm_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/svm_defines.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/fast_math_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/transform_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/complex_math_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/filtering_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/support_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/quaternion_math_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/dsp/window_functions.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_const_structs.h:
-C:/Users/joris/Documents/1.\ Projects/Stage/4.\ STM32/MJSGadget/Lib/arm_common_tables.h:
+../Drivers/CMSIS/DSP/arm_math.h:
+../Drivers/CMSIS/DSP/arm_const_structs.h:
+../Drivers/CMSIS/DSP/arm_math.h:
+../Drivers/CMSIS/DSP/arm_common_tables.h:

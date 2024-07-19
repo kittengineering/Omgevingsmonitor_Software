@@ -31,6 +31,7 @@
 #include "utils.h"
 #include "microphone.h"
 #include "measurement.h"
+#include "ESP.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -126,7 +127,8 @@ int main(void)
   while (1) {
 //    MIC_GetSample();
 	  // Upkeep gadget
-    UpkeepGadget();
+//    UpkeepGadget();
+    ESP_Upkeep();
 
     if(TimestampIsReached(LedBlinkTimestamp)) {
       HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);

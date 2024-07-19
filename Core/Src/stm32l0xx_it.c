@@ -59,6 +59,9 @@ extern DMA_HandleTypeDef hdma_i2c1_rx;
 extern DMA_HandleTypeDef hdma_i2c1_tx;
 extern I2C_HandleTypeDef hi2c1;
 extern DMA_HandleTypeDef hdma_spi2_rx;
+extern DMA_HandleTypeDef hdma_usart4_rx;
+extern DMA_HandleTypeDef hdma_usart4_tx;
+extern UART_HandleTypeDef huart4;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -167,9 +170,25 @@ void DMA1_Channel4_5_6_7_IRQHandler(void)
 
   /* USER CODE END DMA1_Channel4_5_6_7_IRQn 0 */
   HAL_DMA_IRQHandler(&hdma_spi2_rx);
+  HAL_DMA_IRQHandler(&hdma_usart4_rx);
+  HAL_DMA_IRQHandler(&hdma_usart4_tx);
   /* USER CODE BEGIN DMA1_Channel4_5_6_7_IRQn 1 */
 
   /* USER CODE END DMA1_Channel4_5_6_7_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART4 and USART5 interrupt.
+  */
+void USART4_5_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART4_5_IRQn 0 */
+
+  /* USER CODE END USART4_5_IRQn 0 */
+  HAL_UART_IRQHandler(&huart4);
+  /* USER CODE BEGIN USART4_5_IRQn 1 */
+
+  /* USER CODE END USART4_5_IRQn 1 */
 }
 
 /**
