@@ -12,9 +12,15 @@
 #include <stdint.h>
 #include "stm32l0xx_hal.h"
 #include "utils.h"
+#include "gpio.h"
+
+#define ESP_MAX_UART_RETRIES 2
 
 typedef enum {
   ESP_STATE_OFF,
+  ESP_STATE_IDLE,
+  ESP_STATE_WAIT_FOR_READY,
+  ESP_STATE_PROCESS_READY,
   ESP_STATE_INIT,
   ESP_STATE_SEND_AT,
   ESP_STATE_WAIT_FOR_RESPONSE,

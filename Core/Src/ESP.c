@@ -10,7 +10,11 @@
 static UART_HandleTypeDef* EspUart = NULL;
 static volatile bool TxComplete = false;
 static volatile bool RxComplete = false;
-static uint8_t RxBuffer[100] = {0};
+static uint8_t RxBuffer[10] = {0};
+static bool EspTurnedOn = false;
+static uint8_t RxNotCompletedCount = 0;
+static uint8_t TxNotCompletedCount = 0;
+static char* AT_OkResponse = "OK\r\n";
 
 static ESP_States EspState = ESP_STATE_OFF;
 
@@ -46,6 +50,7 @@ static bool ESP_Receive(uint8_t* reply, uint8_t length) {
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart == EspUart) {
     TxComplete = true;
+    Debug("TxComplete");
   }
 }
 
@@ -53,6 +58,7 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart == EspUart) {
     RxComplete = true;
+    Debug("RxComplete");
   }
 }
 
@@ -64,29 +70,86 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
   }
 }
 
-void ESP_TestStartUp(void) {
+static bool ESP_TranceivingDone(void) {
+  if(TxComplete) {
+    return true;
+  }else {
+    if(TxNotCompletedCount >= ESP_MAX_UART_RETRIES) {
+      TxNotCompletedCount = 0;
+      EspState = ESP_STATE_ERROR;
+    }
+    TxNotCompletedCount += 1;
+    return false;
+  }
+}
 
+static bool ESP_ReceivingDone(void) {
+  if(RxComplete) {
+    return true;
+  }else {
+    if(RxNotCompletedCount >= ESP_MAX_UART_RETRIES) {
+      RxNotCompletedCount = 0;
+      EspState = ESP_STATE_ERROR;
+    }
+    RxNotCompletedCount += 1;
+    return false;
+  }
+}
+
+static bool ESP_ResponseMatch(uint8_t* rxBuffer, char* expectedResponse) {
+  return(strstr((char*)rxBuffer, expectedResponse) != NULL);
 }
 
 void ESP_Upkeep(void) {
   switch (EspState) {
     case ESP_STATE_OFF:
-      // ESP is turned off or inactive
-      // TODO: Add sleep mode?
+      // Turning off the ESP
+      HAL_GPIO_WritePin(Wireless_EN_GPIO_Port, Wireless_EN_Pin, GPIO_PIN_RESET);
+      EspTurnedOn = false;
+      EspState = ESP_STATE_IDLE;
+      break;
+
+    case ESP_STATE_IDLE:
+      // Waiting for wake up call.
       break;
 
     case ESP_STATE_INIT:
-      // Initialization state
-      if (ESP_Send((uint8_t*)"AT\r\n", 8)) {
-        EspState = ESP_STATE_WAIT_FOR_RESPONSE;
+        // Initialization state
+      if(!EspTurnedOn) {
+        HAL_GPIO_WritePin(Wireless_EN_GPIO_Port, Wireless_EN_Pin, GPIO_PIN_SET);
+        EspTurnedOn = true;
+      }
+      // Wait for ESP to be ready
+      if (ESP_Send((uint8_t*)"AT\r\n", 4)) {
+          EspState = ESP_STATE_WAIT_FOR_READY;
       } else {
-        EspState = ESP_STATE_ERROR;
+          EspState = ESP_STATE_ERROR;
       }
       break;
 
+    case ESP_STATE_WAIT_FOR_READY:
+      if(ESP_TranceivingDone()) {
+        if (ESP_Receive(RxBuffer, 4)) {
+          Debug("Checking rx");
+          EspState = ESP_STATE_PROCESS_READY;
+        }
+      }
+      break;
+
+    case ESP_STATE_PROCESS_READY:
+      if(ESP_ReceivingDone()) {
+        if(ESP_ResponseMatch(RxBuffer, AT_OkResponse)) {
+          EspState = ESP_STATE_SEND_AT;
+        }else {
+          EspState = ESP_STATE_ERROR;
+        }
+      }
+      break;
     case ESP_STATE_SEND_AT:
+
       // Send an AT command
       // TODO: Add sequence of commands that you want to send.
+      // Similar to the measurements, with done flag etc.
       if (ESP_Send((uint8_t*)"AT\r\n", 4)) {
         EspState = ESP_STATE_WAIT_FOR_RESPONSE;
       } else {
@@ -97,24 +160,29 @@ void ESP_Upkeep(void) {
     case ESP_STATE_WAIT_FOR_RESPONSE:
       // Wait for the response
       if(TxComplete) {
-        if(ESP_Receive(RxBuffer, 100)) {
+        if(ESP_Receive(RxBuffer, 4)) {
           EspState = ESP_STATE_PROCESS_RESPONSE;
         }
       }
       break;
 
     case ESP_STATE_PROCESS_RESPONSE:
+      if(RxNotCompletedCount >= ESP_MAX_UART_RETRIES) {
+        RxNotCompletedCount = 0;
+        EspState = ESP_STATE_ERROR;
+      }
       if(RxComplete) {
         Debug("RxBuffer: %s", RxBuffer);
 //        EspState = ESP_STATE_SEND_AT;
         EspState = ESP_STATE_OFF;
+      } else {
+        RxNotCompletedCount += 1;
       }
       break;
 
     case ESP_STATE_ERROR:
       // Handle error state
       Debug("ESP Error occurred");
-      // Optionally reset the state machine
       EspState = ESP_STATE_INIT;
       break;
 

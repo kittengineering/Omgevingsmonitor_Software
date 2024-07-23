@@ -31,9 +31,7 @@ Core/Src/microphone.o: ../Core/Src/microphone.c ../Core/Inc/gpio.h \
  C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_rtc_ex.h \
  C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart.h \
  C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart_ex.h \
- ../Core/Inc/microphone.h ../Core/Inc/utils.h \
- ../Drivers/CMSIS/DSP/arm_math.h ../Drivers/CMSIS/DSP/arm_const_structs.h \
- ../Drivers/CMSIS/DSP/arm_math.h ../Drivers/CMSIS/DSP/arm_common_tables.h
+ ../Core/Inc/microphone.h ../Core/Inc/utils.h
 ../Core/Inc/gpio.h:
 ../Core/Inc/main.h:
 C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal.h:
@@ -69,7 +67,3 @@ C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HA
 C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart_ex.h:
 ../Core/Inc/microphone.h:
 ../Core/Inc/utils.h:
-../Drivers/CMSIS/DSP/arm_math.h:
-../Drivers/CMSIS/DSP/arm_const_structs.h:
-../Drivers/CMSIS/DSP/arm_math.h:
-../Drivers/CMSIS/DSP/arm_common_tables.h:
