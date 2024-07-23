@@ -10,11 +10,14 @@
 static UART_HandleTypeDef* EspUart = NULL;
 static volatile bool TxComplete = false;
 static volatile bool RxComplete = false;
-static uint8_t RxBuffer[10] = {0};
+static uint8_t RxBuffer[100] = {0};
 static bool EspTurnedOn = false;
 static uint8_t RxNotCompletedCount = 0;
 static uint8_t TxNotCompletedCount = 0;
-static char* AT_OkResponse = "OK\r\n";
+static char AT_OkResponse[8] = "AT\r\nOK\r\n";
+static uint32_t StartUpTime = ESP_START_UP_TIME;
+static uint32_t DMATimeout = ESP_DMA_TIMEOUT;
+static bool StartUpDone = false;
 
 static ESP_States EspState = ESP_STATE_OFF;
 
@@ -46,21 +49,23 @@ static bool ESP_Receive(uint8_t* reply, uint8_t length) {
   return true;
 }
 
-// Callback for transmission complete
+//// Callback for transmission complete
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
   if (huart == EspUart) {
     TxComplete = true;
+    HAL_GPIO_WritePin(MIC_Trigger_GPIO_Port, MIC_Trigger_Pin, SET);
     Debug("TxComplete");
+    HAL_GPIO_WritePin(MIC_Trigger_GPIO_Port, MIC_Trigger_Pin, RESET);
   }
 }
-
-// Callback for reception complete
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-  if (huart == EspUart) {
-    RxComplete = true;
-    Debug("RxComplete");
-  }
-}
+//
+//// Callback for reception complete
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+//  if (huart == EspUart) {
+//    RxComplete = true;
+//    Debug("RxComplete");
+//  }
+//}
 
 // Callback for UART error
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
@@ -97,7 +102,12 @@ static bool ESP_ReceivingDone(void) {
 }
 
 static bool ESP_ResponseMatch(uint8_t* rxBuffer, char* expectedResponse) {
-  return(strstr((char*)rxBuffer, expectedResponse) != NULL);
+//  // Ensure the buffer is null-terminated
+//  uint8_t tempBuffer[ESP_MAX_BUFFER_SIZE] = {0};
+//  strncpy((char*)tempBuffer, (char*)rxBuffer, sizeof(tempBuffer) - 1);
+
+  // Use strstr to check if the expected response is within the buffer
+  return (strstr((char*)rxBuffer, expectedResponse) != NULL);
 }
 
 void ESP_Upkeep(void) {
@@ -114,36 +124,45 @@ void ESP_Upkeep(void) {
       break;
 
     case ESP_STATE_INIT:
-        // Initialization state
+      // Initialization state
+      StartUpTime = GetCurrentHalTicks() + ESP_START_UP_TIME;
+      StartUpDone = false;
       if(!EspTurnedOn) {
         HAL_GPIO_WritePin(Wireless_EN_GPIO_Port, Wireless_EN_Pin, GPIO_PIN_SET);
         EspTurnedOn = true;
       }
       // Wait for ESP to be ready
-      if (ESP_Send((uint8_t*)"AT\r\n", 4)) {
-          EspState = ESP_STATE_WAIT_FOR_READY;
-      } else {
-          EspState = ESP_STATE_ERROR;
-      }
+      EspState = ESP_STATE_WAIT_FOR_READY;
       break;
 
     case ESP_STATE_WAIT_FOR_READY:
-      if(ESP_TranceivingDone()) {
-        if (ESP_Receive(RxBuffer, 4)) {
-          Debug("Checking rx");
-          EspState = ESP_STATE_PROCESS_READY;
+      if (TimestampIsReached(StartUpTime) && !StartUpDone) {
+        if(ESP_Send((uint8_t*)"AT\r\n", 4)) {
+          StartUpDone = true;
+        }else {
+          EspState = ESP_STATE_ERROR;
+        }
+      }
+      if(StartUpDone) {
+        if(ESP_TranceivingDone()) {
+          if(ESP_Receive(RxBuffer, 10)) {
+            //TODO: Add timeout for dma to stop reading and then return that data.
+            Debug("RxBuffer contents: %s", (char*)RxBuffer);
+            EspState = ESP_STATE_PROCESS_READY;
+          }
         }
       }
       break;
 
     case ESP_STATE_PROCESS_READY:
-      if(ESP_ReceivingDone()) {
-        if(ESP_ResponseMatch(RxBuffer, AT_OkResponse)) {
+//      if(ESP_ReceivingDone()) {
+//        if(ESP_ResponseMatch(RxBuffer, AT_OkResponse)) {
+        if(strstr((char*)RxBuffer, AT_OkResponse) != NULL) {
           EspState = ESP_STATE_SEND_AT;
         }else {
           EspState = ESP_STATE_ERROR;
         }
-      }
+//      }
       break;
     case ESP_STATE_SEND_AT:
 

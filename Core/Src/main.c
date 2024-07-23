@@ -130,7 +130,6 @@ int main(void)
 //    UpkeepGadget();
     ESP_Upkeep();
 
-
     if(TimestampIsReached(LedBlinkTimestamp)) {
       HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
       LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
