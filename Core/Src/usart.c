@@ -143,7 +143,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
 
     GPIO_InitStruct.Pin = GPIO_PIN_10;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF6_USART4;
     HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -158,7 +158,7 @@ void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
     hdma_usart4_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
     hdma_usart4_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
     hdma_usart4_rx.Init.Mode = DMA_NORMAL;
-    hdma_usart4_rx.Init.Priority = DMA_PRIORITY_VERY_HIGH;
+    hdma_usart4_rx.Init.Priority = DMA_PRIORITY_LOW;
     if (HAL_DMA_Init(&hdma_usart4_rx) != HAL_OK)
     {
       Error_Handler();

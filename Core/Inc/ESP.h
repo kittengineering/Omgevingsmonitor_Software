@@ -16,7 +16,7 @@
 
 #define ESP_MAX_UART_RETRIES 2
 #define ESP_MAX_BUFFER_SIZE 100
-#define ESP_START_UP_TIME 20
+#define ESP_START_UP_TIME 700
 #define ESP_DMA_TIMEOUT 50
 
 typedef enum {
