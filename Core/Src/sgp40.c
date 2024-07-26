@@ -22,7 +22,6 @@ static uint8_t GetSerialNumberBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0
 //static uint8_t MeasureRawSignalBufferCompensated[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x26, 0x0f};
 static uint8_t MeasureRawSignalBuffer[SGP_LONG_COMMAND_BUFFER_LENGTH] = {0x26, 0x0f, 0x80, 0x00, 0xA2, 0x66, 0x66, 0x93};
 static uint8_t SoftResetBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x00, 0x06};
-
 static uint8_t SGP_ReadBuffer[SGP_SERIAL_NUMBER_RESPONSE_LENGTH] = {0};
 // static uint8_t SGP_WriteBuffer[SGP_SERIAL_NUMBER_BUFFER_LENGTH] = {0};
 

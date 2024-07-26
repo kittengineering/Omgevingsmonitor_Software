@@ -56,10 +56,11 @@ static bool VOC_IsMeasurementDoneWrapper(void) {
 }
 
 static void NO_StartMeasurementWrapper(void) {
-  // TODO: Implement NO wrapper.
+  // TODO: Implement NO Start wrapper.
 }
 
 static bool NO_IsMeasurementDoneWrapper(void) {
+  // TODO: Implement NO Start wrapper.
   return true;
 }
 
@@ -68,7 +69,8 @@ static void MIC_StartMeasurementWrapper(void) {
 }
 
 static bool MIC_IsMeasurementDoneWrapper(void) {
-    return false;
+  // TODO: Implement NO Start wrapper.
+  return false;
 }
 
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
