@@ -8,6 +8,7 @@
 #include "utils.h"
 
 #include "measurement.h"
+
 #include "I2CSensors.h"
 #include "microphone.h"
 #include "gasSensor.h"
@@ -65,12 +66,13 @@ static bool NO_IsMeasurementDoneWrapper(void) {
 }
 
 static void MIC_StartMeasurementWrapper(void) {
-  MIC_Start(SAMPLE_RATE_48K, NR_SAMPLES_128);
+  MIC_Start(SAMPLE_RATE_8K, NR_SAMPLES_128);
 }
 
 static bool MIC_IsMeasurementDoneWrapper(void) {
   // TODO: Implement NO Start wrapper.
-  return false;
+//  return false;
+  return MIC_MeasurementDone();
 }
 
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
@@ -150,11 +152,12 @@ void Meas_Upkeep(void) {
     break;
 
   case MEAS_STATE_PROCESS_RESULTS:
-    Debug("Processing results.");
-    Debug("SGP40 index value: %d", MeasurementCtx.vocIndex);
+
     // TODO: Return values and let gadget handle with too high humidity and the sensor values
     // TODO: Check if all measurements are ready for the next measurement before switching states. Only check for the enabled measurements.
-//    Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
+    Debug("Processing results.");
+    Debug("SGP40 index value: %d", MeasurementCtx.vocIndex);
+    Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
     MeasState = MEAS_STATE_INIT;
     break;
 
@@ -173,7 +176,6 @@ void Meas_SetEnabledSensors(EnabledMeasurements enabled) {
   Measurements[offset++].enabled = enabled.NO_measurementEnabled;
   Measurements[offset++].enabled = enabled.MIC_measurementEnabled;
 }
-
 
 static void Meas_TurnOff(void) {
   MeasState = MEAS_STATE_OFF;

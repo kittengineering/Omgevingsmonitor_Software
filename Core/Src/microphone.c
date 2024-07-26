@@ -5,34 +5,27 @@
  *      Author: Joris Blankestijn
  */
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "gpio.h"
 #include "microphone.h"
-#include "stm32l0xx_hal.h"
-#include "utils.h"
+
 
 // TODO: include arm math libraries differently.
 #define CORTEX_M0
 //#include "arm_math.h"
 //#include "arm_const_structs.h"
 
-#define AUDIO_RX_BUFFER NR_SAMPLES_128
+
 
 static I2S_HandleTypeDef* I2SHandle = NULL;
+static NrOfSamples Samples = NR_SAMPLES_128;
 
-//static uint16_t AudioRxBuffer[AUDIO_RX_BUFFER] = {0};
-static uint16_t AudioRxBuffer[128] = {0};
+static uint16_t AudioRxBuffer[NR_SAMPLES_256] = {0};
 //static float32_t FFTResult[NR_SAMPLES_128];
 
-static uint32_t StartTime = 0;
-static uint32_t StartupDoneTime = 0;
+static volatile uint32_t StartTime = 0;
+static volatile uint32_t StartupDoneTime = 0;
 static volatile bool StartUpDone = false;
 static volatile bool DataReady = false;
+
 
 void MIC_Init(I2S_HandleTypeDef* i2SHandle) { I2SHandle = i2SHandle; }
 
@@ -93,39 +86,44 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
     Error("Microphone is not initialised.");
     return;
   }
+  Debug("In mic start");
+  UpdateSampleRate(sampleRate);
+  Samples = (NrOfSamples)nrSamples;
 
-//  UpdateSampleRate(sampleRate);
-
-  StartTime = HAL_GetTick();
+  StartTime = GetCurrentHalTicks();
   StartupDoneTime = StartTime + 20;
   StartUpDone = false;
   DataReady = false;
 
-  HAL_StatusTypeDef status = HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer, 256);
+  HAL_StatusTypeDef status = HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer, Samples >> 1);
 //      HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer,
-//                          AUDIO_RX_BUFFER >> 1); //>>1 because reading half word
+//          Samples >> 1); //>>1 because reading half word
 
   Info("Status %d", status);
 }
 
-static void MIC_ProcessFFT() {
-  CalculateFFT();
-}
+//static void MIC_ProcessFFT() {
+//  CalculateFFT();
+//}
 
-bool MIC_MeasurementDone(void) { return DataReady; }
 
 void MIC_Print(void) {
-//  Info("New samples");
-//  for (uint8_t i = 0; i < AUDIO_RX_BUFFER; i += 2) {
-//    uint32_t sample = ConvertAudio(&AudioRxBuffer[i]);
-//    Info("0x%08x", sample);
-//  }
   Info("New samples");
-  for (uint8_t i = 0; i < 128; i += 2) {
-    uint16_t sample = &AudioRxBuffer[i];
+  for (uint32_t i = 0; i < Samples; i += 2) {
+    uint32_t sample = ConvertAudio(&AudioRxBuffer[i]);
     Info("0x%08x", sample);
   }
 }
+
+bool MIC_MeasurementDone(void) {
+  if(DataReady) {
+    MIC_Print();
+    Debug("MIC measurement is done with %i samples.", Samples >> 1);
+    return true;
+  }
+  return false;
+}
+
 
 // #TODO Also include half full callback
 void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef* hi2s) {
@@ -135,6 +133,7 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef* hi2s) {
   if (StartUpDone) {
     HAL_I2S_DMAStop(I2SHandle);
     DataReady = true;
+    // MIC trigger pin is used to debug when the measurement has started.
     HAL_GPIO_WritePin(MIC_Trigger_GPIO_Port, MIC_Trigger_Pin, GPIO_PIN_RESET);
   } else if (TimestampIsReached(StartupDoneTime)) {
     StartUpDone = true;
@@ -160,11 +159,3 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef* hi2s) {
 //
 //    return dBValue;
 //}
-
-
-void MIC_GetSample(void) {
-  if(MIC_MeasurementDone()) {
-    MIC_Print();
-    MIC_Start(16000, 128);
-  }
-}

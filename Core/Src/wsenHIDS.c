@@ -5,14 +5,8 @@
  *      Author: Joris Blankestijn
  */
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include <stddef.h>
 #include "wsenHIDS.h"
-#include "utils.h"
-#include "stm32l0xx_hal.h"
+
 
 static HIDSHeaterModes HeaterMode = HHM_HIGH_PRECISION_1S_200MW;
 static HIDSMeasureModes MeasureMode = HMM_HIGH_PRECISION;

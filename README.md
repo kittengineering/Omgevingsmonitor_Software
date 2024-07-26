@@ -10,18 +10,36 @@ Beurs Gadget WoTS / MJSGadget environment monitor
 ## ❓ Description
 This project is using the MJS PCB in combination with the added environment measurement PCB. 
 
+The final product will include these functions:
+
+**Environment monitoring**
+- Microphone measurements.
+- Humidity temperature measurements.
+- VOC measurements.
+- PM, NOx, VOC, RH & T measurements (Optional sensor upgrade).
+
+**Communication**
+- WiFi communication
+- Sending the sensor and gps data to the sensor community server.
+- Webpage to set parameters.
+- Low power capabilities.
+
+**Other**
+- LED indication for Status, dB and VOC.
+
 ## ⚙️ Installation
 Make sure you have the following installed:
 - STM32CubeIDE
-- STM32PowerMonitor -> For debugging purposes.
+- STM32CuberMonitor-Power -> For debugging purposes.
 
 Make sure the library paths link to your repository files.
 
 In STM32CubeIDE change the paths under:
 - Project -> Properties -> C/C++ General -> Paths and Symbols
+- Repository default installation location: C:Users/YOURUSERNAME/STM32Cube/Repository.
 
 ## 📗 Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+~~Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.~~
 
 ## ✅ Roadmap 
 - [x] **Utilities**
@@ -31,21 +49,24 @@ Use examples liberally, and show the expected output if you can. It's helpful to
   - [x] Callbacks to I2C, I2S and UART handlers.
   - [x] State machine to handle measurements logic.
     - [x] Ability to turn off / on measurements.
-    - [ ] De-init sensors function
+    - [ ] Check humidity is above a certain % and turn heater on if necessary.
+    - [ ] De-init sensors function.
   - [ ] Microphone
     - [x] I2S Low level driver with DMA functionality.
     - [x] Init function.
     - [x] Ability to start a measurement with sample rate / amount of samples.
     - [ ] Fix bug for flipping bits in I2S signal. 
     - [ ] FFT conversion (use CMSIS libraries?)
-    - [ ] Measurement done function callback.
-  - [x] Humidity / Temperature
+    - [x] Measurement done function callback.
+    - [ ] Returning sensor status (BUSY, IDLE, WAIT, FINISHED, ERROR)
+  - [ ] Humidity / Temperature
     - [x] I2C Low level driver with DMA functionality.
     - [x] Init function.
     - [x] Start measurement function.
-    - [x] Measurement done function.
+    - [ ] Measurement done function.
       - [x] Calculate the CRC to verify data integrity.
       - [x] Returning humidity and temperature values function (non-blocking).
+      - [ ] Returning sensor status (BUSY, IDLE, WAIT, FINISHED, ERROR).
   - [ ] VOC
     - [x] Init function.
       - [x] Read serial to see if device is connected.
@@ -54,9 +75,11 @@ Use examples liberally, and show the expected output if you can. It's helpful to
     - [x] Measurement done function.
       - [x] Calculate the CRC to verify data integrity.
       - [x] Calculate the VOC index using the provided sensor algorithm. 
-      - [ ] Use the humidity and temperature values from the humidity temperature sensor to calculate the VOC index.
+      - [ ] Use the humidity and temperature values from the humidity 
+      temperature sensor to calculate the VOC index.
       - [x] Returning the VOC index (non-blocking).
-      - [x] Wait for the measurement interval before starting another measurement.
+      - [x] Wait for the measurement interval before starting another 
+      - [ ] Returning sensor status (BUSY, IDLE, WAIT, FINISHED, ERROR).
   - [ ] Sensirion SEN5
     - [ ] I2C Low level driver.
     - [ ] Init function.
@@ -64,12 +87,14 @@ Use examples liberally, and show the expected output if you can. It's helpful to
     - [ ] Measurement done function.
       - [ ] Calculate the CRC to verify data integrity.
       - [ ] Returning the PM, NOx, VOC, RH & T values (non-blocking).
+      - [ ] Returning sensor status (BUSY, IDLE, WAIT, FINISHED, ERROR)
+  - [ ] Re-init sensors function.
 - [ ] **ESP32**
   - [ ] UART bridge mode for programming ESP
   - [x] Ability to turn on ESP32 using a GPIO.
   - [ ] UART Low level driver with DMA functionality.
   - [ ] Sending / receiving AT commands.
-    - [ ] WIFI Access Point mode
+    - [ ] WiFi Access Point mode
     - [ ] Turn-off ESP
   - [ ] Settable sleep mode.
   - [ ] Read back from NTP server.
@@ -78,6 +103,7 @@ Use examples liberally, and show the expected output if you can. It's helpful to
     - [ ] Web page interface to set parameters. 
     - [ ] Web page interface to save parameters to EEPROM.
     - [ ] Parsed JSON file for sensor community.
+  - [ ] Check for WiFi availability.  
 - [ ] **Sleep mode**
   - [ ] Settable sleep interval parameter
   - [ ] Switching between clock frequencies.
@@ -93,7 +119,7 @@ Use examples liberally, and show the expected output if you can. It's helpful to
   - [ ] Set sleep interval depending on power mode.
   - [ ] Set measurement duration depending on power mode.
 - [ ] **User Button**
-  - [ ] User button pressed -> go to WIFI Access Point mode ESP.
+  - [ ] User button pressed -> go to WiFi Access Point mode ESP.
 - [ ] **LED indication**
   - [ ] LED indicator for the status
   - [ ] LED indicator for the dB (7 colours)
@@ -107,7 +133,6 @@ Use examples liberally, and show the expected output if you can. It's helpful to
 - [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
 
 ## 🧪 Test and Deploy
-
 Use the built-in continuous integration in GitLab.
 
 - [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
@@ -115,10 +140,6 @@ Use the built-in continuous integration in GitLab.
 - [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
 - [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
 - [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
-
-***
-
-
 
 ## 🤝 Contributing
 State if you are open to contributions and what your requirements are for accepting them.

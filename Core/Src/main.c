@@ -118,22 +118,19 @@ int main(void)
   SetVerboseLevel(VERBOSE_ALL);
   BinaryReleaseInfo();
   Gadget_Init(&hi2c1, &hi2s2, &huart4);
-//  MIC_Init(&hi2s2);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-//  MIC_Start(16000, 512);
   while (1) {
-//    MIC_GetSample();
 	  // Upkeep gadget
-//    UpkeepGadget();
-    ESP_Upkeep();
+    UpkeepGadget();
+//    ESP_Upkeep();
 
-//    if(TimestampIsReached(LedBlinkTimestamp)) {
-//      HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
-//      LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
-//    }
+    if(TimestampIsReached(LedBlinkTimestamp)) {
+      HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
+      LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
+    }
 
     /* USER CODE END WHILE */
 

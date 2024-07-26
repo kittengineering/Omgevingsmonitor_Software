@@ -1,9 +1,7 @@
-../Core/Src/microphone.c:37:6:MIC_Init	1
-../Core/Src/microphone.c:75:13:UpdateSampleRate	2
-../Core/Src/microphone.c:85:17:ConvertAudio	1
-../Core/Src/microphone.c:91:6:MIC_Start	2
-../Core/Src/microphone.c:111:13:MIC_ProcessFFT	1
-../Core/Src/microphone.c:115:6:MIC_MeasurementDone	1
-../Core/Src/microphone.c:117:6:MIC_Print	2
-../Core/Src/microphone.c:131:6:HAL_I2S_RxCpltCallback	4
-../Core/Src/microphone.c:165:6:MIC_GetSample	2
+../Core/Src/microphone.c:30:6:MIC_Init	1
+../Core/Src/microphone.c:68:13:UpdateSampleRate	2
+../Core/Src/microphone.c:78:17:ConvertAudio	1
+../Core/Src/microphone.c:84:6:MIC_Start	2
+../Core/Src/microphone.c:110:6:MIC_Print	2
+../Core/Src/microphone.c:118:6:MIC_MeasurementDone	2
+../Core/Src/microphone.c:129:6:HAL_I2S_RxCpltCallback	4

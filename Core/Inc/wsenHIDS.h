@@ -9,7 +9,13 @@
 #define INC_WSENHIDS_H_
 
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
+#include <stddef.h>
+
+#include "utils.h"
+#include "stm32l0xx_hal.h"
 
 #define HIDS_I2C_ADDRESS 0x44
 #define HIDS_SERIAL_NUMBER_REG 0x89
