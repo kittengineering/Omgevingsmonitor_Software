@@ -93,7 +93,7 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
     SGP_IdleTime = GetCurrentHalTicks() + SGP_SENSOR_IDLE_TIME;
   }
   if (HeatUpIsDone && SGP_MeasurementReady() && !MeasurementIsReady) {
-    Debug("Measurement[%i] is ready, reading buffer.", SGP_AmountOfSamplesDone + 1);
+    Debug("SGP_Measurement[%i] is ready, reading buffer.", SGP_AmountOfSamplesDone + 1);
     MeasurementIsReady = true;
     // Measurement is ready to be read, also turning the heater off.
     ReadRegister(SGP_I2C_ADDRESS, SGP_ReadBuffer, SGP_MEASURE_BUFFER_RESPONSE_LENGTH);
@@ -117,7 +117,7 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
 //      *vocIndex = 1337;
       *vocIndex = tempVocIndex;
       SGP_AmountOfSamplesDone = 0;
-      Debug("Measurement completely done.");
+      Debug("SGP_Measurement completely done.");
 //      for (uint8_t i = 0; i < SGP_MEASURE_BUFFER_RESPONSE_LENGTH; i++) {
 //        Debug("SGP_Measurement buffer[%d]: %d", i, SGP_ReadBuffer[i]);
 //      }
@@ -126,7 +126,7 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
   }
   if (SGP_MeasurementDone() && HeatUpIsDone && MeasurementIsReady) {
     // Starting next measurement
-    Debug("Starting next measurement.");
+    Debug("Starting next SGP_measurement.");
     SGP_StartMeasurement();
   }
   return false;

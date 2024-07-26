@@ -29,8 +29,12 @@ The final product will include these functions:
 
 ## ⚙️ Installation
 Make sure you have the following installed:
+- GDB server
 - STM32CubeIDE
 - STM32CuberMonitor-Power -> For debugging purposes.
+
+- Generate code via .ioc file.
+- Go to run -> Debug Configurations -> MJSGadget Debug -> Debugger -> Scan your ST-link serial number
 
 Make sure the library paths link to your repository files.
 

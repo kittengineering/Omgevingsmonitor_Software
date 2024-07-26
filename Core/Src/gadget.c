@@ -15,10 +15,10 @@
 //  return true;
 //}
 
-
+// TODO: Rename NO measurement
 static EnabledMeasurements SensorSetTest = {
     .HT_measurementEnabled = true,
-    .VOC_measurementEnabled = true,
+    .VOC_measurementEnabled = false,
     .NO_measurementEnabled = false,
     .MIC_measurementEnabled = false
 };
