@@ -13,8 +13,6 @@
 //#include "arm_math.h"
 //#include "arm_const_structs.h"
 
-
-
 static I2S_HandleTypeDef* I2SHandle = NULL;
 static NrOfSamples Samples = NR_SAMPLES_128;
 
@@ -134,10 +132,11 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef* hi2s) {
     HAL_I2S_DMAStop(I2SHandle);
     DataReady = true;
     // MIC trigger pin is used to debug when the measurement has started.
-    HAL_GPIO_WritePin(MIC_Trigger_GPIO_Port, MIC_Trigger_Pin, GPIO_PIN_RESET);
+//    HAL_GPIO_WritePin(MIC_Trigger_GPIO_Port, MIC_Trigger_Pin, GPIO_PIN_RESET);
+    // TODO: Use different pin for MIC_Trigger.
   } else if (TimestampIsReached(StartupDoneTime)) {
     StartUpDone = true;
-    HAL_GPIO_WritePin(MIC_Trigger_GPIO_Port, MIC_Trigger_Pin, GPIO_PIN_SET);
+//    HAL_GPIO_WritePin(MIC_Trigger_GPIO_Port, MIC_Trigger_Pin, GPIO_PIN_SET);
   }
 }
 

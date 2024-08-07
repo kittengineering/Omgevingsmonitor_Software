@@ -57,14 +57,34 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define MIC_Trigger_Pin GPIO_PIN_10
-#define MIC_Trigger_GPIO_Port GPIOB
-#define STATUS_LED_Pin GPIO_PIN_8
-#define STATUS_LED_GPIO_Port GPIOC
-#define Wireless_EN_Pin GPIO_PIN_15
-#define Wireless_EN_GPIO_Port GPIOA
-#define Wireless_PG_Pin GPIO_PIN_8
-#define Wireless_PG_GPIO_Port GPIOB
+#define ESP32_EN_Pin GPIO_PIN_0
+#define ESP32_EN_GPIO_Port GPIOH
+#define ESP32_BOOT_Pin GPIO_PIN_1
+#define ESP32_BOOT_GPIO_Port GPIOH
+#define MCU_LED_B_R_Pin GPIO_PIN_0
+#define MCU_LED_B_R_GPIO_Port GPIOA
+#define MCU_LED_B_G_Pin GPIO_PIN_2
+#define MCU_LED_B_G_GPIO_Port GPIOA
+#define MCU_LED_B_B_Pin GPIO_PIN_3
+#define MCU_LED_B_B_GPIO_Port GPIOA
+#define VusbDetect_Pin GPIO_PIN_7
+#define VusbDetect_GPIO_Port GPIOA
+#define MCU_LED_C_R_Pin GPIO_PIN_0
+#define MCU_LED_C_R_GPIO_Port GPIOB
+#define MCU_LED_A_R_Pin GPIO_PIN_6
+#define MCU_LED_A_R_GPIO_Port GPIOC
+#define MCU_LED_A_G_Pin GPIO_PIN_7
+#define MCU_LED_A_G_GPIO_Port GPIOC
+#define MCU_LED_A_B_Pin GPIO_PIN_8
+#define MCU_LED_A_B_GPIO_Port GPIOC
+#define Wireless_PSU_PG_Pin GPIO_PIN_8
+#define Wireless_PSU_PG_GPIO_Port GPIOA
+#define User_Button_Pin GPIO_PIN_2
+#define User_Button_GPIO_Port GPIOD
+#define MCU_LED_C_G_Pin GPIO_PIN_8
+#define MCU_LED_C_G_GPIO_Port GPIOB
+#define MCU_LED_C_B_Pin GPIO_PIN_9
+#define MCU_LED_C_B_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 #define SRC_VERSION "0.01"

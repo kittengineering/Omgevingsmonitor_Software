@@ -19,6 +19,8 @@ static bool StartUpDone = false;
 
 static ESP_States EspState = ESP_STATE_OFF;
 
+//TODO: Add de-init if ESP is off. Otherwise there is going to be 3.3V on the ESP.
+
 
 void ESP_Init(UART_HandleTypeDef* espUart) {
   EspUart = espUart;
@@ -89,7 +91,7 @@ void ESP_Upkeep(void) {
   switch (EspState) {
     case ESP_STATE_OFF:
       // Turning off the ESP
-      HAL_GPIO_WritePin(Wireless_EN_GPIO_Port, Wireless_EN_Pin, GPIO_PIN_RESET);
+//      HAL_GPIO_WritePin(Wireless_EN_GPIO_Port, Wireless_EN_Pin, GPIO_PIN_RESET);
       EspTurnedOn = false;
       EspState = ESP_STATE_IDLE;
       break;
@@ -103,7 +105,7 @@ void ESP_Upkeep(void) {
       StartUpTime = GetCurrentHalTicks() + ESP_START_UP_TIME;
       StartUpDone = false;
       if(!EspTurnedOn) {
-        HAL_GPIO_WritePin(Wireless_EN_GPIO_Port, Wireless_EN_Pin, GPIO_PIN_SET);
+//        HAL_GPIO_WritePin(Wireless_EN_GPIO_Port, Wireless_EN_Pin, GPIO_PIN_SET);
         EspTurnedOn = true;
       }
       // Wait for ESP to be ready
