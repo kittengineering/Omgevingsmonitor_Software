@@ -32,6 +32,8 @@ extern "C" {
 
 /* USER CODE END Includes */
 
+extern UART_HandleTypeDef hlpuart1;
+
 extern UART_HandleTypeDef huart1;
 
 extern UART_HandleTypeDef huart4;
@@ -40,6 +42,7 @@ extern UART_HandleTypeDef huart4;
 
 /* USER CODE END Private defines */
 
+void MX_LPUART1_UART_Init(void);
 void MX_USART1_UART_Init(void);
 void MX_USART4_UART_Init(void);
 
