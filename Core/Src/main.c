@@ -128,7 +128,36 @@ int main(void)
 //    ESP_Upkeep();
 
     if(TimestampIsReached(LedBlinkTimestamp)) {
+<<<<<<< Updated upstream
       HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
+=======
+      // Red LED
+//      HAL_GPIO_TogglePin(MCU_LED_B_R_GPIO_Port, MCU_LED_B_R_Pin);
+//      HAL_GPIO_WritePin(MCU_LED_B_G_GPIO_Port, MCU_LED_B_G_Pin, 1);
+//      HAL_GPIO_WritePin(MCU_LED_B_B_GPIO_Port, MCU_LED_B_B_Pin, 1);
+
+
+      // Blue LED
+//      HAL_GPIO_WritePin(MCU_LED_B_R_GPIO_Port, MCU_LED_B_R_Pin, 1);
+//      HAL_GPIO_WritePin(MCU_LED_B_G_GPIO_Port, MCU_LED_B_G_Pin, 1);
+//      HAL_GPIO_TogglePin(MCU_LED_B_B_GPIO_Port, MCU_LED_B_B_Pin);
+
+      // Green LED
+      HAL_GPIO_WritePin(MCU_LED_B_R_GPIO_Port, MCU_LED_B_R_Pin, 1);
+      HAL_GPIO_TogglePin(MCU_LED_B_G_GPIO_Port, MCU_LED_B_G_Pin);
+      HAL_GPIO_WritePin(MCU_LED_B_B_GPIO_Port, MCU_LED_B_B_Pin, 1);
+
+
+//      HAL_GPIO_WritePin(MCU_LED_B_R_GPIO_Port, MCU_LED_B_R_Pin, 1);
+//      HAL_GPIO_WritePin(MCU_LED_B_G_GPIO_Port, MCU_LED_B_G_Pin, 1);
+//      HAL_GPIO_WritePin(MCU_LED_B_B_GPIO_Port, MCU_LED_B_B_Pin, 1);
+
+//      HAL_GPIO_TogglePin(MCU_LED_B_R_GPIO_Port, MCU_LED_B_R_Pin);
+//      HAL_GPIO_TogglePin(MCU_LED_B_G_GPIO_Port, MCU_LED_B_G_Pin);
+//      HAL_GPIO_TogglePin(MCU_LED_B_B_GPIO_Port, MCU_LED_B_B_Pin);
+
+
+>>>>>>> Stashed changes
       LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
     }
 
