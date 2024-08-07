@@ -129,6 +129,9 @@ In STM32CubeIDE change the paths under:
   - [ ] LED indicator for the dB (7 colours)
   - [ ] LED indicator for the temperature
 
+- [ ]!IMPORTANT Turn RX and TX swapping off for final gadget.
+
+
 ## 🫂 Collaborate with your team
 - [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
 - [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
