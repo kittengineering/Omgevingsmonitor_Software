@@ -6,6 +6,7 @@
  */
 
 #include "wsenHIDS.h"
+#include "sgp40.h"
 
 
 static HIDSHeaterModes HeaterMode = HHM_HIGH_PRECISION_1S_200MW;
@@ -148,10 +149,10 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
   Debug("HT measurements: %d out of %d completed.", measurements + 1, amountOfMeasurements);
   ReadRegister(HIDS_I2C_ADDRESS, MeasureBuffer, HIDS_MEASURE_BUFFER_LENGTH);
 	if(!CheckCRC(MeasureBuffer)) {
-		Error("HIDS measurements CRC check failed.");
-		Info("Measure buffer structure:");
+		//Error("HIDS measurements CRC check failed.");
+		//Info("Measure buffer structure:");
 		for(uint8_t i = 0; i < HIDS_MEASURE_BUFFER_LENGTH; i++) {
-			Debug("HIDS_Measurement buffer[%d]: %d", i, MeasureBuffer[i]);
+			//Debug("HIDS_Measurement buffer[%d]: %d", i, MeasureBuffer[i]);
 		}
 		return false;
 	}
@@ -187,9 +188,11 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
     *temperature = sumTemperature / measurements;
     *humidity = sumHumidity / measurements;
 
+    SGP_GetHT(temperature, humidity);
+
     measurements = 0;
     MeasurementDone = true;
-    Debug("HIDS measurement is done.");
+    //Debug("HIDS measurement is done.");
     return true;
 	}
 	// Starting another measurement, still not done with all measurements.
