@@ -15,26 +15,25 @@
 //  return true;
 //}
 
-// TODO: Rename NO measurement
 static EnabledMeasurements SensorSetTest = {
     .HT_measurementEnabled = true,
-    .VOC_measurementEnabled = false,
-    .NO_measurementEnabled = false,
+    .VOC_measurementEnabled = true,
+    .PM_measurementEnabled = false,
     .MIC_measurementEnabled = false
 };
 
-static EnabledMeasurements SensorSetPower = {
-    .HT_measurementEnabled = true,
-    .VOC_measurementEnabled = true,
-    .NO_measurementEnabled = false,
-    .MIC_measurementEnabled = true
-};
-static EnabledMeasurements SensorSetBatt = {
-    .HT_measurementEnabled = true,
-    .VOC_measurementEnabled = true,
-    .NO_measurementEnabled = false,
-    .MIC_measurementEnabled = true
-};
+//static EnabledMeasurements SensorSetPower = {
+//    .HT_measurementEnabled = true,
+//    .VOC_measurementEnabled = true,
+//    .PM_measurementEnabled = false,
+//    .MIC_measurementEnabled = true
+//};
+//static EnabledMeasurements SensorSetBatt = {
+//    .HT_measurementEnabled = true,
+//    .VOC_measurementEnabled = true,
+//    .PM_measurementEnabled = false,
+//    .MIC_measurementEnabled = true
+//};
 
 void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, UART_HandleTypeDef* espUart) {
   // TODO: Add gadget re-init. So it works after sleep mode again.
@@ -42,6 +41,7 @@ void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, UART_H
   // Init sensor + peripherals
   Meas_SetEnabledSensors(SensorSetTest);
   Meas_Init(sensorI2C, micI2s);
+  // Working on ESP, disabling it now
 //  ESP_Init(espUart);
 //  Gadget_SetSleepDuration();
   Info("Gadget initialised.");

@@ -21,7 +21,6 @@
 #include "dma.h"
 #include "i2c.h"
 #include "i2s.h"
-#include "rtc.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -101,8 +100,10 @@ int main(void)
   MX_I2S2_Init();
   MX_USART4_UART_Init();
   MX_USART1_UART_Init();
-  MX_RTC_Init();
+  MX_I2C2_Init();
+  MX_USB_PCD_Init();
   MX_TIM2_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
   // General TODO 's
 	/*
@@ -120,13 +121,6 @@ int main(void)
   SetVerboseLevel(VERBOSE_ALL);
   BinaryReleaseInfo();
   Gadget_Init(&hi2c1, &hi2s2, &huart4);
-  TIM2->ARR = timeValue;
-  TIM2->CCR1 = timeValue;
-  TIM2->CCR3 = timeValue;
-  TIM2->CCR4 = timeValue;
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3);
-  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -194,7 +188,6 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_I2C1
-                              |RCC_PERIPHCLK_RTC;
   PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
   PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
   PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;

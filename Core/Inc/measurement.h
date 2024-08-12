@@ -27,7 +27,7 @@ typedef enum {
 typedef struct {
     bool HT_measurementEnabled;
     bool VOC_measurementEnabled;
-    bool NO_measurementEnabled;
+    bool PM_measurementEnabled;
     bool MIC_measurementEnabled;
 } EnabledMeasurements;
 
