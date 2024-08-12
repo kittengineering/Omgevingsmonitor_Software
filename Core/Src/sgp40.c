@@ -39,15 +39,15 @@ static bool HeatUpIsDone = false;
 static bool MeasurementIsReady = false;
 static GasIndexAlgorithmParams params;
 
-static uint16_t sgp40_Hum;
-static uint16_t sgp40_Temp;
-static bool ht_MeasurementReceived = false;
-static bool sgp_MsgSent = false;
+static uint16_t SGP_Hum;
+static uint16_t SGP_Temp;
+static bool HT_MeasurementReceived = false;
+static bool SGP_MsgSent = false;
 
-static uint16_t red;
-static uint16_t blue;
-static uint16_t green;
-static uint16_t timeValue = 4000;
+static uint16_t Red;
+static uint16_t Blue;
+static uint16_t Green;
+static uint16_t TimeValue = 4000;
 
 //#define SGP_TEST_BUFFER_SIZE 6
 //#define SGP_TEST_SEGMENT_SIZE 3
@@ -73,7 +73,7 @@ void SGP_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
 }
 
 void SGP_StartMeasurement(void) {
-  if(ht_MeasurementReceived){
+  if(HT_MeasurementReceived){
     WriteRegister(SGP_I2C_ADDRESS, MeasureRawWithCompBuffer, SGP_LONG_COMMAND_BUFFER_LENGTH);
     SGP_IdleTime = GetCurrentHalTicks() + SGP_SENSOR_IDLE_TIME;
   }
@@ -101,13 +101,11 @@ void SGP_TurnHeaterOff(void) {
 }
 
 bool SGP_GetMeasurementValues(int32_t *vocIndex) {
-  // TODO: Don't parse the values 0 since VOC index is still measuring.
-  // Maybe use the
-  if (SGP_HeatedUp() && !HeatUpIsDone && !sgp_MsgSent) {
+  if (SGP_HeatedUp() && !HeatUpIsDone && !SGP_MsgSent) {
     Debug("SGP is heated up, starting the measurement.");
     HeatUpIsDone = true;
     // SGP is heated up, we ignore the output and start another measurement.
-    if(ht_MeasurementReceived){
+    if(HT_MeasurementReceived){
       WriteRegister(SGP_I2C_ADDRESS, MeasureRawWithCompBuffer, SGP_LONG_COMMAND_BUFFER_LENGTH);
       SGP_IdleTime = GetCurrentHalTicks() + SGP_SENSOR_IDLE_TIME;
     }
@@ -115,7 +113,7 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
       WriteRegister(SGP_I2C_ADDRESS, MeasureRawSignalBuffer, SGP_LONG_COMMAND_BUFFER_LENGTH);
       SGP_IdleTime = GetCurrentHalTicks() + SGP_SENSOR_IDLE_TIME;
     }
-    sgp_MsgSent = true;
+    SGP_MsgSent = true;
   }
   if (HeatUpIsDone && SGP_MeasurementReady() && !MeasurementIsReady) {
     Debug("SGP_Measurement[%i] is ready, reading buffer.", SGP_AmountOfSamplesDone + 1);
@@ -142,28 +140,29 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
 //      *vocIndex = 1337;
       *vocIndex = tempVocIndex;
       if(*vocIndex > 0){
-        HAL_GPIO_TogglePin(STATUS2_LED_GPIO_Port, STATUS2_LED_Pin);
+        // TODO add status LED logic.
+//        HAL_GPIO_TogglePin(STATUS2_LED_GPIO_Port, STATUS2_LED_Pin);
       }
       if(*vocIndex > 0 && *vocIndex <= 100){
-      green = (1.0-(*vocIndex/100.0))*timeValue;
-      blue = (*vocIndex/100.0)*timeValue;
-      red = timeValue;
-      TIM2->CCR1 = red;
-      TIM2->CCR3 = green;
-      TIM2->CCR4 = blue;
+      Green = (1.0-(*vocIndex/100.0))*TimeValue;
+      Blue = (*vocIndex/100.0)*TimeValue;
+      Red = TimeValue;
+      TIM2->CCR1 = Red;
+      TIM2->CCR3 = Green;
+      TIM2->CCR4 = Blue;
       }
       if(*vocIndex > 100){
-        green = (((*vocIndex-100.0)/400.0))*timeValue;
-        red = (1.0-((*vocIndex-100.0)/400.0))*timeValue;
-        blue = timeValue;
-        TIM2->CCR1 = red;
-        TIM2->CCR3 = green;
-        TIM2->CCR4 = blue;
+        Green = (((*vocIndex-100.0)/400.0))*TimeValue;
+        Red = (1.0-((*vocIndex-100.0)/400.0))*TimeValue;
+        Blue = TimeValue;
+        TIM2->CCR1 = Red;
+        TIM2->CCR3 = Green;
+        TIM2->CCR4 = Blue;
       }
       SGP_AmountOfSamplesDone = 0;
       Debug("SGP_Measurement completely done.");
-      ht_MeasurementReceived = false;
-      sgp_MsgSent = false;
+      HT_MeasurementReceived = false;
+      SGP_MsgSent = false;
 //      for (uint8_t i = 0; i < SGP_MEASURE_BUFFER_RESPONSE_LENGTH; i++) {
 //        Debug("SGP_Measurement buffer[%d]: %d", i, SGP_ReadBuffer[i]);
 //      }
@@ -174,7 +173,7 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
     // Starting next measurement
     Debug("Starting next SGP_measurement.");
     SGP_StartMeasurement();
-    sgp_MsgSent = false;
+    SGP_MsgSent = false;
   }
   return false;
 }
@@ -230,15 +229,15 @@ static uint8_t CalculateCRC(uint8_t *data, uint8_t length) {
 void SGP_GetHT(float* temperature, float* humidity){
   uint8_t humBuf[2];
   uint8_t tempBuf[2];
-  sgp40_Temp = (uint16_t)(((*temperature+45.0f)/175.0f)*(float)0xFFFF);
-  sgp40_Hum = ((*humidity/100.0f)*(float)0xFFFF);
-  humBuf[0] = MeasureRawWithCompBuffer[2] = sgp40_Hum >> 8;
-  humBuf[1] = MeasureRawWithCompBuffer[3] = sgp40_Hum;
+  SGP_Temp = (uint16_t)(((*temperature+45.0f)/175.0f)*(float)0xFFFF);
+  SGP_Hum = ((*humidity/100.0f)*(float)0xFFFF);
+  humBuf[0] = MeasureRawWithCompBuffer[2] = SGP_Hum >> 8;
+  humBuf[1] = MeasureRawWithCompBuffer[3] = SGP_Hum;
   MeasureRawWithCompBuffer[4] = CalculateCRC(humBuf, 2);
-  tempBuf[0] = MeasureRawWithCompBuffer[5] = sgp40_Temp >> 8;
-  tempBuf[1] = MeasureRawWithCompBuffer[6] = sgp40_Temp;
+  tempBuf[0] = MeasureRawWithCompBuffer[5] = SGP_Temp >> 8;
+  tempBuf[1] = MeasureRawWithCompBuffer[6] = SGP_Temp;
   MeasureRawWithCompBuffer[7] = CalculateCRC(tempBuf, 2);
-  ht_MeasurementReceived = true;
+  HT_MeasurementReceived = true;
 }
 
 void SGP_StartSelfTest(void) {
