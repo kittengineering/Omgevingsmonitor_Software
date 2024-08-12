@@ -10,7 +10,6 @@
 static UART_HandleTypeDef* EspUart = NULL;
 extern DMA_HandleTypeDef hdma_usart4_rx;
 
-static uint8_t RxBufferLength = 256;
 
 static volatile bool RxComplete = false;
 static uint8_t RxBuffer[ESP_MAX_BUFFER_SIZE] = {0};
@@ -20,6 +19,7 @@ static bool EspTurnedOn = false;
 //static bool ResponseFound = false;
 static volatile uint8_t OldPos = 0;
 static uint16_t TempIndex = 0;
+static uint16_t ATCommandIndex = 0;
 
 static char TempBuffer[ESP_MAX_BUFFER_SIZE];      // Buffer to build up the received message
 static char CommandBuffer[ESP_MAX_BUFFER_SIZE]; // Buffer to store the last sent command
@@ -29,7 +29,15 @@ static bool CommandEchoed = false;            // Flag to indicate if the command
  * Response handle functions
 */
 //static char* ATCommands[AT_COMMANDS_SIZE] = {};
+
+typedef struct {
+    char* ATCommand;
+    bool* doneFlag;
+} ATCommandsParameters;
+
+
 static ESP_States EspState = ESP_STATE_INIT;
+static ATCommandsParameters ATCommands[ESP_AT_COMMANDS_COUNT];
 
 //TODO: Add de-init if ESP is off. Otherwise there is going to be 3.3V on the ESP.
 
@@ -92,16 +100,12 @@ void ParseBuffer(uint8_t* buffer, uint16_t len) {
         if (c == '\n' && TempIndex > 1 && TempBuffer[TempIndex - 2] == '\r') {
             // Null-terminate the string
             TempBuffer[TempIndex] = '\0';
-
-            // Check if the received string matches the last sent command (echo)
-            if (!CommandEchoed && strstr(TempBuffer, CommandBuffer) != NULL) {
-                CommandEchoed = true;
-            }
             if (CommandEchoed) {
               // Command is echoed.
               // Copying last response to buffer.
               if(strstr(TempBuffer, AT_RESPONSE_OK) != NULL) {
                 Debug("Found OK, stop parsing.");
+                ATCommandIndex += 1;
                 EspState = ESP_STATE_SEND_AT;
                 break;
               }
@@ -110,14 +114,22 @@ void ParseBuffer(uint8_t* buffer, uint16_t len) {
                 EspState = ESP_STATE_ERROR;
                 break;
               }
-
               memcpy(LastATResponse, TempBuffer, ESP_MAX_BUFFER_SIZE);
+              // Response handled, resetting buffer.
               TempIndex = 0;
               // Clear the buffer
               memset(TempBuffer, 0, ESP_MAX_BUFFER_SIZE);
             }
+            // Check if the received string matches the last sent command (echo)
+            if (!CommandEchoed && strstr(TempBuffer, CommandBuffer) != NULL) {
+                CommandEchoed = true;
+                // Reseting index and clearing buffer.
+                TempIndex = 0;
+                memset(TempBuffer, 0, ESP_MAX_BUFFER_SIZE);
+            }
+
           // If TempIndex reaches TEMP_BUFFER_SIZE, reset to prevent overflow
-          if (TempIndex >= ESP_MAX_BUFFER_SIZE - 1) {
+          if (TempIndex >= ESP_MAX_BUFFER_SIZE) {
               TempIndex = 0;
           }
        }
@@ -159,11 +171,14 @@ void ESP_Upkeep(void) {
       break;
 
     case ESP_STATE_INIT:
+      uint8_t offset = 0;
+      ATCommands[offset++] = (ATCommands) {};
       // TODO: Add turning on the ESP32 and wait for ready after, so we know for sure that the ESP is on.
       // Initialization state
 //      StartUpTime = GetCurrentHalTicks() + ESP_START_UP_TIME;
 //      StartUpDone = false;
       if(!EspTurnedOn) {
+
 //        HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_RESET);
 //        // Turn ESP on.
 //        HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_SET);
@@ -172,15 +187,14 @@ void ESP_Upkeep(void) {
 //        HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_RESET);
 
         EspTurnedOn = true;
-        // Wait for ESP to be ready
-        // Start reading DMA buffer for AT commands
-        // TODO: Fix the warning for the macro definition
-        if(ESP_Receive(RxBuffer, RxBufferLength)) {
-          char* atCommand = "AT+GMR\r\n";
-          SetCommandBuffer(atCommand);
-          if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
-            EspState = ESP_STATE_WAIT_FOR_READY;
-          }
+      }
+      // Wait for ESP to be ready
+      // Start reading DMA buffer for AT commands
+      if(ESP_Receive(RxBuffer, ESP_MAX_BUFFER_SIZE)) {
+        char* atCommand = "AT+GMR\r\n";
+        SetCommandBuffer(atCommand);
+        if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
+          EspState = ESP_STATE_WAIT_FOR_READY;
         }
       }
       break;

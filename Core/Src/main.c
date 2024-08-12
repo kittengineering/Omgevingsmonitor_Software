@@ -128,8 +128,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
 	  // Upkeep gadget
-    UpkeepGadget();
-//    ESP_Upkeep();
+//    UpkeepGadget();
+    ESP_Upkeep();
 //    Info("Hello?");
     if(TimestampIsReached(LedBlinkTimestamp)) {
       // Red LED

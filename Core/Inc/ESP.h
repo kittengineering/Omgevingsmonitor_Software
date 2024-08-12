@@ -15,9 +15,10 @@
 #include "gpio.h"
 
 #define ESP_MAX_UART_RETRIES 2
-#define ESP_MAX_BUFFER_SIZE 256
+#define ESP_MAX_BUFFER_SIZE 255
 #define ESP_START_UP_TIME 700
 #define ESP_DMA_TIMEOUT 50
+#define ESP_AT_COMMANDS_COUNT 4
 
 #define AT_RESPONSE_OK "OK"
 #define AT_RESPONSE_ERROR "ERROR"

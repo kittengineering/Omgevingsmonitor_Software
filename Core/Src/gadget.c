@@ -42,7 +42,7 @@ void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, UART_H
   Meas_SetEnabledSensors(SensorSetTest);
   Meas_Init(sensorI2C, micI2s);
   // Working on ESP, disabling it now
-//  ESP_Init(espUart);
+  ESP_Init(espUart);
 //  Gadget_SetSleepDuration();
   Info("Gadget initialised.");
 }
