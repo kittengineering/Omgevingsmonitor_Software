@@ -1,6 +1,9 @@
-../Core/Src/ESP.c:25:6:ESP_Init	16	static
-../Core/Src/ESP.c:30:13:ESP_Send	32	static
-../Core/Src/ESP.c:39:13:ESP_Receive	32	static
-../Core/Src/ESP.c:52:6:HAL_UART_RxCpltCallback	16	static
-../Core/Src/ESP.c:61:6:HAL_UART_ErrorCallback	16	static
-../Core/Src/ESP.c:90:6:ESP_Upkeep	8	static
+../Core/Src/ESP.c:37:6:ESP_Init	16	static
+../Core/Src/ESP.c:42:13:ESP_Send	32	static
+../Core/Src/ESP.c:51:13:ESP_Receive	32	static
+../Core/Src/ESP.c:64:6:HAL_UART_RxCpltCallback	16	static
+../Core/Src/ESP.c:72:6:HAL_UART_ErrorCallback	16	static
+../Core/Src/ESP.c:79:6:SetCommandBuffer	16	static
+../Core/Src/ESP.c:84:6:ParseBuffer	24	static
+../Core/Src/ESP.c:127:6:DMA_ProcessBuffer	16	static
+../Core/Src/ESP.c:147:6:ESP_Upkeep	16	static

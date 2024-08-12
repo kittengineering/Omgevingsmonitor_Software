@@ -17,6 +17,7 @@
 "./Core/Src/syscalls.o"
 "./Core/Src/sysmem.o"
 "./Core/Src/system_stm32l0xx.o"
+"./Core/Src/tim.o"
 "./Core/Src/usart.o"
 "./Core/Src/usb.o"
 "./Core/Src/utils.o"

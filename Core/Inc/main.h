@@ -79,6 +79,8 @@ void Error_Handler(void);
 #define MCU_LED_A_B_GPIO_Port GPIOC
 #define Wireless_PSU_PG_Pin GPIO_PIN_8
 #define Wireless_PSU_PG_GPIO_Port GPIOA
+#define Wireless_PSU_EN_Pin GPIO_PIN_11
+#define Wireless_PSU_EN_GPIO_Port GPIOC
 #define User_Button_Pin GPIO_PIN_2
 #define User_Button_GPIO_Port GPIOD
 #define MCU_LED_C_G_Pin GPIO_PIN_8

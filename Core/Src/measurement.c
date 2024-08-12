@@ -20,7 +20,7 @@ typedef struct {
     int32_t vocIndex;
     bool HT_measurementDone;
     bool VOC_measurementDone;
-    bool NO_measurementDone;
+    bool PM_measurementDone;
     bool MIC_measurementDone;
 } MeasurementContext;
 
@@ -56,12 +56,10 @@ static bool VOC_IsMeasurementDoneWrapper(void) {
   return Gas_GetMeasurementValues(&MeasurementCtx.vocIndex);
 }
 
-static void NO_StartMeasurementWrapper(void) {
-  // TODO: Implement NO Start wrapper.
+static void PM_StartMeasurementWrapper(void) {
 }
 
-static bool NO_IsMeasurementDoneWrapper(void) {
-  // TODO: Implement NO Start wrapper.
+static bool PM_IsMeasurementDoneWrapper(void) {
   return true;
 }
 
@@ -70,8 +68,6 @@ static void MIC_StartMeasurementWrapper(void) {
 }
 
 static bool MIC_IsMeasurementDoneWrapper(void) {
-  // TODO: Implement NO Start wrapper.
-//  return false;
   return MIC_MeasurementDone();
 }
 
@@ -94,7 +90,7 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   uint8_t offset = 0;
   Measurements[offset++] = (MeasurementParameters) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &MeasurementCtx.HT_measurementDone, MeasEnabled.HT_measurementEnabled};
   Measurements[offset++] = (MeasurementParameters) {VOC_StartMeasurementWrapper, VOC_IsMeasurementDoneWrapper, &MeasurementCtx.VOC_measurementDone, MeasEnabled.VOC_measurementEnabled};
-  Measurements[offset++] = (MeasurementParameters) {NO_StartMeasurementWrapper, NO_IsMeasurementDoneWrapper, &MeasurementCtx.NO_measurementDone, MeasEnabled.NO_measurementEnabled};
+  Measurements[offset++] = (MeasurementParameters) {PM_StartMeasurementWrapper, PM_IsMeasurementDoneWrapper, &MeasurementCtx.PM_measurementDone, MeasEnabled.PM_measurementEnabled};
   Measurements[offset++] = (MeasurementParameters) {MIC_StartMeasurementWrapper, MIC_IsMeasurementDoneWrapper, &MeasurementCtx.MIC_measurementDone, MeasEnabled.MIC_measurementEnabled};
 }
 
@@ -112,7 +108,7 @@ void ResetMeasurements(void) {
   MeasurementCtx.vocIndex = 0;
   MeasurementCtx.HT_measurementDone = false;
   MeasurementCtx.VOC_measurementDone = false;
-  MeasurementCtx.NO_measurementDone = false;
+  MeasurementCtx.PM_measurementDone = false;
   MeasurementCtx.MIC_measurementDone = false;
 }
 
@@ -173,7 +169,7 @@ void Meas_SetEnabledSensors(EnabledMeasurements enabled) {
   MeasEnabled = enabled;
   Measurements[offset++].enabled = enabled.HT_measurementEnabled;
   Measurements[offset++].enabled = enabled.VOC_measurementEnabled;
-  Measurements[offset++].enabled = enabled.NO_measurementEnabled;
+  Measurements[offset++].enabled = enabled.PM_measurementEnabled;
   Measurements[offset++].enabled = enabled.MIC_measurementEnabled;
 }
 
