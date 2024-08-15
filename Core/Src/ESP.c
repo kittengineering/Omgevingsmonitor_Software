@@ -35,6 +35,16 @@ typedef struct {
     bool* doneFlag;
 } ATCommandsParameters;
 
+// Taken from firmware https://github.com/opendata-stuttgart/sensors-software/blob/master/airrohr-firmware/airrohr-firmware.ino
+
+struct struct_wifiInfo
+{
+  char ssid[35];
+  uint8_t encryptionType;
+  int32_t RSSI;
+  int32_t channel;
+};
+
 
 static ESP_States EspState = ESP_STATE_INIT;
 static ATCommandsParameters ATCommands[ESP_AT_COMMANDS_COUNT];
@@ -92,7 +102,8 @@ void SetCommandBuffer(const char* command) {
 void ParseBuffer(uint8_t* buffer, uint16_t len) {
     for (uint16_t i = 0; i < len; i++) {
         char c = buffer[i];
-
+        // TODO: Add logic to parsebuffer depending on sent AT command
+        // Make sure to keep track of beginning /r/n of the OK response: /r/nOK/r/n
         // Add the new character to the temp buffer
         TempBuffer[TempIndex++] = c;
 
@@ -172,7 +183,7 @@ void ESP_Upkeep(void) {
 
     case ESP_STATE_INIT:
       uint8_t offset = 0;
-      ATCommands[offset++] = (ATCommands) {};
+//      ATCommands[offset++] = (ATCommands) {};
       // TODO: Add turning on the ESP32 and wait for ready after, so we know for sure that the ESP is on.
       // Initialization state
 //      StartUpTime = GetCurrentHalTicks() + ESP_START_UP_TIME;

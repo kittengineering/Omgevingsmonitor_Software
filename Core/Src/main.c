@@ -21,8 +21,8 @@
 #include "dma.h"
 #include "i2c.h"
 #include "i2s.h"
-#include "tim.h"
 #include "usart.h"
+#include "tim.h"
 #include "usb.h"
 #include "gpio.h"
 
@@ -105,6 +105,7 @@ int main(void)
   MX_USB_PCD_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
+  MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
   // General TODO 's
 	/*
@@ -118,6 +119,7 @@ int main(void)
 	 * : Add CLI via usb-c
 	 * : Network not found? Sleep
 	 */
+  GPIO_InitPWMLEDs(&htim2, &htim3);
   uint32_t LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
   SetVerboseLevel(VERBOSE_ALL);
   BinaryReleaseInfo();
@@ -129,15 +131,12 @@ int main(void)
   while (1) {
 	  // Upkeep gadget
 //    UpkeepGadget();
-    ESP_Upkeep();
-//    Info("Hello?");
-    if(TimestampIsReached(LedBlinkTimestamp)) {
-      // Red LED
-      HAL_GPIO_TogglePin(MCU_LED_B_R_GPIO_Port, MCU_LED_B_R_Pin);
-      HAL_GPIO_WritePin(MCU_LED_B_G_GPIO_Port, MCU_LED_B_G_Pin, 1);
-      HAL_GPIO_WritePin(MCU_LED_B_B_GPIO_Port, MCU_LED_B_B_Pin, 1);
-      LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
-    }
+//    ESP_Upkeep();
+//    if(TimestampIsReached(LedBlinkTimestamp)) {
+//      // Red LED
+//
+//      LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
+//    }
 
     // Optional colours:
     // Red, Yellow, Magenta, White, Cyan, Blue, Green.
@@ -189,9 +188,10 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_I2C1
-                              |RCC_PERIPHCLK_USB;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_LPUART1
+                              |RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_USB;
   PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
+  PeriphClkInit.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_PCLK1;
   PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
   PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)

@@ -65,12 +65,10 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pins : PC13 PC0 PC1 PC2
-                           PC3 PC4 PC5 PC9
-                           PC12 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2
-                          |GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_9
-                          |GPIO_PIN_12;
+  /*Configure GPIO pins : PC13 PC2 PC3 PC4
+                           PC5 PC9 PC12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4
+                          |GPIO_PIN_5|GPIO_PIN_9|GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -82,8 +80,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA4 PA5 PA6 PA15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_15;
+  /*Configure GPIO pins : PA4 PA5 PA6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -110,6 +108,12 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = BOOT0_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(BOOT0_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = Wireless_PSU_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -125,5 +129,28 @@ void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 2 */
+void GPIO_InitPWMLEDs(TIM_HandleTypeDef* timer2, TIM_HandleTypeDef* timer3) {
+  // Timer 2 PWM init
+  HAL_TIM_PWM_Start(timer2, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(timer2, TIM_CHANNEL_3);
+  HAL_TIM_PWM_Start(timer2, TIM_CHANNEL_4);
+  TIM2 -> ARR = 4000;
 
+  // Resetting the LEDs.
+  // CCR1 = Red, CCR3 = Green, CCR4 = Blue.
+  TIM2 -> CCR1 = 4000;
+  TIM2 -> CCR3 = 4000;
+  TIM2 -> CCR4 = 4000;
+
+  // Timer 3 PWM init
+  HAL_TIM_PWM_Start(timer3, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(timer3, TIM_CHANNEL_2);
+  HAL_TIM_PWM_Start(timer3, TIM_CHANNEL_3);
+  TIM3 -> ARR = 4000;
+
+  // CCR1 = Red, CCR2 = Green, CCR3 = Blue.
+  TIM3 -> CCR1 = 4000;
+  TIM3 -> CCR2 = 4000;
+  TIM3 -> CCR3 = 4000;
+}
 /* USER CODE END 2 */

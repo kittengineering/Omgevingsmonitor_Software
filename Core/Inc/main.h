@@ -79,6 +79,8 @@ void Error_Handler(void);
 #define MCU_LED_A_B_GPIO_Port GPIOC
 #define Wireless_PSU_PG_Pin GPIO_PIN_8
 #define Wireless_PSU_PG_GPIO_Port GPIOA
+#define BOOT0_Pin GPIO_PIN_15
+#define BOOT0_GPIO_Port GPIOA
 #define Wireless_PSU_EN_Pin GPIO_PIN_11
 #define Wireless_PSU_EN_GPIO_Port GPIOC
 #define User_Button_Pin GPIO_PIN_2
@@ -89,7 +91,7 @@ void Error_Handler(void);
 #define MCU_LED_C_B_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-#define SRC_VERSION "0.01"
+#define SRC_VERSION "1.00"
 #define LED_BLINK_INTERVAL 1000
 /* USER CODE END Private defines */
 

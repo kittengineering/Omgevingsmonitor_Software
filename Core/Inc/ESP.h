@@ -25,7 +25,6 @@
 
 #define AT_COMMANDS_SIZE 18
 
-
 typedef enum {
   ESP_STATE_OFF,
   ESP_STATE_IDLE,
@@ -40,5 +39,6 @@ void ESP_Init(UART_HandleTypeDef* espUart);
 void ESP_Upkeep(void);
 void ESP_Reset(void);
 void ESP_Sleep(void);
+void ESP_DeInit(void);
 
 #endif /* INC_ESP_H_ */
