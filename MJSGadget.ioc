@@ -90,6 +90,7 @@ Mcu.Name=STM32L072R(B-Z)Tx
 Mcu.Package=LQFP64
 Mcu.Pin0=PC14-OSC32_IN
 Mcu.Pin1=PC15-OSC32_OUT
+<<<<<<< HEAD
 Mcu.Pin10=PA7
 Mcu.Pin11=PB0
 Mcu.Pin12=PB10
@@ -125,6 +126,40 @@ Mcu.Pin7=PA1
 Mcu.Pin8=PA2
 Mcu.Pin9=PA3
 Mcu.PinsNb=36
+=======
+Mcu.Pin10=PB10
+Mcu.Pin11=PB11
+Mcu.Pin12=PB12
+Mcu.Pin13=PB13
+Mcu.Pin14=PB15
+Mcu.Pin15=PC6
+Mcu.Pin16=PC7
+Mcu.Pin17=PC8
+Mcu.Pin18=PA8
+Mcu.Pin19=PA9
+Mcu.Pin2=PH0-OSC_IN
+Mcu.Pin20=PA10
+Mcu.Pin21=PA11
+Mcu.Pin22=PA12
+Mcu.Pin23=PA13
+Mcu.Pin24=PA14
+Mcu.Pin25=PC10
+Mcu.Pin26=PC11
+Mcu.Pin27=PD2
+Mcu.Pin28=PB6
+Mcu.Pin29=PB7
+Mcu.Pin3=PH1-OSC_OUT
+Mcu.Pin30=PB8
+Mcu.Pin31=PB9
+Mcu.Pin32=VP_SYS_VS_Systick
+Mcu.Pin4=PA0
+Mcu.Pin5=PA1
+Mcu.Pin6=PA2
+Mcu.Pin7=PA3
+Mcu.Pin8=PA7
+Mcu.Pin9=PB0
+Mcu.PinsNb=33
+>>>>>>> main
 Mcu.ThirdPartyNb=0
 Mcu.UserConstants=
 Mcu.UserName=STM32L072RZTx
@@ -220,12 +255,15 @@ PB9.GPIO_Label=MCU_LED_C_B
 PB9.Locked=true
 PB9.PinState=GPIO_PIN_SET
 PB9.Signal=GPIO_Output
+<<<<<<< HEAD
 PC0.Locked=true
 PC0.Mode=Asynchronous
 PC0.Signal=LPUART1_RX
 PC1.Locked=true
 PC1.Mode=Asynchronous
 PC1.Signal=LPUART1_TX
+=======
+>>>>>>> main
 PC10.GPIOParameters=GPIO_PuPd
 PC10.GPIO_PuPd=GPIO_NOPULL
 PC10.Locked=true

@@ -7,6 +7,8 @@
 #include "stm32l0xx_hal.h"
 #include "utils.h"
 #include "sensirion_gas_index_algorithm.h"
+#include "wsenHIDS.h"
+#include "main.h"
 #include <sgp40.h>
 
 
@@ -20,7 +22,8 @@ static uint8_t TurnHeaterOffBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x1
 static uint8_t GetSerialNumberBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x36, 0x82};
 
 //static uint8_t MeasureRawSignalBufferCompensated[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x26, 0x0f};
-static uint8_t MeasureRawSignalBuffer[SGP_LONG_COMMAND_BUFFER_LENGTH] = {0x26, 0x0f, 0x80, 0x00, 0xA2, 0x66, 0x66, 0x93};
+static uint8_t MeasureRawSignalBuffer[SGP_LONG_COMMAND_BUFFER_LENGTH] = {0x26, 0x0F, 0x80, 0x00, 0xA2, 0x66, 0x66, 0x93};
+static uint8_t MeasureRawWithCompBuffer[SGP_LONG_COMMAND_BUFFER_LENGTH] = {0x26, 0x0F};
 static uint8_t SoftResetBuffer[SGP_SHORT_COMMAND_BUFFER_LENGTH] = {0x00, 0x06};
 static uint8_t SGP_ReadBuffer[SGP_SERIAL_NUMBER_RESPONSE_LENGTH] = {0};
 // static uint8_t SGP_WriteBuffer[SGP_SERIAL_NUMBER_BUFFER_LENGTH] = {0};
@@ -36,6 +39,15 @@ static bool HeatUpIsDone = false;
 static bool MeasurementIsReady = false;
 static GasIndexAlgorithmParams params;
 
+static uint16_t SGP_Hum;
+static uint16_t SGP_Temp;
+static bool HT_MeasurementReceived = false;
+static bool SGP_MsgSent = false;
+
+static uint16_t Red;
+static uint16_t Blue;
+static uint16_t Green;
+static uint16_t TimeValue = 4000;
 
 //#define SGP_TEST_BUFFER_SIZE 6
 //#define SGP_TEST_SEGMENT_SIZE 3
@@ -61,8 +73,14 @@ void SGP_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
 }
 
 void SGP_StartMeasurement(void) {
-  WriteRegister(SGP_I2C_ADDRESS, MeasureRawSignalBuffer, SGP_LONG_COMMAND_BUFFER_LENGTH);
-  SGP_HeatUpTime = GetCurrentHalTicks() + SGP_SENSOR_HEATUP_TIME;
+  if(HT_MeasurementReceived){
+    WriteRegister(SGP_I2C_ADDRESS, MeasureRawWithCompBuffer, SGP_LONG_COMMAND_BUFFER_LENGTH);
+    SGP_IdleTime = GetCurrentHalTicks() + SGP_SENSOR_IDLE_TIME;
+  }
+  else{
+    WriteRegister(SGP_I2C_ADDRESS, MeasureRawSignalBuffer, SGP_LONG_COMMAND_BUFFER_LENGTH);
+    SGP_HeatUpTime = GetCurrentHalTicks() + SGP_SENSOR_HEATUP_TIME;
+  }
   HeatUpIsDone = false;
   MeasurementIsReady = false;
 }
@@ -83,14 +101,19 @@ void SGP_TurnHeaterOff(void) {
 }
 
 bool SGP_GetMeasurementValues(int32_t *vocIndex) {
-  // TODO: Don't parse the values 0 since VOC index is still measuring.
-  // Maybe use the
-  if (SGP_HeatedUp() && !HeatUpIsDone) {
+  if (SGP_HeatedUp() && !HeatUpIsDone && !SGP_MsgSent) {
     Debug("SGP is heated up, starting the measurement.");
     HeatUpIsDone = true;
     // SGP is heated up, we ignore the output and start another measurement.
-    WriteRegister(SGP_I2C_ADDRESS, MeasureRawSignalBuffer, SGP_LONG_COMMAND_BUFFER_LENGTH);
-    SGP_IdleTime = GetCurrentHalTicks() + SGP_SENSOR_IDLE_TIME;
+    if(HT_MeasurementReceived){
+      WriteRegister(SGP_I2C_ADDRESS, MeasureRawWithCompBuffer, SGP_LONG_COMMAND_BUFFER_LENGTH);
+      SGP_IdleTime = GetCurrentHalTicks() + SGP_SENSOR_IDLE_TIME;
+    }
+    else{
+      WriteRegister(SGP_I2C_ADDRESS, MeasureRawSignalBuffer, SGP_LONG_COMMAND_BUFFER_LENGTH);
+      SGP_IdleTime = GetCurrentHalTicks() + SGP_SENSOR_IDLE_TIME;
+    }
+    SGP_MsgSent = true;
   }
   if (HeatUpIsDone && SGP_MeasurementReady() && !MeasurementIsReady) {
     Debug("SGP_Measurement[%i] is ready, reading buffer.", SGP_AmountOfSamplesDone + 1);
@@ -116,8 +139,30 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
       Debug("vocIndex value: %d", tempVocIndex);
 //      *vocIndex = 1337;
       *vocIndex = tempVocIndex;
+      if(*vocIndex > 0){
+        // TODO add status LED logic.
+//        HAL_GPIO_TogglePin(STATUS2_LED_GPIO_Port, STATUS2_LED_Pin);
+      }
+      if(*vocIndex > 0 && *vocIndex <= 100){
+      Green = (1.0-(*vocIndex/100.0))*TimeValue;
+      Blue = (*vocIndex/100.0)*TimeValue;
+      Red = TimeValue;
+      TIM2->CCR1 = Red;
+      TIM2->CCR3 = Green;
+      TIM2->CCR4 = Blue;
+      }
+      if(*vocIndex > 100){
+        Green = (((*vocIndex-100.0)/400.0))*TimeValue;
+        Red = (1.0-((*vocIndex-100.0)/400.0))*TimeValue;
+        Blue = TimeValue;
+        TIM2->CCR1 = Red;
+        TIM2->CCR3 = Green;
+        TIM2->CCR4 = Blue;
+      }
       SGP_AmountOfSamplesDone = 0;
       Debug("SGP_Measurement completely done.");
+      HT_MeasurementReceived = false;
+      SGP_MsgSent = false;
 //      for (uint8_t i = 0; i < SGP_MEASURE_BUFFER_RESPONSE_LENGTH; i++) {
 //        Debug("SGP_Measurement buffer[%d]: %d", i, SGP_ReadBuffer[i]);
 //      }
@@ -128,6 +173,7 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
     // Starting next measurement
     Debug("Starting next SGP_measurement.");
     SGP_StartMeasurement();
+    SGP_MsgSent = false;
   }
   return false;
 }
@@ -180,6 +226,20 @@ static uint8_t CalculateCRC(uint8_t *data, uint8_t length) {
   return crc;
 }
 
+void SGP_GetHT(float* temperature, float* humidity){
+  uint8_t humBuf[2];
+  uint8_t tempBuf[2];
+  SGP_Temp = (uint16_t)(((*temperature+45.0f)/175.0f)*(float)0xFFFF);
+  SGP_Hum = ((*humidity/100.0f)*(float)0xFFFF);
+  humBuf[0] = MeasureRawWithCompBuffer[2] = SGP_Hum >> 8;
+  humBuf[1] = MeasureRawWithCompBuffer[3] = SGP_Hum;
+  MeasureRawWithCompBuffer[4] = CalculateCRC(humBuf, 2);
+  tempBuf[0] = MeasureRawWithCompBuffer[5] = SGP_Temp >> 8;
+  tempBuf[1] = MeasureRawWithCompBuffer[6] = SGP_Temp;
+  MeasureRawWithCompBuffer[7] = CalculateCRC(tempBuf, 2);
+  HT_MeasurementReceived = true;
+}
+
 void SGP_StartSelfTest(void) {
   if (SGP_SelfTestStarted)
     return;
@@ -227,9 +287,10 @@ bool SGP_SelfTestSuccessful(void) {
 }
 
 void SGP_SoftReset(void) {
-  // Datasheet mentioned this was a general reset command, which is odd.
+  /* Joris: Datasheet mentioned this was a general reset command, which is odd.
   // But if something happens to the i2c bus, this might be the issue.
-  // Worth mentioning.
+  Worth mentioning. */
+  // Danny: Its not odd, its a general reset command which is a standard syntaxis. So do not use blind.
   // This command could take from 0.1 to 1ms.
   WriteRegister(SGP_I2C_ADDRESS, SoftResetBuffer,
                 SGP_SHORT_COMMAND_BUFFER_LENGTH);
