@@ -1,7 +1,7 @@
-../Core/Src/microphone.c:28:6:MIC_Init	16	static
-../Core/Src/microphone.c:66:13:UpdateSampleRate	16	static
-../Core/Src/microphone.c:76:17:ConvertAudio	24	static
-../Core/Src/microphone.c:82:6:MIC_Start	32	static
-../Core/Src/microphone.c:108:6:MIC_Print	16	static
-../Core/Src/microphone.c:116:6:MIC_MeasurementDone	8	static
-../Core/Src/microphone.c:127:6:HAL_I2S_RxCpltCallback	16	static
+../Core/Src/microphone.c:28:6:MIC_Init	32	static
+../Core/Src/microphone.c:110:13:UpdateSampleRate	16	static
+../Core/Src/microphone.c:119:17:ConvertAudio	24	static
+../Core/Src/microphone.c:125:6:MIC_Start	32	static
+../Core/Src/microphone.c:152:6:MIC_Print	16	static
+../Core/Src/microphone.c:160:6:MIC_MeasurementDone	8	static
+../Core/Src/microphone.c:171:6:HAL_I2S_RxCpltCallback	16	static

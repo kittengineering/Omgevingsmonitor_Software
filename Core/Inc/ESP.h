@@ -15,15 +15,15 @@
 #include "gpio.h"
 
 #define ESP_MAX_UART_RETRIES 2
-#define ESP_MAX_BUFFER_SIZE 256
+#define ESP_MAX_BUFFER_SIZE 255
 #define ESP_START_UP_TIME 700
 #define ESP_DMA_TIMEOUT 50
+#define ESP_AT_COMMANDS_COUNT 4
 
 #define AT_RESPONSE_OK "OK"
 #define AT_RESPONSE_ERROR "ERROR"
 
 #define AT_COMMANDS_SIZE 18
-
 
 typedef enum {
   ESP_STATE_OFF,
@@ -39,5 +39,6 @@ void ESP_Init(UART_HandleTypeDef* espUart);
 void ESP_Upkeep(void);
 void ESP_Reset(void);
 void ESP_Sleep(void);
+void ESP_DeInit(void);
 
 #endif /* INC_ESP_H_ */

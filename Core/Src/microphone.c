@@ -16,16 +16,60 @@
 static I2S_HandleTypeDef* I2SHandle = NULL;
 static NrOfSamples Samples = NR_SAMPLES_128;
 
-static uint16_t AudioRxBuffer[NR_SAMPLES_256] = {0};
-//static float32_t FFTResult[NR_SAMPLES_128];
+static uint16_t AudioRxBuffer[AUDIO_RX_BUFFER] = {0};
 
 static volatile uint32_t StartTime = 0;
 static volatile uint32_t StartupDoneTime = 0;
 static volatile bool StartUpDone = false;
 static volatile bool DataReady = false;
+static uint8_t MIC_InitRetries = 0;
+static uint8_t MIC_MaxRetries = 3;
 
-
-void MIC_Init(I2S_HandleTypeDef* i2SHandle) { I2SHandle = i2SHandle; }
+void MIC_Init(I2S_HandleTypeDef* i2SHandle) {
+  I2SHandle = i2SHandle;
+  if (I2SHandle == NULL) {
+     Error("Microphone is not initialised.");
+     return;
+  }
+  // Start data receiving to check if MIC is connected.
+  HAL_StatusTypeDef status = HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer, Samples);
+  if(status == HAL_ERROR) {
+    Error("Microphone NOT initialised.");
+    // Setting LED to RED to show mic is not working.
+    TIM3 -> CCR1 = 2000;
+    TIM3 -> CCR2 = 4000;
+    TIM3 -> CCR3 = 4000;
+  }
+  if(status == HAL_BUSY) {
+    Debug("Microphone is BUSY, retrying.");
+    // Setting LED to YELLOW to show mic is busy.
+    // CCR1 = Red, CCR2 = Green, CCR3 = Blue.
+    TIM3 -> CCR1 = 2000;
+    TIM3 -> CCR2 = 2000;
+    TIM3 -> CCR3 = 4000;
+    if(MIC_InitRetries <= MIC_MaxRetries) {
+      MIC_InitRetries += 1;
+      // Calling function again.
+      MIC_Init(i2SHandle);
+    }else {
+      Debug("Microphone is BUSY and is NOT working after retrying.");
+      // Setting LED to RED to show mic is not working.
+      // CCR1 = Red, CCR2 = Green, CCR3 = Blue.
+      TIM3 -> CCR1 = 2000;
+      TIM3 -> CCR2 = 4000;
+      TIM3 -> CCR3 = 4000;
+    }
+  }else {
+    Debug("Microphone initialised.");
+    // Setting LED to GREEN to show mic is working.
+    // CCR1 = Red, CCR2 = Green, CCR3 = Blue.
+    TIM3 -> CCR1 = 4000;
+    TIM3 -> CCR2 = 2000;
+    TIM3 -> CCR3 = 4000;
+  }
+  // Stop DMA
+  HAL_I2S_DMAStop(I2SHandle);
+}
 
 //static void CalculateFFT(void) {
 //  float32_t IQ[NR_SAMPLES_128 * 2] ={0};      /*! I/Q interleave buffer Required 2x FFT-Size */
@@ -67,7 +111,6 @@ static void UpdateSampleRate(uint32_t sampleRate) {
   if (I2SHandle->Init.AudioFreq == sampleRate) {
     return;
   }
-
   HAL_I2S_DeInit(I2SHandle);
   I2SHandle->Init.AudioFreq = sampleRate;
   HAL_I2S_Init(I2SHandle);
@@ -97,7 +140,8 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
 //      HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer,
 //          Samples >> 1); //>>1 because reading half word
 
-  Info("Status %d", status);
+//  Info("Status %d", status);
+
 }
 
 //static void MIC_ProcessFFT() {

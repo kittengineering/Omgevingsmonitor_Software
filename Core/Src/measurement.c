@@ -76,12 +76,34 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
   if(MeasEnabled.HT_measurementEnabled || MeasEnabled.VOC_measurementEnabled) {
     I2CSensors_Init(sensorI2C);
     if(!HT_DeviceConnected()) {
-       Error("HT device not connected!");
+       Error("Humidity / Temperature sensor NOT connected!");
        MeasEnabled.HT_measurementEnabled = false;
+       // HT Device NOT connected, turning LED on RED.
+       // CCR1 = Red, CCR3 = Green, CCR4 = Blue.
+       TIM2 -> CCR1 = 0;
+       TIM2 -> CCR3 = 4000;
+       TIM2 -> CCR4 = 4000;
+    }else {
+      // HT Device is connected, turning led on GREEN.
+      // CCR1 = Red, CCR3 = Green, CCR4 = Blue.
+      Debug("Humidity / Temperature sensor initialised.");
+      TIM2 -> CCR1 = 4000;
+      TIM2 -> CCR3 = 0;
+      TIM2 -> CCR4 = 4000;
     }
     if(!Gas_DeviceConnected()) {
        Error("SGP device not connected!");
+       // SGP Device is NOT connected, turning led on RED.
+       HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
+       HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
+       HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
        MeasEnabled.VOC_measurementEnabled = false;
+    }else{
+      Debug("SGP sensor initialised.");
+      // HT Device is connected, turning led on GREEN.
+      HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
+      HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
+      HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
     }
   }
   if(MeasEnabled.MIC_measurementEnabled) {

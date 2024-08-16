@@ -34,7 +34,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_ll_usb.h \
  C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pcd_ex.h \
  ../Core/Inc/dma.h ../Core/Inc/main.h ../Core/Inc/i2c.h ../Core/Inc/i2s.h \
- ../Core/Inc/tim.h ../Core/Inc/usart.h ../Core/Inc/usb.h \
+ ../Core/Inc/usart.h ../Core/Inc/tim.h ../Core/Inc/usb.h \
  ../Core/Inc/gpio.h ../Core/Inc/gadget.h ../Core/Inc/gadget.h \
  ../Core/Inc/measurement.h ../Core/Inc/utils.h ../Core/Inc/ESP.h \
  ../Core/Inc/gpio.h ../Core/Inc/utils.h ../Core/Inc/microphone.h \
@@ -78,8 +78,8 @@ C:/Users/joris/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HA
 ../Core/Inc/main.h:
 ../Core/Inc/i2c.h:
 ../Core/Inc/i2s.h:
-../Core/Inc/tim.h:
 ../Core/Inc/usart.h:
+../Core/Inc/tim.h:
 ../Core/Inc/usb.h:
 ../Core/Inc/gpio.h:
 ../Core/Inc/gadget.h:
