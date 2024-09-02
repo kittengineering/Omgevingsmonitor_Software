@@ -14,21 +14,25 @@ extern DMA_HandleTypeDef hdma_usart4_rx;
 
 
 static volatile bool RxComplete = false;
+
 static uint8_t RxBuffer[ESP_MAX_BUFFER_SIZE] = {0};
-static uint8_t LastATResponse[ESP_MAX_BUFFER_SIZE] = {0};
+//static uint8_t LastATResponse[ESP_MAX_BUFFER_SIZE] = {0};
 static bool EspTurnedOn = false;
 char SSID[] = "KITT-guest";
 char Password[] = "ZonderSnoerCommuniceren053";
-uint8_t AT_Command_Number;
+char API[] = "\"https://api.opensensemap.org/boxes/66c7394026df8b0008c359a4/data\", 508, 1, \"content-type: application/json\"";
+uint8_t ATState;
 //static bool StartUpDone = false;
 //static bool ResponseFound = false;
 static volatile uint8_t OldPos = 0;
-static uint16_t TempIndex = 0;
-static uint16_t ATCommandIndex = 0;
+//static uint16_t TempIndex = 0;
+//static uint16_t ATCommandIndex = 0;
 static uint32_t ESPTimeStamp = 0;
 static uint8_t retry = 0;
+static uint8_t ATExpectation = RECEIVE_EXPECTATION_OK;
+static uint8_t nextATCommand = AT_WAKEUP;
 
-static char TempBuffer[ESP_MAX_BUFFER_SIZE];      // Buffer to build up the received message
+//static char TempBuffer[ESP_MAX_BUFFER_SIZE];      // Buffer to build up the received message
 static char CommandBuffer[ESP_MAX_BUFFER_SIZE]; // Buffer to store the last sent command
 static bool CommandEchoed = false;            // Flag to indicate if the command was echoed
 
@@ -54,6 +58,7 @@ struct struct_wifiInfo
 
 
 static ESP_States EspState = ESP_STATE_INIT;
+static AT_Commands ATCommands = AT_WAKEUP;
 //static ATCommandsParameters ATCommands[ESP_AT_COMMANDS_COUNT];
 
 //TODO: Add de-init if ESP is off. Otherwise there is going to be 3.3V on the ESP.
@@ -106,9 +111,9 @@ void SetCommandBuffer(const char* command) {
     CommandEchoed = false; // Reset the flag when a new command is sent
 }
 
- void ParseBuffer(uint8_t* buffer, uint16_t len, uint8_t command) {
+ uint8_t ParseBuffer(uint8_t* buffer, uint16_t len, uint8_t expectation) {
   char tempBuf[len+1];
-  bool Received = false;
+  char status = RECEIVE_STATUS_INCOMPLETE;
   for(uint16_t i=0; i<len; i++){
     tempBuf[i] = (char)buffer[i];
   }
@@ -118,24 +123,28 @@ void SetCommandBuffer(const char* command) {
   char * ParsePoint2;
   const char OK[] = AT_RESPONSE_OK;
   const char ERROR[] = AT_RESPONSE_ERROR;
-  ParsePoint = strstr(tempBuf, OK);
+  const char ready[] = AT_RESPONSE_READY;
+  if(expectation == RECEIVE_EXPECTATION_OK){
+    ParsePoint = strstr(tempBuf, OK);
+  }
+  if(expectation == RECEIVE_EXPECTATION_READY){
+    ParsePoint = strstr(tempBuf, ready);
+  }
   ParsePoint2 = strstr(tempBuf, ERROR);
   if(len > 1 ){
     TestChar = *ParsePoint;
     if(TestChar == 'O'){
-      Received = true;
+      status = RECEIVE_STATUS_OK;
+    }
+    if(TestChar == 'r'){
+      status = RECEIVE_STATUS_READY;
     }
     TestChar = *ParsePoint2;
     if(TestChar == 'E'){
-      Received = false;
+      status = RECEIVE_STATUS_ERROR;
     }
   }
-  if(Received){
-    EspState = command+1;
-  }
-  else{
-    EspState = command;
-  }
+  return(status);
 
 //    for (uint16_t i = 0; i < len; i++) {
 //        char c = buffer[i];
@@ -183,106 +192,258 @@ void SetCommandBuffer(const char* command) {
 //       }
 //    }
 }
-void PollAwake(){
+bool PollAwake(){
   char* atCommand = "ATE0\r\n";
   SetCommandBuffer(atCommand);
-  AT_Command_Number = AT_WAKEUP;
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
-    EspState = ESP_STATE_WAIT_FOR_READY;
+    return true;
+  }
+  else{
+    return false;
   }
 }
-void RFPower(){
+bool RFPower(){
   char* atCommand = "AT+RFPOWER=70\r\n";
   SetCommandBuffer(atCommand);
-  AT_Command_Number = AT_SET_RFPOWER;
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
-    EspState = ESP_STATE_WAIT_FOR_READY;
+    return true;
+  }
+  else{
+    return false;
   }
 }
-void CheckRFPower(){
+bool CheckRFPower(){
   char* atCommand = "AT+RFPOWER?\r\n";
   SetCommandBuffer(atCommand);
-  AT_Command_Number = AT_CHECK_RFPOWER;
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
-    EspState = ESP_STATE_WAIT_FOR_READY;
+    return true;
+  }
+  else{
+    return false;
   }
 }
-void ATRestore(){
+bool ATRestore(){
   char* atCommand = "AT+RESTORE\r\n";
   SetCommandBuffer(atCommand);
-  AT_Command_Number = AT_RESTORE;
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
-    EspState = ESP_STATE_WAIT_FOR_READY;
+    return true;
+  }
+  else{
+    return false;
   }
 }
-void CWINIT(){
+bool CWINIT(){
   char* atCommand = "AT+CWINIT=1\r\n";
   SetCommandBuffer(atCommand);
-  AT_Command_Number = AT_CWINIT;
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
-    EspState = ESP_STATE_WAIT_FOR_READY;
+    return true;
+  }
+  else{
+    return false;
   }
 }
-void CWMODE1(){
+bool CWMODE1(){
   char* atCommand = "AT+CWMODE=1\r\n";
   SetCommandBuffer(atCommand);
-  AT_Command_Number = AT_CWMODE1;
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
-    EspState = ESP_STATE_WAIT_FOR_READY;
+    return true;
+  }
+  else{
+    return false;
   }
 }
-void CWAUTOCONN(){
+bool CWAUTOCONN(){
   char* atCommand = "AT+CWAUTOCONN=1\r\n";
   SetCommandBuffer(atCommand);
-  AT_Command_Number = AT_CWAUTOCONN;
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
-    EspState = ESP_STATE_WAIT_FOR_READY;
+    return true;
+  }
+  else{
+    return false;
   }
 }
-void CWJAP(){
+bool CWJAP(){
   char atCommandBuff[100];
-  sprintf(atCommandBuff, "AT+CWJAP=%s, %s\r\n", SSID, Password);
+  sprintf(atCommandBuff, "AT+CWJAP=\"%s\",\"%s\"\r\n", SSID, Password);
   uint8_t len = strlen(atCommandBuff);
   char atCommand[len+1];
   strncpy(atCommand, atCommandBuff, len);
   SetCommandBuffer(atCommand);
-  AT_Command_Number = AT_CWAUTOCONN;
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
-    EspState = ESP_STATE_WAIT_FOR_READY;
+    return true;
+  }
+  else{
+    return false;
   }
 }
-void DMA_ProcessBuffer(void) {
+bool CWMODE3(){
+  char* atCommand = "AT+CWMODE=3\r\n";
+  SetCommandBuffer(atCommand);
+  if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+bool CWSAP(){
+  char* atCommand = "AT+CWSAP=\"WOTS_Config\",\"\", 11,0,1\r\n";
+  SetCommandBuffer(atCommand);
+  if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+bool CIPMUX(){
+  char* atCommand = "AT+CIPMUX=0\r\n";
+  SetCommandBuffer(atCommand);
+  if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+bool WEBSERVER(){
+  char* atCommand = "AT+WEBSERVER=1,80,60\r\n";
+  SetCommandBuffer(atCommand);
+  if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+bool HTTPCPOST(){
+  char atCommandBuff[255];
+  sprintf(atCommandBuff, "AT+HTTPCPOST=%s\r\n", API);
+  uint8_t len = strlen(atCommandBuff);
+  char atCommand[len+1];
+  strncpy(atCommand, atCommandBuff, len);
+  SetCommandBuffer(atCommand);
+  if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+uint8_t DMA_ProcessBuffer(uint8_t expectation) {
     uint16_t pos = ESP_MAX_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart4_rx);
+    uint8_t status = RECEIVE_STATUS_INCOMPLETE;
     if(pos > ESP_MAX_BUFFER_SIZE) {
       pos = ESP_MAX_BUFFER_SIZE;
     }
     if(pos == OldPos){
       if(retry >4){
-        EspState = AT_Command_Number;
+        EspState = ESP_STATE_SEND;
         retry = 0;
+        status = RECEIVE_STATUS_RETRY;
       }
       else{
         retry ++;
         ESPTimeStamp = HAL_GetTick() + ESP_WIFI_INIT_TIME;
+        status = RECEIVE_STATUS_RETRY;
       }
     }
     if (pos != OldPos) {
       retry = 0;
         if (pos > OldPos) {
             // Direct parsing
-            ParseBuffer(&RxBuffer[OldPos], (pos - OldPos), AT_Command_Number);
+            status = ParseBuffer(&RxBuffer[OldPos], (pos - OldPos), expectation);
+            if(status != RECEIVE_STATUS_INCOMPLETE){
+              //memset(RxBuffer, 0, ESP_MAX_BUFFER_SIZE);
+            }
         } else {
             // Buffer wrap-around
-            ParseBuffer(&RxBuffer[OldPos], ESP_MAX_BUFFER_SIZE - OldPos, AT_Command_Number);
+            status = ParseBuffer(&RxBuffer[OldPos], ESP_MAX_BUFFER_SIZE - OldPos, expectation);
             if (pos > 0) {
-                ParseBuffer(&RxBuffer[0], pos, AT_Command_Number);
+                status = ParseBuffer(&RxBuffer[0], pos, expectation);
             }
         }
         OldPos = pos;
+        return status;
     }
+}
+bool ATCompare(uint8_t AT_Command_Received, uint8_t AT_Command_Expected){
+  bool value = false;
+  if(AT_Command_Expected == RECEIVE_EXPECTATION_OK){
+    value = (AT_Command_Received == RECEIVE_STATUS_OK);
+  }
+  if(AT_Command_Expected == RECEIVE_EXPECTATION_READY){
+    value = (AT_Command_Received == RECEIVE_STATUS_READY);
+  }
+  return(value);
+}
+
+bool AT_Send(state){
+  bool ATCommandSend = false;
+  switch (state){
+
+  case AT_WAKEUP:
+  if(TimestampIsReached(ESPTimeStamp)){
+    ATCommandSend = PollAwake();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+  }
+  break;
+
+  case AT_SET_RFPOWER:
+    Debug("Setting RF Power");
+    ATCommandSend = RFPower();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+    break;
+
+  case AT_CHECK_RFPOWER:
+    Debug("Checking RF Power");
+    ATCommandSend = CheckRFPower();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+    break;
+
+  case AT_RESTORE:
+    Debug("Restoring ESP");
+    ATCommandSend = ATRestore();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_LONG;
+    break;
+
+  case AT_CWINIT:
+    Debug("Initializing Wi-Fi");
+    ATCommandSend = CWINIT();
+    ESPTimeStamp = HAL_GetTick() + ESP_WIFI_INIT_TIME;
+    break;
+
+  case AT_CWMODE1:
+    Debug("Setting to station mode");
+    ATCommandSend = CWMODE1();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+    break;
+
+  case AT_CWAUTOCONN:
+    Debug("Setting auto connect");
+    ATCommandSend = CWAUTOCONN();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+    break;
+
+  case AT_CWJAP:
+    Debug("Connect to Wi-Fi");
+    ATCommandSend = CWJAP();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_LONG;
+    break;
+
+  case AT_CWMODE3:
+    Debug("SET in station/soft-ap mode");
+    ATCommandSend = CWMODE3();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+    break;
+  }
+
+  return(ATCommandSend);
 }
 
 void ESP_Upkeep(void) {
+  bool ATSend = false;
+  uint8_t ATReceived = RECEIVE_STATUS_INCOMPLETE;
   switch (EspState) {
     case ESP_STATE_OFF:
       // Turning off the ESP
@@ -318,68 +479,47 @@ void ESP_Upkeep(void) {
       // Wait for ESP to be ready
       // Start reading DMA buffer for AT commands
       if(ESP_Receive(RxBuffer, ESP_MAX_BUFFER_SIZE)) {
-        EspState = ESP_WAKEUP;
+        EspState = ESP_STATE_SEND;
       }
       break;
 
-    case ESP_WAKEUP:
+    case ESP_STATE_SEND:
+      ATSend = AT_Send(nextATCommand);
+      if(ATSend){
+        EspState = ESP_STATE_WAIT_FOR_REPLY;
+      }
+
+    case ESP_STATE_WAIT_FOR_REPLY:
       if(TimestampIsReached(ESPTimeStamp)){
-        PollAwake();
-        ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
-        EspState = ESP_STATE_WAIT_FOR_READY;
+        ATReceived = DMA_ProcessBuffer(ATExpectation);
+        bool proceed = ATCompare(ATReceived, ATExpectation);
+        if(ATReceived == RECEIVE_STATUS_ERROR){
+          EspState = ESP_STATE_SEND;
+        }
+        if(ATReceived == RECEIVE_STATUS_INCOMPLETE){
+          ESPTimeStamp = HAL_GetTick() + 10;
+        }
+        if(proceed){
+          EspState = ESP_STATE_NEXT_AT;
+        }
       }
       break;
 
-    case ESP_STATE_WAIT_FOR_READY:
-      // Start parsing to read startup response.
-      if(TimestampIsReached(ESPTimeStamp)){
-        DMA_ProcessBuffer();
+    case ESP_STATE_NEXT_AT:
+      if(ATCommands < AT_HTTPCPOST){
+        ATCommands = ATCommands+1;
+        if(ATCommands == AT_RESTORE){
+            ATExpectation = RECEIVE_EXPECTATION_READY;
+        }
+        else{
+          ATExpectation = RECEIVE_EXPECTATION_OK;
+        }
       }
-      break;
-
-    case ESP_SET_RFPOWER:
-      Debug("Setting RF Power");
-      RFPower();
-      ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
-      break;
-
-    case ESP_CHECK_RFPOWER:
-      Debug("Checking RF Power");
-      CheckRFPower();
-      ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
-      break;
-
-    case ESP_RESTORE:
-      Debug("Restoring ESP");
-      ATRestore();
-      ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_LONG;
-      break;
-
-    case ESP_CWINIT:
-      Debug("Initializing Wi-Fi");
-      CWINIT();
-      ESPTimeStamp = HAL_GetTick() + ESP_WIFI_INIT_TIME;
-      break;
-
-    case ESP_CWMODE1:
-      Debug("Setting to station mode");
-      CWMODE1();
-      ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
-      break;
-
-    case ESP_CWAUTOCONN:
-      Debug("Setting auto connect");
-      CWAUTOCONN();
-      ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
-      break;
-
-    case ESP_CWJAP:
-      Debug("Connect to Wi-Fi");
-      CWJAP();
-      ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
-      break;
-
-    case ESP_STATE_PROCESS_AT:
+      else{
+        //Start data sending.
+      }
+      EspState = ESP_STATE_SEND;
+      nextATCommand = ATCommands;
 
       break;
 
