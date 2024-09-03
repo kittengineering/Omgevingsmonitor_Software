@@ -20,7 +20,18 @@ static uint8_t RxBuffer[ESP_MAX_BUFFER_SIZE] = {0};
 static bool EspTurnedOn = false;
 char SSID[] = "KITT-guest";
 char Password[] = "ZonderSnoerCommuniceren053";
-char API[] = "\"https://api.opensensemap.org/boxes/66c7394026df8b0008c359a4/data\", 508, 1, \"content-type: application/json\"";
+char messagePart1[128];
+char messagePart2[128];
+char messagePart3[128];
+char messagePart4[128];
+char messagePart5[128];
+char API[] = "\"https://api.opensensemap.org/boxes/66c7394026df8b0008c359a4/data\"";
+char sensorID1[] = "\"66c7394026df8b0008c359a5\"";
+char sensorID2[] = "\"66c7394026df8b0008c359a6\"";
+char sensorID3[] = "\"66c7394026df8b0008c359a7\"";
+char sensorID4[] = "\"66c7394026df8b0008c359a8\"";
+char sensorID5[] = "\"66c7394026df8b0008c359a9\"";
+char userID[] = "\"55\"";
 uint8_t ATState;
 //static bool StartUpDone = false;
 //static bool ResponseFound = false;
@@ -33,7 +44,7 @@ static uint8_t ATExpectation = RECEIVE_EXPECTATION_OK;
 static uint8_t nextATCommand = AT_WAKEUP;
 
 //static char TempBuffer[ESP_MAX_BUFFER_SIZE];      // Buffer to build up the received message
-static char CommandBuffer[ESP_MAX_BUFFER_SIZE]; // Buffer to store the last sent command
+static char CommandBuffer[ESP_TX_BUFFER_SIZE]; // Buffer to store the last sent command
 static bool CommandEchoed = false;            // Flag to indicate if the command was echoed
 
 /* TODO: Add done function per ATCommand and save the response in there.
@@ -69,7 +80,7 @@ void ESP_Init(UART_HandleTypeDef* espUart) {
   EspState = ESP_STATE_INIT;
 }
 
-static bool ESP_Send(uint8_t* command, uint8_t length) {
+static bool ESP_Send(uint8_t* command, uint16_t length) {
   HAL_StatusTypeDef status = HAL_UART_Transmit_DMA(EspUart, command, length);
   if (status != HAL_OK) {
     Debug("Error in HAL_UART_Transmit_DMA");
@@ -105,9 +116,24 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
     EspState = ESP_STATE_ERROR;
   }
 }
+uint16_t CreateMessage(){
+  uint16_t messageLength = 0;
+  sprintf(messagePart1, "\"name\":\"temp\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":21.2", sensorID1);
+  messageLength += strlen(messagePart1);
+  sprintf(messagePart2, "\"name\":\"humid\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":53.3", sensorID2);
+  messageLength += strlen(messagePart2);
+  sprintf(messagePart3, "\"name\":\"Sound\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":77", sensorID3);
+  messageLength += strlen(messagePart3);
+  sprintf(messagePart4, "\"name\":\"voc\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":200", sensorID4);
+  messageLength += strlen(messagePart4);
+  sprintf(messagePart5, "\"name\":\"battery\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":4.05", sensorID5);
+  messageLength += strlen(messagePart5);
+  messageLength += 20;
+  return(messageLength);
+}
 
 void SetCommandBuffer(const char* command) {
-    strncpy(CommandBuffer, command, ESP_MAX_BUFFER_SIZE);
+    strncpy(CommandBuffer, command, ESP_TX_BUFFER_SIZE);
     CommandEchoed = false; // Reset the flag when a new command is sent
 }
 
@@ -124,11 +150,15 @@ void SetCommandBuffer(const char* command) {
   const char OK[] = AT_RESPONSE_OK;
   const char ERROR[] = AT_RESPONSE_ERROR;
   const char ready[] = AT_RESPONSE_READY;
+  const char start[] = AT_RESPONSE_START;
   if(expectation == RECEIVE_EXPECTATION_OK){
     ParsePoint = strstr(tempBuf, OK);
   }
   if(expectation == RECEIVE_EXPECTATION_READY){
     ParsePoint = strstr(tempBuf, ready);
+  }
+  if(expectation == RECEIVE_EXPECTATION_START){
+    ParsePoint = strstr(tempBuf, start);
   }
   ParsePoint2 = strstr(tempBuf, ERROR);
   if(len > 1 ){
@@ -138,6 +168,9 @@ void SetCommandBuffer(const char* command) {
     }
     if(TestChar == 'r'){
       status = RECEIVE_STATUS_READY;
+    }
+    if(TestChar == '>'){
+      status = RECEIVE_STATUS_START;
     }
     TestChar = *ParsePoint2;
     if(TestChar == 'E'){
@@ -192,6 +225,10 @@ void SetCommandBuffer(const char* command) {
 //       }
 //    }
 }
+/* line 228 to 383 contain the AT commands. This could be optimized by loading the commands into
+ * an array and having the function handling the sending. This was the simple but verbose
+ * implementation.
+ */
 bool PollAwake(){
   char* atCommand = "ATE0\r\n";
   SetCommandBuffer(atCommand);
@@ -287,7 +324,7 @@ bool CWMODE3(){
   }
 }
 bool CWSAP(){
-  char* atCommand = "AT+CWSAP=\"WOTS_Config\",\"\", 11,0,1\r\n";
+  char* atCommand = "AT+CWSAP=\"WOTS_Config\",\"\",11,0,1\r\n";
   SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
@@ -317,19 +354,36 @@ bool WEBSERVER(){
   }
 }
 bool HTTPCPOST(){
-  char atCommandBuff[255];
-  sprintf(atCommandBuff, "AT+HTTPCPOST=%s\r\n", API);
+  char atCommandBuff[600];
+  uint16_t length = CreateMessage();
+  sprintf(atCommandBuff, "AT+HTTPCPOST=%s,%d,1,\"content-type: application/json\"\r\n", API, length);
   uint8_t len = strlen(atCommandBuff);
   char atCommand[len+1];
   strncpy(atCommand, atCommandBuff, len);
   SetCommandBuffer(atCommand);
-  if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))){
+  if(ESP_Send((uint8_t*)atCommand, len)){
     return true;
   }
   else{
     return false;
   }
 }
+bool SENDDATA(){
+  char atCommandBuff[656];
+  sprintf(atCommandBuff,"[{%s}, {%s}, {%s}, {%s}, {%s}]", messagePart1, messagePart2, messagePart3, messagePart4, messagePart5);
+  uint16_t len = strlen(atCommandBuff);
+  char atCommand[len+1];
+  strncpy(atCommand, atCommandBuff, len);
+  atCommand[len] = '\0';
+  SetCommandBuffer(atCommand);
+  if(ESP_Send((uint8_t*)atCommand, len)) {
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
 uint8_t DMA_ProcessBuffer(uint8_t expectation) {
     uint16_t pos = ESP_MAX_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart4_rx);
     uint8_t status = RECEIVE_STATUS_INCOMPLETE;
@@ -374,6 +428,9 @@ bool ATCompare(uint8_t AT_Command_Received, uint8_t AT_Command_Expected){
   }
   if(AT_Command_Expected == RECEIVE_EXPECTATION_READY){
     value = (AT_Command_Received == RECEIVE_STATUS_READY);
+  }
+  if(AT_Command_Expected == RECEIVE_EXPECTATION_START){
+    value = (AT_Command_Received == RECEIVE_STATUS_START);
   }
   return(value);
 }
@@ -436,6 +493,37 @@ bool AT_Send(state){
     ATCommandSend = CWMODE3();
     ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
     break;
+
+  case AT_CWSAP:
+    Debug("SET soft AP mode parameters");
+    ATCommandSend = CWSAP();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+    break;
+
+  case AT_CIPMUX:
+    Debug("SET in station/soft-ap mode");
+    ATCommandSend = CIPMUX();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+    break;
+
+  case AT_WEBSERVER:
+    Debug("SET in station/soft-ap mode");
+    ATCommandSend = WEBSERVER();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+    break;
+
+  case AT_HTTPCPOST:
+    Debug("SET in station/soft-ap mode");
+    ATCommandSend = HTTPCPOST();
+    ESPTimeStamp = HAL_GetTick() + ESP_WIFI_INIT_TIME;
+    break;
+
+  case AT_SENDDATA:
+    Debug("Send the data");
+    ATCommandSend = SENDDATA();
+    ESPTimeStamp = HAL_GetTick() + ESP_WIFI_INIT_TIME;
+    break;
+
   }
 
   return(ATCommandSend);
@@ -484,10 +572,12 @@ void ESP_Upkeep(void) {
       break;
 
     case ESP_STATE_SEND:
-      ATSend = AT_Send(nextATCommand);
-      if(ATSend){
-        EspState = ESP_STATE_WAIT_FOR_REPLY;
-      }
+        ATSend = AT_Send(nextATCommand);
+        if(ATSend){
+          EspState = ESP_STATE_WAIT_FOR_REPLY;
+        }
+         break;
+
 
     case ESP_STATE_WAIT_FOR_REPLY:
       if(TimestampIsReached(ESPTimeStamp)){
@@ -506,20 +596,24 @@ void ESP_Upkeep(void) {
       break;
 
     case ESP_STATE_NEXT_AT:
-      if(ATCommands < AT_HTTPCPOST){
+      if(ATCommands < AT_SENDDATA){
         ATCommands = ATCommands+1;
         if(ATCommands == AT_RESTORE){
             ATExpectation = RECEIVE_EXPECTATION_READY;
         }
-        else{
+        if(ATCommands == AT_HTTPCPOST){
+          ATExpectation = RECEIVE_EXPECTATION_START;
+        }
+        if(ATCommands != AT_HTTPCPOST && ATCommands != AT_RESTORE){
           ATExpectation = RECEIVE_EXPECTATION_OK;
         }
       }
-      else{
-        //Start data sending.
-      }
       EspState = ESP_STATE_SEND;
       nextATCommand = ATCommands;
+
+      break;
+
+    case ESP_STATE_RESET:
 
       break;
 
