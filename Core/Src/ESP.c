@@ -18,8 +18,12 @@ static volatile bool RxComplete = false;
 static uint8_t RxBuffer[ESP_MAX_BUFFER_SIZE] = {0};
 //static uint8_t LastATResponse[ESP_MAX_BUFFER_SIZE] = {0};
 static bool EspTurnedOn = false;
+static bool measurementDone = false;
+int humidityValue = 0;
 char SSID[] = "KITT-guest";
 char Password[] = "ZonderSnoerCommuniceren053";
+float Temperature = 0;
+float Humidity = 0;
 char messagePart1[128];
 char messagePart2[128];
 char messagePart3[128];
@@ -56,7 +60,10 @@ typedef struct {
     char* ATCommand;
     bool* doneFlag;
 } ATCommandsParameters;
-
+void setHIDSMeasurement(float temp, float humid){
+  Temperature = temp;
+  Humidity = humid;
+}
 // Taken from firmware https://github.com/opendata-stuttgart/sensors-software/blob/master/airrohr-firmware/airrohr-firmware.ino
 
 struct struct_wifiInfo
@@ -118,9 +125,9 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
 }
 uint16_t CreateMessage(){
   uint16_t messageLength = 0;
-  sprintf(messagePart1, "\"name\":\"temp\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":21.2", sensorID1);
+  sprintf(messagePart1, "\"name\":\"temp\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f", sensorID1, Temperature);
   messageLength += strlen(messagePart1);
-  sprintf(messagePart2, "\"name\":\"humid\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":53.3", sensorID2);
+  sprintf(messagePart2, "\"name\":\"humid\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f", sensorID2, Humidity);
   messageLength += strlen(messagePart2);
   sprintf(messagePart3, "\"name\":\"Sound\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":77", sensorID3);
   messageLength += strlen(messagePart3);
@@ -301,12 +308,14 @@ bool CWAUTOCONN(){
 }
 bool CWJAP(){
   char atCommandBuff[100];
+  memset(atCommandBuff, '\0', 100);
   sprintf(atCommandBuff, "AT+CWJAP=\"%s\",\"%s\"\r\n", SSID, Password);
   uint8_t len = strlen(atCommandBuff);
   char atCommand[len+1];
+  atCommand[len] = '\0';
   strncpy(atCommand, atCommandBuff, len);
   SetCommandBuffer(atCommand);
-  if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
+  if(ESP_Send((uint8_t*)atCommand, len)) {
     return true;
   }
   else{
@@ -370,11 +379,12 @@ bool HTTPCPOST(){
 }
 bool SENDDATA(){
   char atCommandBuff[656];
+  memset(atCommandBuff, '\0', 656);
   sprintf(atCommandBuff,"[{%s}, {%s}, {%s}, {%s}, {%s}]", messagePart1, messagePart2, messagePart3, messagePart4, messagePart5);
   uint16_t len = strlen(atCommandBuff);
   char atCommand[len+1];
+  memset(atCommand, '\0', len+1);
   strncpy(atCommand, atCommandBuff, len);
-  atCommand[len] = '\0';
   SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, len)) {
     return true;
@@ -385,21 +395,21 @@ bool SENDDATA(){
 }
 
 uint8_t DMA_ProcessBuffer(uint8_t expectation) {
-    uint16_t pos = ESP_MAX_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart4_rx);
+    uint8_t pos = ESP_MAX_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart4_rx);
     uint8_t status = RECEIVE_STATUS_INCOMPLETE;
     if(pos > ESP_MAX_BUFFER_SIZE) {
       pos = ESP_MAX_BUFFER_SIZE;
     }
     if(pos == OldPos){
       if(retry >4){
-        EspState = ESP_STATE_SEND;
+        //EspState = ESP_STATE_SEND;
         retry = 0;
-        status = RECEIVE_STATUS_RETRY;
+        status = RECEIVE_STATUS_TIMEOUT;
       }
-      else{
-        retry ++;
-        ESPTimeStamp = HAL_GetTick() + ESP_WIFI_INIT_TIME;
-        status = RECEIVE_STATUS_RETRY;
+     else{
+       retry ++;
+       ESPTimeStamp = HAL_GetTick() + ESP_WIFI_INIT_TIME;
+       status = RECEIVE_STATUS_RETRY;
       }
     }
     if (pos != OldPos) {
@@ -409,6 +419,7 @@ uint8_t DMA_ProcessBuffer(uint8_t expectation) {
             status = ParseBuffer(&RxBuffer[OldPos], (pos - OldPos), expectation);
             if(status != RECEIVE_STATUS_INCOMPLETE){
               //memset(RxBuffer, 0, ESP_MAX_BUFFER_SIZE);
+              //pos = 0;
             }
         } else {
             // Buffer wrap-around
@@ -417,10 +428,12 @@ uint8_t DMA_ProcessBuffer(uint8_t expectation) {
                 status = ParseBuffer(&RxBuffer[0], pos, expectation);
             }
         }
-        OldPos = pos;
-        return status;
     }
+    OldPos = pos;
+    return status;
 }
+
+//Compares the received status to the expected status (OK, ready, >).
 bool ATCompare(uint8_t AT_Command_Received, uint8_t AT_Command_Expected){
   bool value = false;
   if(AT_Command_Expected == RECEIVE_EXPECTATION_OK){
@@ -435,7 +448,7 @@ bool ATCompare(uint8_t AT_Command_Received, uint8_t AT_Command_Expected){
   return(value);
 }
 
-bool AT_Send(state){
+bool AT_Send(AT_Commands state){
   bool ATCommandSend = false;
   switch (state){
 
@@ -546,7 +559,7 @@ void ESP_Upkeep(void) {
       break;
 
     case ESP_STATE_INIT:
-      uint8_t offset = 0;
+      //uint8_t offset = 0;
 //      ATCommands[offset++] = (ATCommands) {};
       // TODO: Add turning on the ESP32 and wait for ready after, so we know for sure that the ESP is on.
       // Initialization state
@@ -589,6 +602,17 @@ void ESP_Upkeep(void) {
         if(ATReceived == RECEIVE_STATUS_INCOMPLETE){
           ESPTimeStamp = HAL_GetTick() + 10;
         }
+        if(ATReceived == RECEIVE_STATUS_TIMEOUT){
+          if(nextATCommand != AT_SENDDATA){
+            EspState = ESP_STATE_SEND;
+          }
+          else{
+            nextATCommand = AT_HTTPCPOST;
+            ATCommands = AT_HTTPCPOST;
+            ATExpectation = RECEIVE_EXPECTATION_START;
+            EspState = ESP_STATE_SEND;
+          }
+        }
         if(proceed){
           EspState = ESP_STATE_NEXT_AT;
         }
@@ -607,13 +631,24 @@ void ESP_Upkeep(void) {
         if(ATCommands != AT_HTTPCPOST && ATCommands != AT_RESTORE){
           ATExpectation = RECEIVE_EXPECTATION_OK;
         }
+        EspState = EspState = ESP_STATE_SEND;
+        nextATCommand = ATCommands;
       }
-      EspState = ESP_STATE_SEND;
-      nextATCommand = ATCommands;
+      else{
+        ESPTimeStamp = HAL_GetTick() + 300000;
+        EspState = ESP_STATE_RESET;
+        break;
+      }
 
-      break;
 
+    break;
     case ESP_STATE_RESET:
+      if(TimestampIsReached(ESPTimeStamp)){
+        nextATCommand = AT_HTTPCPOST;
+        ATCommands = AT_HTTPCPOST;
+        EspState = ESP_STATE_SEND;
+        ATExpectation = RECEIVE_EXPECTATION_START;
+      }
 
       break;
 

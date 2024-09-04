@@ -10,6 +10,7 @@
 
 #include "stm32l0xx_hal.h"
 #include <stdbool.h>
+#include "ESP.h"
 
 #define MEAS_MAX_RETRY_ATTEMPTS 3
 #define MEAS_MEASUREMENT_COUNT 4
@@ -38,3 +39,4 @@ void Meas_SetEnabledSensors(EnabledMeasurements enabled);
 void Meas_DeInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s);
 
 #endif /* INC_MEASUREMENT_H_ */
+void setESPMeasurementDone();

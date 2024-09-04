@@ -36,7 +36,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Inc/dma.h ../Core/Inc/main.h ../Core/Inc/i2c.h ../Core/Inc/i2s.h \
  ../Core/Inc/tim.h ../Core/Inc/usart.h ../Core/Inc/usb.h \
  ../Core/Inc/gpio.h ../Core/Inc/gadget.h ../Core/Inc/gadget.h \
- ../Core/Inc/measurement.h ../Core/Inc/utils.h ../Core/Inc/ESP.h \
+ ../Core/Inc/measurement.h ../Core/Inc/ESP.h ../Core/Inc/utils.h \
  ../Core/Inc/gpio.h ../Core/Inc/utils.h ../Core/Inc/microphone.h \
  ../Core/Inc/measurement.h ../Core/Inc/ESP.h
 ../Core/Inc/main.h:
@@ -85,8 +85,8 @@ C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HA
 ../Core/Inc/gadget.h:
 ../Core/Inc/gadget.h:
 ../Core/Inc/measurement.h:
-../Core/Inc/utils.h:
 ../Core/Inc/ESP.h:
+../Core/Inc/utils.h:
 ../Core/Inc/gpio.h:
 ../Core/Inc/utils.h:
 ../Core/Inc/microphone.h:

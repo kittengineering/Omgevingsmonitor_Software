@@ -33,7 +33,8 @@ Core/Src/ESP.o: ../Core/Src/ESP.c ../Core/Inc/ESP.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pcd.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_ll_usb.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pcd_ex.h \
- ../Core/Inc/utils.h ../Core/Inc/gpio.h ../Core/Inc/main.h
+ ../Core/Inc/utils.h ../Core/Inc/gpio.h ../Core/Inc/main.h \
+ ../Core/Inc/measurement.h ../Core/Inc/ESP.h
 ../Core/Inc/ESP.h:
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal.h:
 ../Core/Inc/stm32l0xx_hal_conf.h:
@@ -72,3 +73,5 @@ C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HA
 ../Core/Inc/utils.h:
 ../Core/Inc/gpio.h:
 ../Core/Inc/main.h:
+../Core/Inc/measurement.h:
+../Core/Inc/ESP.h:

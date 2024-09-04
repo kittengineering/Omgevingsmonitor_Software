@@ -13,6 +13,7 @@
 #include "stm32l0xx_hal.h"
 #include "utils.h"
 #include "gpio.h"
+#include "measurement.h"
 
 #define ESP_MAX_UART_RETRIES 2
 #define ESP_MAX_BUFFER_SIZE 255
@@ -37,7 +38,8 @@ typedef enum {
   RECEIVE_STATUS_READY,
   RECEIVE_STATUS_INCOMPLETE,
   RECEIVE_STATUS_RETRY,
-  RECEIVE_STATUS_START
+  RECEIVE_STATUS_START,
+  RECEIVE_STATUS_TIMEOUT,
 }RECEIVE_STATUS;
 
 typedef enum {
@@ -45,7 +47,7 @@ typedef enum {
   RECEIVE_EXPECTATION_READY,
   RECEIVE_EXPECTATION_START,
   RECEIVE_EXPECTATION_WIFI
-};
+} AT_Expectation;
 
 typedef enum {
   ESP_STATE_OFF,
@@ -57,7 +59,8 @@ typedef enum {
   ESP_STATE_PROCESS_AT,
   ESP_STATE_ERROR,
   ESP_STATE_WAIT_TO_SEND,
-  ESP_STATE_RESET
+  ESP_STATE_RESET,
+  ESP_STATE_RECEIVE_DATA
 } ESP_States;
 
 typedef enum {
@@ -84,3 +87,4 @@ void ESP_Sleep(void);
 void ESP_DeInit(void);
 
 #endif /* INC_ESP_H_ */
+void setHIDSMeasurement(float temp, float humid);

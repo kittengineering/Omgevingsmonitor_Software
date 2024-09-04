@@ -11,7 +11,9 @@
 ../Core/Src/measurement.c:127:6:ResetMeasurements	8	static
 ../Core/Src/measurement.c:137:6:MeasurementsCompleted	8	static
 ../Core/Src/measurement.c:150:6:Meas_Upkeep	32	static
-../Core/Src/measurement.c:189:6:Meas_SetEnabledSensors	32	static
-../Core/Src/measurement.c:198:13:Meas_TurnOff	16	static
-../Core/Src/measurement.c:208:18:Meas_GetState	8	static
-../Core/Src/measurement.c:212:6:Meas_DeInit	16	static
+../Core/Src/measurement.c:189:7:getTemperature	16	static
+../Core/Src/measurement.c:194:7:getHumidity	16	static
+../Core/Src/measurement.c:199:6:Meas_SetEnabledSensors	32	static
+../Core/Src/measurement.c:208:13:Meas_TurnOff	16	static
+../Core/Src/measurement.c:218:18:Meas_GetState	8	static
+../Core/Src/measurement.c:222:6:Meas_DeInit	16	static

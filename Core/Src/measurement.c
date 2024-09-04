@@ -176,6 +176,7 @@ void Meas_Upkeep(void) {
     Debug("Processing results.");
     Debug("SGP40 index value: %d", MeasurementCtx.vocIndex);
     Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
+    setHIDSMeasurement(MeasurementCtx.temperature, MeasurementCtx.humidityPerc);
     MeasState = MEAS_STATE_INIT;
     break;
 
@@ -184,6 +185,15 @@ void Meas_Upkeep(void) {
     MeasState = MEAS_STATE_INIT;
     break;
   }
+}
+float getTemperature(){
+  float Temperature = MeasurementCtx.temperature;
+  return Temperature;
+}
+
+float getHumidity(){
+  float Humidity = MeasurementCtx.humidityPerc;
+  return Humidity;
 }
 
 void Meas_SetEnabledSensors(EnabledMeasurements enabled) {
