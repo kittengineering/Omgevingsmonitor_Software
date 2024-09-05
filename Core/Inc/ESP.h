@@ -14,6 +14,7 @@
 #include "utils.h"
 #include "gpio.h"
 #include "measurement.h"
+#include "Battery_utils.h"
 
 #define ESP_MAX_UART_RETRIES 2
 #define ESP_MAX_BUFFER_SIZE 255
@@ -87,4 +88,5 @@ void ESP_Sleep(void);
 void ESP_DeInit(void);
 
 #endif /* INC_ESP_H_ */
-void setHIDSMeasurement(float temp, float humid);
+void setMeasurement(float temp, float humid, uint16_t voc);
+void setCharges(float charge, float solar);

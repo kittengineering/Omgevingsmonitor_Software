@@ -35,12 +35,12 @@ static EnabledMeasurements SensorSetTest = {
 //    .MIC_measurementEnabled = true
 //};
 
-void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, UART_HandleTypeDef* espUart) {
+void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, UART_HandleTypeDef* espUart, ADC_HandleTypeDef* ADC_HANDLER) {
   // TODO: Add gadget re-init. So it works after sleep mode again.
   // Check battery power
   // Init sensor + peripherals
   Meas_SetEnabledSensors(SensorSetTest);
-  Meas_Init(sensorI2C, micI2s);
+  Meas_Init(sensorI2C, micI2s, ADC_HANDLER);
   // Working on ESP, disabling it now
   ESP_Init(espUart);
 //  Gadget_SetSleepDuration();

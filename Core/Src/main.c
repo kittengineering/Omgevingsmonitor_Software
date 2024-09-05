@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
 #include "dma.h"
 #include "i2c.h"
 #include "i2s.h"
@@ -105,6 +106,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_USART4_UART_Init();
+  MX_ADC_Init();
   /* USER CODE BEGIN 2 */
   // General TODO 's
 	/*
@@ -122,7 +124,7 @@ int main(void)
   uint32_t LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
   SetVerboseLevel(VERBOSE_ALL);
   BinaryReleaseInfo();
-  Gadget_Init(&hi2c1, &hi2s2, &huart4);
+  Gadget_Init(&hi2c1, &hi2s2, &huart4, &hadc);
   /* USER CODE END 2 */
 
   /* Infinite loop */

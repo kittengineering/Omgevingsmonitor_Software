@@ -19,11 +19,13 @@ static uint8_t RxBuffer[ESP_MAX_BUFFER_SIZE] = {0};
 //static uint8_t LastATResponse[ESP_MAX_BUFFER_SIZE] = {0};
 static bool EspTurnedOn = false;
 static bool measurementDone = false;
-int humidityValue = 0;
 char SSID[] = "KITT-guest";
 char Password[] = "ZonderSnoerCommuniceren053";
 float Temperature = 0;
 float Humidity = 0;
+float batteryCharge = 0;
+float solarCharge = 0;
+uint16_t VOCIndex = 0;
 char messagePart1[128];
 char messagePart2[128];
 char messagePart3[128];
@@ -60,9 +62,14 @@ typedef struct {
     char* ATCommand;
     bool* doneFlag;
 } ATCommandsParameters;
-void setHIDSMeasurement(float temp, float humid){
+void setCharges(float battery, float solar){
+  batteryCharge = battery;
+  solarCharge = solar;
+}
+void setMeasurement(float temp, float humid, uint16_t voc){
   Temperature = temp;
   Humidity = humid;
+  VOCIndex = voc;
 }
 // Taken from firmware https://github.com/opendata-stuttgart/sensors-software/blob/master/airrohr-firmware/airrohr-firmware.ino
 
@@ -131,9 +138,9 @@ uint16_t CreateMessage(){
   messageLength += strlen(messagePart2);
   sprintf(messagePart3, "\"name\":\"Sound\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":77", sensorID3);
   messageLength += strlen(messagePart3);
-  sprintf(messagePart4, "\"name\":\"voc\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":200", sensorID4);
+  sprintf(messagePart4, "\"name\":\"voc\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%d", sensorID4, VOCIndex);
   messageLength += strlen(messagePart4);
-  sprintf(messagePart5, "\"name\":\"battery\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":4.05", sensorID5);
+  sprintf(messagePart5, "\"name\":\"battery\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f", sensorID5, batteryCharge);
   messageLength += strlen(messagePart5);
   messageLength += 20;
   return(messageLength);
@@ -236,6 +243,7 @@ void SetCommandBuffer(const char* command) {
  * an array and having the function handling the sending. This was the simple but verbose
  * implementation.
  */
+ //PollAwake, RFPOWER and CheckRFPower necesarry when comming out of sleep mode.
 bool PollAwake(){
   char* atCommand = "ATE0\r\n";
   SetCommandBuffer(atCommand);
@@ -266,6 +274,7 @@ bool CheckRFPower(){
     return false;
   }
 }
+//Only necesarry on first init
 bool ATRestore(){
   char* atCommand = "AT+RESTORE\r\n";
   SetCommandBuffer(atCommand);
@@ -352,6 +361,7 @@ bool CIPMUX(){
     return false;
   }
 }
+//This command sets the webserver, only necessary for first initialization.
 bool WEBSERVER(){
   char* atCommand = "AT+WEBSERVER=1,80,60\r\n";
   SetCommandBuffer(atCommand);
@@ -362,6 +372,7 @@ bool WEBSERVER(){
     return false;
   }
 }
+//These are the commands necesarry for sending data.
 bool HTTPCPOST(){
   char atCommandBuff[600];
   uint16_t length = CreateMessage();

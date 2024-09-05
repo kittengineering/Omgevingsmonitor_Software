@@ -71,8 +71,9 @@ static bool MIC_IsMeasurementDoneWrapper(void) {
   return MIC_MeasurementDone();
 }
 
-void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
+void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_HandleTypeDef* ADC_HANDLER) {
   MeasState = MEAS_STATE_INIT;
+  batteryInit(ADC_HANDLER);
   if(MeasEnabled.HT_measurementEnabled || MeasEnabled.VOC_measurementEnabled) {
     I2CSensors_Init(sensorI2C);
     if(!HT_DeviceConnected()) {
@@ -176,7 +177,8 @@ void Meas_Upkeep(void) {
     Debug("Processing results.");
     Debug("SGP40 index value: %d", MeasurementCtx.vocIndex);
     Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
-    setHIDSMeasurement(MeasurementCtx.temperature, MeasurementCtx.humidityPerc);
+    setMeasurement(MeasurementCtx.temperature, MeasurementCtx.humidityPerc, MeasurementCtx.vocIndex);
+    checkCharges();
     MeasState = MEAS_STATE_INIT;
     break;
 

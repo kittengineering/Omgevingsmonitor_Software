@@ -69,6 +69,10 @@ void Error_Handler(void);
 #define MCU_LED_B_B_GPIO_Port GPIOA
 #define VusbDetect_Pin GPIO_PIN_7
 #define VusbDetect_GPIO_Port GPIOA
+#define BatMeasure_Pin GPIO_PIN_4
+#define BatMeasure_GPIO_Port GPIOC
+#define SolarMeasure_Pin GPIO_PIN_5
+#define SolarMeasure_GPIO_Port GPIOC
 #define MCU_LED_C_R_Pin GPIO_PIN_0
 #define MCU_LED_C_R_GPIO_Port GPIOB
 #define MCU_LED_A_R_Pin GPIO_PIN_6

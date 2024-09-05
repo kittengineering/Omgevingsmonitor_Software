@@ -36,6 +36,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal.c</locationURI>
 		</link>
 		<link>
+			<name>Drivers/STM32L0xx_HAL_Driver/stm32l0xx_hal_adc.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_adc.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32L0xx_HAL_Driver/stm32l0xx_hal_adc_ex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_adc_ex.c</locationURI>
+		</link>
+		<link>
 			<name>Drivers/STM32L0xx_HAL_Driver/stm32l0xx_hal_cortex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_cortex.c</locationURI>

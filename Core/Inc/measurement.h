@@ -11,6 +11,7 @@
 #include "stm32l0xx_hal.h"
 #include <stdbool.h>
 #include "ESP.h"
+#include "Battery_utils.h"
 
 #define MEAS_MAX_RETRY_ATTEMPTS 3
 #define MEAS_MEASUREMENT_COUNT 4
@@ -32,7 +33,7 @@ typedef struct {
     bool MIC_measurementEnabled;
 } EnabledMeasurements;
 
-void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s);
+void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_HandleTypeDef* ADC_HANDLER);
 void Meas_Upkeep(void);
 MeasurementState Meas_GetState(void);
 void Meas_SetEnabledSensors(EnabledMeasurements enabled);
