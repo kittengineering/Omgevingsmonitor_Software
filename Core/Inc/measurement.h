@@ -33,6 +33,13 @@ typedef struct {
     bool MIC_measurementEnabled;
 } EnabledMeasurements;
 
+typedef struct {
+  bool HT_Tested;
+  bool VOC_Tested;
+  bool MIC_Tested;
+  bool ESP_Tested;
+}MeasurementTested;
+
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_HandleTypeDef* ADC_HANDLER);
 void Meas_Upkeep(void);
 MeasurementState Meas_GetState(void);

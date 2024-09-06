@@ -37,6 +37,7 @@ typedef struct {
 static MeasurementContext MeasurementCtx;
 static MeasurementParameters Measurements[MEAS_MEASUREMENT_COUNT];
 static EnabledMeasurements MeasEnabled;
+static MeasurementTested MeasTest;
 static MeasurementState MeasState = MEAS_STATE_INIT;
 static uint8_t CurrentMeasurementIndex = 0;
 
@@ -87,6 +88,7 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_Hand
     }else {
       // HT Device is connected, turning led on GREEN.
       // CCR1 = Red, CCR3 = Green, CCR4 = Blue.
+      MeasTest.HT_Tested = true;
       Debug("Humidity / Temperature sensor initialised.");
       TIM2 -> CCR1 = 4000;
       TIM2 -> CCR3 = 0;
@@ -100,6 +102,7 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_Hand
        HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
        MeasEnabled.VOC_measurementEnabled = false;
     }else{
+      MeasTest.VOC_Tested = true;
       Debug("SGP sensor initialised.");
       // HT Device is connected, turning led on GREEN.
       HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
@@ -215,6 +218,10 @@ static void Meas_TurnOff(void) {
   Measurements[offset++].enabled = false;
   Measurements[offset++].enabled = false;
   Measurements[offset++].enabled = false;
+}
+
+void Meas_Test(){
+
 }
 
 MeasurementState Meas_GetState(void) {
