@@ -11,4 +11,5 @@
 ../Core/Src/wsenHIDS.c:125:6:HIDS_SetMeasurementMode	16	static
 ../Core/Src/wsenHIDS.c:129:6:HIDS_MeasurementReady	8	static
 ../Core/Src/wsenHIDS.c:133:6:HIDS_SoftReset	16	static
-../Core/Src/wsenHIDS.c:138:6:HIDS_GetMeasurementValues	56	static
+../Core/Src/wsenHIDS.c:138:6:ShowHumidity	8	static
+../Core/Src/wsenHIDS.c:167:6:HIDS_GetMeasurementValues	56	static

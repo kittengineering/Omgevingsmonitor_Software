@@ -40,5 +40,6 @@ bool SGP_GetMeasurementValues(int32_t* vocIndex);
 bool SGP_DeviceConnected(void);
 bool SGP_SelfTest(void);
 void SGP_SoftReset(void);
+void SGP_GetHT(float* temperature, float* humidity);
 
 #endif /* INC_SGP40_H_ */

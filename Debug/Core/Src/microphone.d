@@ -36,7 +36,12 @@ Core/Src/microphone.o: ../Core/Src/microphone.c ../Core/Inc/microphone.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pcd.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_ll_usb.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pcd_ex.h \
- ../Core/Inc/utils.h
+ ../Core/Inc/utils.h ../Core/Inc/main.h ../Core/Inc/GPIO.h \
+ C:/Users/Danny/Documents/GitHub/MJSGadget/Drivers/CMSIS/DSP/Include/arm_math.h \
+ C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/CMSIS/Include/core_cm0.h \
+ C:/Users/Danny/Documents/GitHub/MJSGadget/Drivers/CMSIS/DSP/Include/arm_const_structs.h \
+ C:/Users/Danny/Documents/GitHub/MJSGadget/Drivers/CMSIS/DSP/Include/arm_math.h \
+ C:/Users/Danny/Documents/GitHub/MJSGadget/Drivers/CMSIS/DSP/Include/arm_common_tables.h
 ../Core/Inc/microphone.h:
 ../Core/Inc/gpio.h:
 ../Core/Inc/main.h:
@@ -77,3 +82,10 @@ C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HA
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_ll_usb.h:
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pcd_ex.h:
 ../Core/Inc/utils.h:
+../Core/Inc/main.h:
+../Core/Inc/GPIO.h:
+C:/Users/Danny/Documents/GitHub/MJSGadget/Drivers/CMSIS/DSP/Include/arm_math.h:
+C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/CMSIS/Include/core_cm0.h:
+C:/Users/Danny/Documents/GitHub/MJSGadget/Drivers/CMSIS/DSP/Include/arm_const_structs.h:
+C:/Users/Danny/Documents/GitHub/MJSGadget/Drivers/CMSIS/DSP/Include/arm_math.h:
+C:/Users/Danny/Documents/GitHub/MJSGadget/Drivers/CMSIS/DSP/Include/arm_common_tables.h:
