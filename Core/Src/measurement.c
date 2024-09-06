@@ -64,7 +64,7 @@ static bool PM_IsMeasurementDoneWrapper(void) {
 }
 
 static void MIC_StartMeasurementWrapper(void) {
-  MIC_Start(SAMPLE_RATE_8K, NR_SAMPLES_128);
+  MIC_Start(SAMPLE_RATE_8K, NR_SAMPLES_128); // Dont init like this.
 }
 
 static bool MIC_IsMeasurementDoneWrapper(void) {

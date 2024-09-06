@@ -6,70 +6,34 @@
  */
 
 #include "microphone.h"
+#include "main.h"
+#include "GPIO.h"
 
 
 // TODO: include arm math libraries differently.
 #define CORTEX_M0
-//#include "arm_math.h"
-//#include "arm_const_structs.h"
+#include "arm_math.h"
+#include "arm_const_structs.h"
+#include <stdlib.h>
 
 static I2S_HandleTypeDef* I2SHandle = NULL;
-static NrOfSamples Samples = NR_SAMPLES_128;
+static NrOfSamples Samples = NR_SAMPLES_512;
+static uint16_t AudioRxBuffer[NR_SAMPLES_512*4] = {0};
+q15_t output[NR_SAMPLES_512*2];
+uint32_t numStages = 1;
 
-static uint16_t AudioRxBuffer[AUDIO_RX_BUFFER] = {0};
 
 static volatile uint32_t StartTime = 0;
 static volatile uint32_t StartupDoneTime = 0;
 static volatile bool StartUpDone = false;
 static volatile bool DataReady = false;
-static uint8_t MIC_InitRetries = 0;
-static uint8_t MIC_MaxRetries = 3;
+float OCT[10];
+q15_t sample[NR_SAMPLES_512];
 
-void MIC_Init(I2S_HandleTypeDef* i2SHandle) {
-  I2SHandle = i2SHandle;
-  if (I2SHandle == NULL) {
-     Error("Microphone is not initialised.");
-     return;
-  }
-  // Start data receiving to check if MIC is connected.
-  HAL_StatusTypeDef status = HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer, Samples);
-  if(status == HAL_ERROR) {
-    Error("Microphone NOT initialised.");
-    // Setting LED to RED to show mic is not working.
-    TIM3 -> CCR1 = 2000;
-    TIM3 -> CCR2 = 4000;
-    TIM3 -> CCR3 = 4000;
-  }
-  if(status == HAL_BUSY) {
-    Debug("Microphone is BUSY, retrying.");
-    // Setting LED to YELLOW to show mic is busy.
-    // CCR1 = Red, CCR2 = Green, CCR3 = Blue.
-    TIM3 -> CCR1 = 2000;
-    TIM3 -> CCR2 = 2000;
-    TIM3 -> CCR3 = 4000;
-    if(MIC_InitRetries <= MIC_MaxRetries) {
-      MIC_InitRetries += 1;
-      // Calling function again.
-      MIC_Init(i2SHandle);
-    }else {
-      Debug("Microphone is BUSY and is NOT working after retrying.");
-      // Setting LED to RED to show mic is not working.
-      // CCR1 = Red, CCR2 = Green, CCR3 = Blue.
-      TIM3 -> CCR1 = 2000;
-      TIM3 -> CCR2 = 4000;
-      TIM3 -> CCR3 = 4000;
-    }
-  }else {
-    Debug("Microphone initialised.");
-    // Setting LED to GREEN to show mic is working.
-    // CCR1 = Red, CCR2 = Green, CCR3 = Blue.
-    TIM3 -> CCR1 = 4000;
-    TIM3 -> CCR2 = 2000;
-    TIM3 -> CCR3 = 4000;
-  }
-  // Stop DMA
-  HAL_I2S_DMAStop(I2SHandle);
-}
+
+
+
+void MIC_Init(I2S_HandleTypeDef* i2SHandle) { I2SHandle = i2SHandle; }
 
 //static void CalculateFFT(void) {
 //  float32_t IQ[NR_SAMPLES_128 * 2] ={0};      /*! I/Q interleave buffer Required 2x FFT-Size */
@@ -111,15 +75,85 @@ static void UpdateSampleRate(uint32_t sampleRate) {
   if (I2SHandle->Init.AudioFreq == sampleRate) {
     return;
   }
+
   HAL_I2S_DeInit(I2SHandle);
   I2SHandle->Init.AudioFreq = sampleRate;
   HAL_I2S_Init(I2SHandle);
 }
 
-static uint32_t ConvertAudio(uint16_t* data) {
-  uint32_t audioValue = data[1] | (data[0] << 16);
-  audioValue = audioValue >> 7;
+static q15_t ConvertAudio(uint16_t* data) {
+  bool Sign = 0;
+  //float dB = 0;
+  float Division = 2147483647.0; //Reference?
+  int32_t audioValue = 0;
+  //Sign = data[0] >> 14;
+  audioValue = (data[0]<<17)|(data[1]<<1);
+  audioValue = (audioValue/Division)*0x7FFF;
+//  if(Sign){
+//    audioValue = 0x3FFFFFFF;
+//    audioValue -= (0x3FFF & data[0]) << 17;
+//    audioValue -= data[1]<<1;
+//    audioValue = audioValue >> 9;
+//    dB = 20 * log10(audioValue / Division);
+//  }
+//  else{
+//    audioValue += (0x3FFF & data[0]) << 8;
+//    audioValue += (data[1] >> 8);
+//    dB = 20 * log10(audioValue / Division);
+//  }
+
+//  audioValue = data[1] << 1| (data[0] << 17);
+//  audioValue = audioValue >> 9;
+//  if(audioValue < 0){
+//    audioValue = 0xFFFFFFFF-audioValue;
+//  }
+//  dB = 20 * log10(audioValue / Division);
+
   return audioValue;
+}
+
+q15_t X2(q15_t num){
+  q15_t result = num*num;
+  return(result);
+}
+
+q15_t GetOctave(uint16_t width, uint16_t minFreq){
+  q15_t retVal = 0;
+  q15_t buffer = 0;
+  float dB;
+  float Division = (32768.0)-1; //Reference?
+  for(uint16_t i = minFreq; i < minFreq+width; i++){
+    buffer += X2(output[i]);
+  }
+  arm_sqrt_q15(buffer, &retVal);
+  dB = 10*log10(retVal/Division);
+  return(dB);
+}
+
+void GetAllOctaves(){
+  OCT[0] = GetOctave(2, 3); // 31.5 centre should be at 4
+  OCT[1] = GetOctave(4, 6); // 63 centre should be at 8
+  OCT[2] = GetOctave(6, 13); // 125 centre should be at 16
+  OCT[3] = GetOctave(13, 27); // 250 centre should be at 33
+  OCT[4] = GetOctave(22 ,55); // 500 centre should be at 66
+  OCT[5] = GetOctave(46 , 109); // 1000 centre should be at 132
+  //OCT[6] = output[64]*0; //2000
+
+}
+void Downscale(uint16_t downscaleFactor){
+  for(uint16_t i = 0; i <512; i++){
+    output[i] = output[i] / downscaleFactor;
+  }
+}
+
+void FFT(){
+  static arm_rfft_instance_q15 fft_instance;
+  arm_status status;
+  status = arm_rfft_init_q15(&fft_instance, 512, 1, 1);
+  arm_rfft_q15(&fft_instance, sample, output);
+  arm_abs_q15(output, output, 512);
+  Downscale(4);
+  GetAllOctaves();
 }
 
 void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
@@ -136,31 +170,91 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
   StartUpDone = false;
   DataReady = false;
 
-  HAL_StatusTypeDef status = HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer, Samples >> 1);
+  HAL_StatusTypeDef status = HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer, NR_SAMPLES_512*2);
 //      HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer,
 //          Samples >> 1); //>>1 because reading half word
 
-//  Info("Status %d", status);
-
+  Info("Status %d", status);
 }
 
 //static void MIC_ProcessFFT() {
 //  CalculateFFT();
 //}
+int16_t MinimalValue(uint16_t length){
+  int16_t MinVal = 32767;
+  int16_t i;
+  for(i =0; i<length;i++){
+    if(sample[i] < MinVal){
+      MinVal = sample[i];
+    }
+  }
+  return(MinVal);
+}
 
+int16_t MaximalValue(uint16_t length){
+  int16_t MaxVal = -32768;
+  int16_t i;
+  for(i =0; i<length;i++){
+    if(sample[i] > MaxVal){
+      MaxVal = sample[i];
+    }
+  }
+  return(MaxVal);
+}
 
 void MIC_Print(void) {
+  float Max;
+  float Min;
   Info("New samples");
-  for (uint32_t i = 0; i < Samples; i += 2) {
-    uint32_t sample = ConvertAudio(&AudioRxBuffer[i]);
-    Info("0x%08x", sample);
+  for (uint16_t i = 0; i < 512; i += 1) {
+    sample[i] = ConvertAudio(&AudioRxBuffer[4*i+2]);
+    //Info("0x%08x", sample);
   }
+  //filter();
+  Min = MinimalValue(512);
+  Max = MaximalValue(512);
+  //float act_DB = 126.0 + Max;
+//  HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
+//  HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
+//  HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+//  if(act_DB < 90 && act_DB >= 80){
+//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
+//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
+//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+//  }
+//  if(act_DB < 80 && act_DB >= 70){
+//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
+//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
+//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+//  }
+//  if(act_DB < 70 && act_DB >= 60){
+//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
+//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
+//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+//  }
+//  if(act_DB < 60 && act_DB >= 50){
+//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
+//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
+//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+//  }
+//  if(act_DB < 50 && act_DB >= 40){
+//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
+//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
+//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+//  }
+//  if(act_DB < 40 && act_DB >= 30){
+//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
+//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
+//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+//  }
+
+  FFT();
 }
 
 bool MIC_MeasurementDone(void) {
   if(DataReady) {
     MIC_Print();
-    Debug("MIC measurement is done with %i samples.", Samples >> 1);
+    Debug("MIC measurement is done with %i samples.", Samples);
     return true;
   }
   return false;

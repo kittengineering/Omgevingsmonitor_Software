@@ -59,8 +59,8 @@ In STM32CubeIDE change the paths under:
     - [x] I2S Low level driver with DMA functionality.
     - [x] Init function.
     - [x] Ability to start a measurement with sample rate / amount of samples.
-    - [ ] Fix bug for flipping bits in I2S signal. 
-    - [ ] FFT conversion (use CMSIS libraries?)
+    - [x] Fix bug for flipping bits in I2S signal. 
+    - [x] FFT conversion (use CMSIS libraries?)
     - [x] Measurement done function callback.
     - [ ] Returning sensor status (BUSY, IDLE, WAIT, FINISHED, ERROR)
   - [ ] Humidity / Temperature
@@ -79,7 +79,7 @@ In STM32CubeIDE change the paths under:
     - [x] Measurement done function.
       - [x] Calculate the CRC to verify data integrity.
       - [x] Calculate the VOC index using the provided sensor algorithm. 
-      - [ ] Use the humidity and temperature values from the humidity 
+      - [x] Use the humidity and temperature values from the humidity 
       temperature sensor to calculate the VOC index.
       - [x] Returning the VOC index (non-blocking).
       - [x] Wait for the measurement interval before starting another 

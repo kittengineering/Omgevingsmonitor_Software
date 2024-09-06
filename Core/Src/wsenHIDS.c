@@ -135,6 +135,35 @@ void HIDS_SoftReset(void){
   WriteRegister(HIDS_I2C_ADDRESS, &resetReg, 1);
 }
 
+void ShowHumidity(){
+//  humidity = ...
+//  if(humidity >= 0 && humidity <= 20){ //From red to orange
+//    red = 3000;
+//    blue = full;
+//    green = (1-(humidity /20))*half;
+//  }
+//  if(humidity > 20 && humidity <= 40){ orange to yellow
+//    red = 3000;
+//    green = (1-((humidity - 20)/40))*Full;
+//    blue = Full;
+//  }
+//  if(humidity > 40 && humidity <= 60){
+//    red = (1 - ((humidity - 40)/20)*full;
+//    green = full;
+//    blue = 0;
+//  }
+//  if(humidity > 60 && humidity <= 80){
+//    red = 0;
+//    green = Full;
+//    blue = ((humidity - 60)/20))*Full;
+//  }
+//  if(humidity > 80){
+//    red = 0;
+//    green = (1- ((humidity - 80)/20))*Full;
+//    blue = Full;
+//  }
+}
+
 bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
   // TODO: Store last measurement humidity for sgp40 measurement.
   if(MeasurementDone) return true;
