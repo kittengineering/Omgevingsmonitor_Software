@@ -41,6 +41,7 @@ typedef enum {
   RECEIVE_STATUS_RETRY,
   RECEIVE_STATUS_START,
   RECEIVE_STATUS_TIMEOUT,
+  RECEIVE_STATUS_UNPROGGED
 }RECEIVE_STATUS;
 
 typedef enum {
@@ -61,6 +62,7 @@ typedef enum {
   ESP_STATE_ERROR,
   ESP_STATE_WAIT_TO_SEND,
   ESP_STATE_RESET,
+  ESP_STATE_BOOT,
   ESP_STATE_RECEIVE_DATA
 } ESP_States;
 
@@ -78,7 +80,8 @@ typedef enum {
   AT_CIPMUX,
   AT_WEBSERVER,
   AT_HTTPCPOST,
-  AT_SENDDATA
+  AT_SENDDATA,
+  AT_SLEEP
 } AT_Commands;
 
 void ESP_Init(UART_HandleTypeDef* espUart);

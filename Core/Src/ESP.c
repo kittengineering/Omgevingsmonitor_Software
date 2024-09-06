@@ -150,7 +150,18 @@ void SetCommandBuffer(const char* command) {
     strncpy(CommandBuffer, command, ESP_TX_BUFFER_SIZE);
     CommandEchoed = false; // Reset the flag when a new command is sent
 }
-
+void StartProg(){
+  HAL_Delay(1000);
+  HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_RESET);
+  HAL_Delay(100);
+  HAL_GPIO_WritePin(ESP32_BOOT_GPIO_Port, ESP32_BOOT_Pin, GPIO_PIN_RESET);
+  HAL_Delay(500);
+  HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_SET);
+  HAL_Delay(500);
+  HAL_GPIO_WritePin(ESP32_BOOT_GPIO_Port, ESP32_BOOT_Pin, GPIO_PIN_SET);
+  HAL_Delay(40);
+  EspState = ESP_STATE_BOOT;
+}
  uint8_t ParseBuffer(uint8_t* buffer, uint16_t len, uint8_t expectation) {
   char tempBuf[len+1];
   char status = RECEIVE_STATUS_INCOMPLETE;
@@ -404,6 +415,16 @@ bool SENDDATA(){
     return false;
   }
 }
+bool SLEEP(){
+  char* atCommand = "AT+GSLP=30000\r\n";
+  SetCommandBuffer(atCommand);
+  if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
+    return true;
+  }
+  else{
+    return false;
+  }
+}
 
 uint8_t DMA_ProcessBuffer(uint8_t expectation) {
     uint8_t pos = ESP_MAX_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart4_rx);
@@ -413,8 +434,12 @@ uint8_t DMA_ProcessBuffer(uint8_t expectation) {
     }
     if(pos == OldPos){
       if(retry >4){
-        //EspState = ESP_STATE_SEND;
         retry = 0;
+        //EspState = ESP_STATE_SEND;
+        if(ATCommands == AT_WAKEUP){
+          status = RECEIVE_STATUS_UNPROGGED;
+        }
+
         status = RECEIVE_STATUS_TIMEOUT;
       }
      else{
@@ -548,6 +573,11 @@ bool AT_Send(AT_Commands state){
     ESPTimeStamp = HAL_GetTick() + ESP_WIFI_INIT_TIME;
     break;
 
+  case AT_SLEEP:
+    Debug("Setting ESP in sleep mode for 5 min");
+    ATCommandSend = SLEEP();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+    break;
   }
 
   return(ATCommandSend);
@@ -613,6 +643,9 @@ void ESP_Upkeep(void) {
         if(ATReceived == RECEIVE_STATUS_INCOMPLETE){
           ESPTimeStamp = HAL_GetTick() + 10;
         }
+        if(ATReceived == RECEIVE_STATUS_UNPROGGED){
+          StartProg();
+        }
         if(ATReceived == RECEIVE_STATUS_TIMEOUT){
           if(nextATCommand != AT_SENDDATA){
             EspState = ESP_STATE_SEND;
@@ -631,7 +664,7 @@ void ESP_Upkeep(void) {
       break;
 
     case ESP_STATE_NEXT_AT:
-      if(ATCommands < AT_SENDDATA){
+      if(ATCommands < AT_SLEEP){
         ATCommands = ATCommands+1;
         if(ATCommands == AT_RESTORE){
             ATExpectation = RECEIVE_EXPECTATION_READY;
@@ -653,6 +686,7 @@ void ESP_Upkeep(void) {
 
 
     break;
+
     case ESP_STATE_RESET:
       if(TimestampIsReached(ESPTimeStamp)){
         nextATCommand = AT_HTTPCPOST;
@@ -667,6 +701,11 @@ void ESP_Upkeep(void) {
       // Handle error state
       Debug("ESP Error occurred");
       EspState = ESP_STATE_INIT;
+      break;
+
+    case ESP_STATE_BOOT:
+      HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_12);
+      //WAIT FOR RESET;
       break;
 
     default:
