@@ -72,46 +72,69 @@ static bool MIC_IsMeasurementDoneWrapper(void) {
   return MIC_MeasurementDone();
 }
 
+static bool MIC_IsTestMeasurementDoneWrapper(void) {
+  return MIC_TestMeasurementDone();
+}
+void testInit(){
+  MeasTest.ESP_Tested = false;
+  MeasTest.MIC_Tested = false;
+  MeasTest.HT_Tested = false;
+  MeasTest.VOC_Tested = false;
+}
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_HandleTypeDef* ADC_HANDLER) {
   MeasState = MEAS_STATE_INIT;
+  testInit();
   batteryInit(ADC_HANDLER);
   if(MeasEnabled.HT_measurementEnabled || MeasEnabled.VOC_measurementEnabled) {
     I2CSensors_Init(sensorI2C);
     if(!HT_DeviceConnected()) {
        Error("Humidity / Temperature sensor NOT connected!");
+       MeasTest.HT_Tested = false;
        MeasEnabled.HT_measurementEnabled = false;
        // HT Device NOT connected, turning LED on RED.
        // CCR1 = Red, CCR3 = Green, CCR4 = Blue.
-       TIM2 -> CCR1 = 0;
-       TIM2 -> CCR3 = 4000;
-       TIM2 -> CCR4 = 4000;
+//       TIM2 -> CCR1 = 0;
+//       TIM2 -> CCR3 = 4000;
+//       TIM2 -> CCR4 = 4000;
     }else {
       // HT Device is connected, turning led on GREEN.
       // CCR1 = Red, CCR3 = Green, CCR4 = Blue.
       MeasTest.HT_Tested = true;
       Debug("Humidity / Temperature sensor initialised.");
-      TIM2 -> CCR1 = 4000;
-      TIM2 -> CCR3 = 0;
-      TIM2 -> CCR4 = 4000;
+//      TIM2 -> CCR1 = 4000;
+//      TIM2 -> CCR3 = 0;
+//      TIM2 -> CCR4 = 4000;
     }
     if(!Gas_DeviceConnected()) {
+      MeasTest.VOC_Tested = false;
        Error("SGP device not connected!");
        // SGP Device is NOT connected, turning led on RED.
-       HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
-       HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
-       HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+//       HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
+//       HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
+//       HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
        MeasEnabled.VOC_measurementEnabled = false;
     }else{
       MeasTest.VOC_Tested = true;
       Debug("SGP sensor initialised.");
       // HT Device is connected, turning led on GREEN.
+//      HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
+//      HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
+//      HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+    }
+    if(MeasTest.VOC_Tested && MeasTest.HT_Tested){
       HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
       HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
+      HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+    }
+    else{
+      HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
+      HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
       HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
     }
   }
   if(MeasEnabled.MIC_measurementEnabled) {
     MIC_Init(micI2s);
+    Meas_TestStart();
   }
   uint8_t offset = 0;
   Measurements[offset++] = (MeasurementParameters) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &MeasurementCtx.HT_measurementDone, MeasEnabled.HT_measurementEnabled};
@@ -219,9 +242,33 @@ static void Meas_TurnOff(void) {
   Measurements[offset++].enabled = false;
   Measurements[offset++].enabled = false;
 }
+void Meas_TestStart(){
+  MIC_StartMeasurementWrapper();
+}
 
 void Meas_Test(){
+  if(!MeasTest.ESP_Tested){
+    ESP_WakeTest();
+  }
+  if(!MeasTest.MIC_Tested){
+    if(MIC_IsTestMeasurementDoneWrapper()){
+      MeasTest.MIC_Tested = true;
+      TIM2 -> CCR1 = 4000;
+      TIM2 -> CCR3 = 0;
+      TIM2 -> CCR4 = 4000;
+    }
+  }
+  if(MeasTest.HT_Tested && MeasTest.VOC_Tested && MeasTest.ESP_Tested && MeasTest.MIC_Tested){
+    Debug("Test completed");
+    SetTestDone();
+  }
+}
 
+void SetESPMeasurementDone(){
+  MeasTest.ESP_Tested = true;
+}
+void SetMICMeasurementDone(){
+  MeasTest.MIC_Tested = true;
 }
 
 MeasurementState Meas_GetState(void) {

@@ -100,5 +100,5 @@ void Error_Handler(void);
 #ifdef __cplusplus
 }
 #endif
-
+void SetTestDone();
 #endif /* __MAIN_H */

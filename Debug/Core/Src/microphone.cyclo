@@ -9,6 +9,8 @@
 ../Core/Src/microphone.c:159:6:MIC_Start	2
 ../Core/Src/microphone.c:183:9:MinimalValue	3
 ../Core/Src/microphone.c:194:9:MaximalValue	3
-../Core/Src/microphone.c:205:6:MIC_Print	2
-../Core/Src/microphone.c:254:6:MIC_MeasurementDone	2
-../Core/Src/microphone.c:265:6:HAL_I2S_RxCpltCallback	4
+../Core/Src/microphone.c:204:6:MIC_Check	4
+../Core/Src/microphone.c:219:6:MIC_Print	2
+../Core/Src/microphone.c:268:6:MIC_MeasurementDone	2
+../Core/Src/microphone.c:276:6:MIC_TestMeasurementDone	2
+../Core/Src/microphone.c:287:6:HAL_I2S_RxCpltCallback	4

@@ -34,6 +34,15 @@
 #define AT_COMMANDS_SIZE 18
 
 typedef enum {
+  ESP_TEST_INIT,
+  ESP_TEST_SEND,
+  ESP_TEST_RECEIVE,
+  ESP_TEST_VALIDATE,
+  ESP_TEST_DEINIT,
+  ESP_TEST_BOOT
+}ESP_TEST;
+
+typedef enum {
   RECEIVE_STATUS_OK,
   RECEIVE_STATUS_ERROR,
   RECEIVE_STATUS_READY,
@@ -62,7 +71,6 @@ typedef enum {
   ESP_STATE_ERROR,
   ESP_STATE_WAIT_TO_SEND,
   ESP_STATE_RESET,
-  ESP_STATE_BOOT,
   ESP_STATE_RECEIVE_DATA
 } ESP_States;
 
@@ -89,7 +97,9 @@ void ESP_Upkeep(void);
 void ESP_Reset(void);
 void ESP_Sleep(void);
 void ESP_DeInit(void);
-
-#endif /* INC_ESP_H_ */
+void ESP_WakeTest();
 void setMeasurement(float temp, float humid, uint16_t voc);
 void setCharges(float charge, float solar);
+
+#endif /* INC_ESP_H_ */
+

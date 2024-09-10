@@ -15,6 +15,7 @@
 #include <stdlib.h>
 
 #include "gpio.h"
+#include "measurement.h"
 #include "stm32l0xx_hal.h"
 #include "utils.h"
 
@@ -39,7 +40,9 @@ typedef enum {
 void MIC_Init(I2S_HandleTypeDef* I2SHandle);
 void MIC_Start(uint32_t sampleRate, uint16_t nrSamples);
 bool MIC_MeasurementDone(void);
+bool MIC_TestMeasurementDone();
 float MIC_GetDB(void);
+
 
 
 #endif /* INC_MICROPHONE_H_ */

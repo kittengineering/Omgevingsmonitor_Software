@@ -17,27 +17,32 @@ static volatile bool RxComplete = false;
 
 static uint8_t RxBuffer[ESP_MAX_BUFFER_SIZE] = {0};
 //static uint8_t LastATResponse[ESP_MAX_BUFFER_SIZE] = {0};
+static bool testRound = true;
 static bool EspTurnedOn = false;
 static bool measurementDone = false;
-char SSID[] = "KITT-guest";
-char Password[] = "ZonderSnoerCommuniceren053";
+//char SSID[] = "KITT-guest";
+//char Password[] = "ZonderSnoerCommuniceren053";
+char SSIDBeurs[] = "25ac316853";
+char PasswordBeurs[] = "HalloDitIsDeWifi!2024";
 float Temperature = 0;
 float Humidity = 0;
 float batteryCharge = 0;
 float solarCharge = 0;
 uint16_t VOCIndex = 0;
-char messagePart1[128];
-char messagePart2[128];
-char messagePart3[128];
-char messagePart4[128];
-char messagePart5[128];
-char API[] = "\"https://api.opensensemap.org/boxes/66c7394026df8b0008c359a4/data\"";
-char sensorID1[] = "\"66c7394026df8b0008c359a5\"";
-char sensorID2[] = "\"66c7394026df8b0008c359a6\"";
-char sensorID3[] = "\"66c7394026df8b0008c359a7\"";
-char sensorID4[] = "\"66c7394026df8b0008c359a8\"";
-char sensorID5[] = "\"66c7394026df8b0008c359a9\"";
-char userID[] = "\"55\"";
+static char messagePart1[128];
+static char messagePart2[128];
+static char messagePart3[128];
+static char messagePart4[128];
+static char messagePart5[128];
+static char API[] = "\"https://api.opensensemap.org/boxes/66c7394026df8b0008c359a4/data\"";
+static char sensorID1[] = "\"66c7394026df8b0008c359a5\"";
+static char sensorID2[] = "\"66c7394026df8b0008c359a6\"";
+static char sensorID3[] = "\"66c7394026df8b0008c359a7\"";
+static char sensorID4[] = "\"66c7394026df8b0008c359a8\"";
+static char sensorID5[] = "\"66c7394026df8b0008c359a9\"";
+static char userID[] = "\"55\"";
+//static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER};
+//static AT_Commands AT_SEND[] = {AT_WAKEUP,  AT_HTTPCPOST, AT_SENDDATA};
 uint8_t ATState;
 //static bool StartUpDone = false;
 //static bool ResponseFound = false;
@@ -46,8 +51,7 @@ static volatile uint8_t OldPos = 0;
 //static uint16_t ATCommandIndex = 0;
 static uint32_t ESPTimeStamp = 0;
 static uint8_t retry = 0;
-static uint8_t ATExpectation = RECEIVE_EXPECTATION_OK;
-static uint8_t nextATCommand = AT_WAKEUP;
+
 
 //static char TempBuffer[ESP_MAX_BUFFER_SIZE];      // Buffer to build up the received message
 static char CommandBuffer[ESP_TX_BUFFER_SIZE]; // Buffer to store the last sent command
@@ -81,9 +85,11 @@ struct struct_wifiInfo
   int32_t channel;
 };
 
-
+static AT_Expectation ATExpectation = RECEIVE_EXPECTATION_OK;
+static AT_Commands nextATCommand = AT_WAKEUP;
 static ESP_States EspState = ESP_STATE_INIT;
 static AT_Commands ATCommands = AT_WAKEUP;
+static ESP_TEST TestState = ESP_TEST_INIT;
 //static ATCommandsParameters ATCommands[ESP_AT_COMMANDS_COUNT];
 
 //TODO: Add de-init if ESP is off. Otherwise there is going to be 3.3V on the ESP.
@@ -160,7 +166,6 @@ void StartProg(){
   HAL_Delay(500);
   HAL_GPIO_WritePin(ESP32_BOOT_GPIO_Port, ESP32_BOOT_Pin, GPIO_PIN_SET);
   HAL_Delay(40);
-  EspState = ESP_STATE_BOOT;
 }
  uint8_t ParseBuffer(uint8_t* buffer, uint16_t len, uint8_t expectation) {
   char tempBuf[len+1];
@@ -329,10 +334,10 @@ bool CWAUTOCONN(){
 bool CWJAP(){
   char atCommandBuff[100];
   memset(atCommandBuff, '\0', 100);
-  sprintf(atCommandBuff, "AT+CWJAP=\"%s\",\"%s\"\r\n", SSID, Password);
+  sprintf(atCommandBuff, "AT+CWJAP=\"%s\",\"%s\"\r\n", SSIDBeurs, PasswordBeurs);
   uint8_t len = strlen(atCommandBuff);
   char atCommand[len+1];
-  atCommand[len] = '\0';
+  memset(atCommand, '\0', len+1);
   strncpy(atCommand, atCommandBuff, len);
   SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, len)) {
@@ -436,11 +441,12 @@ uint8_t DMA_ProcessBuffer(uint8_t expectation) {
       if(retry >4){
         retry = 0;
         //EspState = ESP_STATE_SEND;
-        if(ATCommands == AT_WAKEUP){
+        if(ATCommands == AT_WAKEUP && testRound == true){
           status = RECEIVE_STATUS_UNPROGGED;
         }
-
-        status = RECEIVE_STATUS_TIMEOUT;
+        else{
+          status = RECEIVE_STATUS_TIMEOUT;
+        }
       }
      else{
        retry ++;
@@ -491,7 +497,7 @@ bool AT_Send(AT_Commands state){
   case AT_WAKEUP:
   if(TimestampIsReached(ESPTimeStamp)){
     ATCommandSend = PollAwake();
-    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_LONG;
   }
   break;
 
@@ -583,9 +589,99 @@ bool AT_Send(AT_Commands state){
   return(ATCommandSend);
 }
 
+void ESP_WakeTest(void) {
+  bool ATSend = false;
+  static RECEIVE_STATUS ATReceived = RECEIVE_STATUS_INCOMPLETE;
+  switch (TestState){
+
+    case ESP_TEST_INIT:
+      if(!EspTurnedOn){
+        HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_RESET);
+        HAL_Delay(500);
+        HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_SET);
+        HAL_Delay(1000);
+        // Reset ESP, so we're sure that we're in the right state.
+        HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_RESET);
+        HAL_Delay(100);
+        HAL_GPIO_WritePin(ESP32_BOOT_GPIO_Port, ESP32_BOOT_Pin, 1);
+        HAL_Delay(100);
+        HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_SET);
+        ESPTimeStamp = HAL_GetTick() + ESP_START_UP_TIME;
+        EspTurnedOn = true;
+      }
+      if(ESP_Receive(RxBuffer, ESP_MAX_BUFFER_SIZE)) {
+        TestState = ESP_TEST_SEND;
+      }
+      break;
+
+    case ESP_TEST_SEND:
+      if(TimestampIsReached(ESPTimeStamp)){
+        ATSend = AT_Send(nextATCommand);
+        if(ATSend){
+          TestState = ESP_TEST_RECEIVE;
+        }
+      }
+      break;
+
+    case ESP_TEST_RECEIVE:
+      if(TimestampIsReached(ESPTimeStamp)){
+        ATReceived = DMA_ProcessBuffer(ATExpectation);
+        bool proceed = ATCompare(ATReceived, ATExpectation);
+        if(ATReceived == RECEIVE_STATUS_ERROR){
+          TestState = ESP_TEST_SEND;
+        }
+        if(ATReceived == RECEIVE_STATUS_RETRY){
+          //TestState = ESP_TEST_SEND;
+          //ESPTimeStamp = HAL_GetTick() + 2*ESP_START_UP_TIME;
+        }
+        if(ATReceived == RECEIVE_STATUS_UNPROGGED){
+          StartProg();
+          TestState = ESP_TEST_BOOT;
+        }
+        if(ATReceived == RECEIVE_STATUS_INCOMPLETE){
+          ESPTimeStamp = HAL_GetTick() + 50;
+          TestState = ESP_TEST_SEND;
+        }
+        if(proceed){
+          TestState = ESP_TEST_VALIDATE;
+        }
+      }
+      break;
+
+    case ESP_TEST_VALIDATE:
+      //Set measurement completed
+      TIM3 -> CCR1 = 4000;
+      TIM3 -> CCR2 = 0;
+      TIM3 -> CCR3 = 4000;
+      TestState = ESP_TEST_DEINIT;
+
+      break;
+
+    case ESP_TEST_DEINIT:
+      testRound = false;
+      EspTurnedOn = false;
+      HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(ESP32_BOOT_GPIO_Port, ESP32_BOOT_Pin, 0);
+      // Reset ESP, so we're sure that we're in the right state.
+      SetESPMeasurementDone();
+
+      break;
+
+
+
+    case ESP_TEST_BOOT:
+      TIM3 -> CCR1 = 4000;
+      TIM3 -> CCR2 = 4000;
+      TIM3 -> CCR3 = 0;
+      //WAIT FOR RESET;
+      break;
+  }
+}
+
 void ESP_Upkeep(void) {
   bool ATSend = false;
-  uint8_t ATReceived = RECEIVE_STATUS_INCOMPLETE;
+  static RECEIVE_STATUS ATReceived = RECEIVE_STATUS_INCOMPLETE;
   switch (EspState) {
     case ESP_STATE_OFF:
       // Turning off the ESP
@@ -606,16 +702,18 @@ void ESP_Upkeep(void) {
       // Initialization state
 //      StartUpTime = GetCurrentHalTicks() + ESP_START_UP_TIME;
 //      StartUpDone = false;
-      if(!EspTurnedOn) {
-
+      if(!EspTurnedOn){
         HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_RESET);
-//        // Turn ESP on.
+        HAL_Delay(500);
         HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_SET);
+        HAL_Delay(1000);
         // Reset ESP, so we're sure that we're in the right state.
+        HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_RESET);
+        HAL_Delay(100);
+        HAL_GPIO_WritePin(ESP32_BOOT_GPIO_Port, ESP32_BOOT_Pin, 1);
+        HAL_Delay(100);
         HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_SET);
-//        HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_RESET);
         ESPTimeStamp = HAL_GetTick() + ESP_START_UP_TIME;
-
         EspTurnedOn = true;
       }
       // Wait for ESP to be ready
@@ -642,9 +740,6 @@ void ESP_Upkeep(void) {
         }
         if(ATReceived == RECEIVE_STATUS_INCOMPLETE){
           ESPTimeStamp = HAL_GetTick() + 10;
-        }
-        if(ATReceived == RECEIVE_STATUS_UNPROGGED){
-          StartProg();
         }
         if(ATReceived == RECEIVE_STATUS_TIMEOUT){
           if(nextATCommand != AT_SENDDATA){
@@ -675,7 +770,7 @@ void ESP_Upkeep(void) {
         if(ATCommands != AT_HTTPCPOST && ATCommands != AT_RESTORE){
           ATExpectation = RECEIVE_EXPECTATION_OK;
         }
-        EspState = EspState = ESP_STATE_SEND;
+        EspState = ESP_STATE_SEND;
         nextATCommand = ATCommands;
       }
       else{
@@ -701,11 +796,6 @@ void ESP_Upkeep(void) {
       // Handle error state
       Debug("ESP Error occurred");
       EspState = ESP_STATE_INIT;
-      break;
-
-    case ESP_STATE_BOOT:
-      HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_12);
-      //WAIT FOR RESET;
       break;
 
     default:

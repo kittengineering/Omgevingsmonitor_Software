@@ -201,7 +201,21 @@ int16_t MaximalValue(uint16_t length){
   }
   return(MaxVal);
 }
-
+bool MIC_Check(void) {
+  float Max;
+  float Min;
+  Info("New samples");
+  for (uint16_t i = 0; i < 512; i += 1) {
+    sample[i] = ConvertAudio(&AudioRxBuffer[4*i+2]);
+    //Info("0x%08x", sample);
+  }
+  Min = MinimalValue(512);
+  Max = MaximalValue(512);
+  if(Max > 0 || Min < 0){
+    return(true);
+  }
+  return(false);
+}
 void MIC_Print(void) {
   float Max;
   float Min;
@@ -256,6 +270,14 @@ bool MIC_MeasurementDone(void) {
     MIC_Print();
     Debug("MIC measurement is done with %i samples.", Samples);
     return true;
+  }
+  return false;
+}
+bool MIC_TestMeasurementDone(void) {
+  bool Check;
+  if(DataReady) {
+    Check = MIC_Check();
+    return Check;
   }
   return false;
 }

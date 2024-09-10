@@ -1,3 +1,4 @@
-../Core/Src/main.c:75:5:main	16	static
-../Core/Src/main.c:156:6:SystemClock_Config	128	static
-../Core/Src/main.c:211:6:Error_Handler	8	static,ignoring_inline_asm
+../Core/Src/main.c:63:6:SetTestDone	8	static
+../Core/Src/main.c:98:5:main	16	static
+../Core/Src/main.c:184:6:SystemClock_Config	128	static
+../Core/Src/main.c:239:6:Error_Handler	8	static,ignoring_inline_asm

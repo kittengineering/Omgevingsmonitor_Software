@@ -54,13 +54,36 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+  bool testDone = false;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+void SetTestDone(){
+  testDone = true;
+  HAL_Delay(1000);
+  HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
+  HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
+  HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+  TIM2 -> CCR1 = 4000;
+  TIM2 -> CCR3 = 4000;
+  TIM2 -> CCR4 = 0;
+  TIM3 -> CCR1 = 4000;
+  TIM3 -> CCR2 = 4000;
+  TIM3 -> CCR3 = 0;
+  HAL_Delay(1000);
+  HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
+  HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
+  HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+  TIM2 -> CCR1 = 4000;
+  TIM2 -> CCR3 = 4000;
+  TIM2 -> CCR4 = 4000;
+  TIM3 -> CCR1 = 4000;
+  TIM3 -> CCR2 = 4000;
+  TIM3 -> CCR3 = 4000;
 
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -131,8 +154,13 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
 	  // Upkeep gadget
-    UpkeepGadget();
-    ESP_Upkeep();
+    if(testDone){
+      UpkeepGadget();
+      ESP_Upkeep();
+    }
+    else{
+      Gadget_Test();
+    }
 //    if(TimestampIsReached(LedBlinkTimestamp)) {
 //      // Red LED
 //

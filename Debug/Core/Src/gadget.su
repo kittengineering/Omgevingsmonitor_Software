@@ -1,4 +1,5 @@
 ../Core/Src/gadget.c:38:6:Gadget_Init	24	static
 ../Core/Src/gadget.c:50:6:Gadget_DeInit	16	static
 ../Core/Src/gadget.c:56:6:Gadget_ReInit	16	static
-../Core/Src/gadget.c:60:6:UpkeepGadget	8	static
+../Core/Src/gadget.c:60:6:Gadget_Test	8	static
+../Core/Src/gadget.c:64:6:UpkeepGadget	8	static

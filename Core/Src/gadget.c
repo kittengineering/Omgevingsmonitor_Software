@@ -57,6 +57,10 @@ void Gadget_ReInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
 
 }
 
+void Gadget_Test(){
+  Meas_Test();
+}
+
 void UpkeepGadget() {
   // State machine implementation?
   /*

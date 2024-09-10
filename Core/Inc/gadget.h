@@ -16,5 +16,6 @@
 
 void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, UART_HandleTypeDef* espUart, ADC_HandleTypeDef* ADC_HANDLER);
 void UpkeepGadget(void);
+void Gadget_Test();
 
 #endif /* INC_GADGET_H_ */

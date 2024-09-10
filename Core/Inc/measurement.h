@@ -11,6 +11,7 @@
 #include "stm32l0xx_hal.h"
 #include <stdbool.h>
 #include "ESP.h"
+#include "utils.h"
 #include "Battery_utils.h"
 
 #define MEAS_MAX_RETRY_ATTEMPTS 3
@@ -45,6 +46,8 @@ void Meas_Upkeep(void);
 MeasurementState Meas_GetState(void);
 void Meas_SetEnabledSensors(EnabledMeasurements enabled);
 void Meas_DeInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s);
-
+void SetESPMeasurementDone();
+void SetMICMeasurementDone();
+void Meas_Test();
 #endif /* INC_MEASUREMENT_H_ */
-void setESPMeasurementDone();
+
