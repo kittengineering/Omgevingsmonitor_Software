@@ -71,7 +71,9 @@ static void MIC_StartMeasurementWrapper(void) {
 static bool MIC_IsMeasurementDoneWrapper(void) {
   return MIC_MeasurementDone();
 }
-
+void Meas_TestStart(){
+  MIC_StartMeasurementWrapper();
+}
 static bool MIC_IsTestMeasurementDoneWrapper(void) {
   return MIC_TestMeasurementDone();
 }
@@ -242,9 +244,7 @@ static void Meas_TurnOff(void) {
   Measurements[offset++].enabled = false;
   Measurements[offset++].enabled = false;
 }
-void Meas_TestStart(){
-  MIC_StartMeasurementWrapper();
-}
+
 
 void Meas_Test(){
   if(!MeasTest.ESP_Tested){
@@ -253,9 +253,9 @@ void Meas_Test(){
   if(!MeasTest.MIC_Tested){
     if(MIC_IsTestMeasurementDoneWrapper()){
       MeasTest.MIC_Tested = true;
-      TIM2 -> CCR1 = 4000;
+      TIM2 -> CCR1 = 40000;
       TIM2 -> CCR3 = 0;
-      TIM2 -> CCR4 = 4000;
+      TIM2 -> CCR4 = 40000;
     }
   }
   if(MeasTest.HT_Tested && MeasTest.VOC_Tested && MeasTest.ESP_Tested && MeasTest.MIC_Tested){

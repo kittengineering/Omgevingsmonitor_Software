@@ -17,9 +17,9 @@
 #include <stdlib.h>
 
 static I2S_HandleTypeDef* I2SHandle = NULL;
-static NrOfSamples Samples = NR_SAMPLES_512;
-static uint16_t AudioRxBuffer[NR_SAMPLES_512*4] = {0};
-q15_t output[NR_SAMPLES_512*2];
+static NrOfSamples Samples = NUMBER_OF_SAMPLES;
+static uint16_t AudioRxBuffer[NUMBER_OF_SAMPLES*4] = {0};
+q15_t output[NUMBER_OF_SAMPLES*2];
 uint32_t numStages = 1;
 
 
@@ -28,7 +28,7 @@ static volatile uint32_t StartupDoneTime = 0;
 static volatile bool StartUpDone = false;
 static volatile bool DataReady = false;
 float OCT[10];
-q15_t sample[NR_SAMPLES_512];
+q15_t sample[NUMBER_OF_SAMPLES];
 
 
 
@@ -82,13 +82,14 @@ static void UpdateSampleRate(uint32_t sampleRate) {
 }
 
 static q15_t ConvertAudio(uint16_t* data) {
-  bool Sign = 0;
-  //float dB = 0;
+  //bool Sign = 0;
+  //float dBc = 0;
   float Division = 2147483647.0; //Reference?
   int32_t audioValue = 0;
   //Sign = data[0] >> 14;
   audioValue = (data[0]<<17)|(data[1]<<1);
   audioValue = (audioValue/Division)*0x7FFF;
+  //dBc = 10*log(audioValue/Division);
 //  if(Sign){
 //    audioValue = 0x3FFFFFFF;
 //    audioValue -= (0x3FFF & data[0]) << 17;
@@ -141,7 +142,7 @@ void GetAllOctaves(){
 
 }
 void Downscale(uint16_t downscaleFactor){
-  for(uint16_t i = 0; i <512; i++){
+  for(uint16_t i = 0; i <NUMBER_OF_SAMPLES; i++){
     output[i] = output[i] / downscaleFactor;
   }
 }
@@ -149,10 +150,9 @@ void Downscale(uint16_t downscaleFactor){
 void FFT(){
   static arm_rfft_instance_q15 fft_instance;
   arm_status status;
-  status = arm_rfft_init_q15(&fft_instance, 512, 1, 1);
+  status = arm_rfft_init_q15(&fft_instance, NUMBER_OF_SAMPLES, 1, 1);
   arm_rfft_q15(&fft_instance, sample, output);
-  arm_abs_q15(output, output, 512);
-  Downscale(4);
+  arm_abs_q15(output, output, NUMBER_OF_SAMPLES);
   GetAllOctaves();
 }
 
@@ -170,7 +170,7 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
   StartUpDone = false;
   DataReady = false;
 
-  HAL_StatusTypeDef status = HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer, NR_SAMPLES_512*2);
+  HAL_StatusTypeDef status = HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer, NUMBER_OF_SAMPLES*2);
 //      HAL_I2S_Receive_DMA(I2SHandle, (uint16_t*)AudioRxBuffer,
 //          Samples >> 1); //>>1 because reading half word
 
@@ -178,7 +178,7 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
 }
 
 //static void MIC_ProcessFFT() {
-//  CalculateFFT();
+  CalculateFFT();
 //}
 int16_t MinimalValue(uint16_t length){
   int16_t MinVal = 32767;
@@ -205,12 +205,12 @@ bool MIC_Check(void) {
   float Max;
   float Min;
   Info("New samples");
-  for (uint16_t i = 0; i < 512; i += 1) {
+  for (uint16_t i = 0; i < NUMBER_OF_SAMPLES; i += 1) {
     sample[i] = ConvertAudio(&AudioRxBuffer[4*i+2]);
     //Info("0x%08x", sample);
   }
-  Min = MinimalValue(512);
-  Max = MaximalValue(512);
+  Min = MinimalValue(NUMBER_OF_SAMPLES);
+  Max = MaximalValue(NUMBER_OF_SAMPLES);
   if(Max > 0 || Min < 0){
     return(true);
   }
@@ -220,13 +220,13 @@ void MIC_Print(void) {
   float Max;
   float Min;
   Info("New samples");
-  for (uint16_t i = 0; i < 512; i += 1) {
+  for (uint16_t i = 0; i < NUMBER_OF_SAMPLES; i += 1) {
     sample[i] = ConvertAudio(&AudioRxBuffer[4*i+2]);
     //Info("0x%08x", sample);
   }
   //filter();
-  Min = MinimalValue(512);
-  Max = MaximalValue(512);
+  Min = MinimalValue(NUMBER_OF_SAMPLES);
+  Max = MaximalValue(NUMBER_OF_SAMPLES);
   //float act_DB = 126.0 + Max;
 //  HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
 //  HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);

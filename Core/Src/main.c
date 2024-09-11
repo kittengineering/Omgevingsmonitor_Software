@@ -24,7 +24,7 @@
 #include "i2s.h"
 #include "tim.h"
 #include "usart.h"
-#include "usb.h"
+#include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -33,6 +33,7 @@
 #include "utils.h"
 #include "microphone.h"
 #include "measurement.h"
+#include "globals.h"
 #include "ESP.h"
 /* USER CODE END Includes */
 
@@ -55,6 +56,7 @@
 
 /* USER CODE BEGIN PV */
   bool testDone = false;
+  bool ESP_Programming = false;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -66,8 +68,8 @@ void SetTestDone(){
   HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
   HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
   HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
-  TIM2 -> CCR1 = 4000;
-  TIM2 -> CCR3 = 4000;
+  TIM2 -> CCR1 = 40000;
+  TIM2 -> CCR3 = 40000;
   TIM2 -> CCR4 = 0;
   TIM3 -> CCR1 = 4000;
   TIM3 -> CCR2 = 4000;
@@ -76,9 +78,9 @@ void SetTestDone(){
   HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
   HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
   HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
-  TIM2 -> CCR1 = 4000;
-  TIM2 -> CCR3 = 4000;
-  TIM2 -> CCR4 = 4000;
+  TIM2 -> CCR1 = 40000;
+  TIM2 -> CCR3 = 40000;
+  TIM2 -> CCR4 = 40000;
   TIM3 -> CCR1 = 4000;
   TIM3 -> CCR2 = 4000;
   TIM3 -> CCR3 = 4000;
@@ -125,11 +127,11 @@ int main(void)
   MX_I2S2_Init();
   MX_USART1_UART_Init();
   MX_I2C2_Init();
-  MX_USB_PCD_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
   MX_USART4_UART_Init();
   MX_ADC_Init();
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
   // General TODO 's
 	/*

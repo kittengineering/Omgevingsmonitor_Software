@@ -19,7 +19,10 @@ static uint8_t RxBuffer[ESP_MAX_BUFFER_SIZE] = {0};
 //static uint8_t LastATResponse[ESP_MAX_BUFFER_SIZE] = {0};
 static bool testRound = true;
 static bool EspTurnedOn = false;
-static bool measurementDone = false;
+static bool InitIsDone = false;
+static bool WifiReset = false;
+static bool ConnectionMade = false;
+//static bool measurementDone = false;
 //char SSID[] = "KITT-guest";
 //char Password[] = "ZonderSnoerCommuniceren053";
 char SSIDBeurs[] = "25ac316853";
@@ -41,9 +44,13 @@ static char sensorID3[] = "\"66c7394026df8b0008c359a7\"";
 static char sensorID4[] = "\"66c7394026df8b0008c359a8\"";
 static char sensorID5[] = "\"66c7394026df8b0008c359a9\"";
 static char userID[] = "\"55\"";
-//static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER};
-//static AT_Commands AT_SEND[] = {AT_WAKEUP,  AT_HTTPCPOST, AT_SENDDATA};
+static AT_Commands ATCommandArray[10];
+static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER, AT_CWINIT, AT_CWMODE3, AT_CWSAP, AT_CIPMUX, AT_WEBSERVER};
+static AT_Commands AT_SEND[] = {AT_WAKEUP,  AT_HTTPCPOST, AT_SENDDATA};
+static AT_Commands AT_WIFI_CONFIG[] = {AT_WAKEUP, AT_CWINIT, AT_CWMODE1, AT_CWAUTOCONN, AT_CWJAP, AT_CIPMUX};
+static AT_Commands AT_WIFI_RECONFIG[] = {AT_WAKEUP, AT_RESTORE};
 uint8_t ATState;
+uint8_t ATCounter = 0;
 //static bool StartUpDone = false;
 //static bool ResponseFound = false;
 static volatile uint8_t OldPos = 0;
@@ -86,9 +93,9 @@ struct struct_wifiInfo
 };
 
 static AT_Expectation ATExpectation = RECEIVE_EXPECTATION_OK;
-static AT_Commands nextATCommand = AT_WAKEUP;
+static AT_Commands ATCommand = AT_WAKEUP;
 static ESP_States EspState = ESP_STATE_INIT;
-static AT_Commands ATCommands = AT_WAKEUP;
+static AT_MODE Mode;
 static ESP_TEST TestState = ESP_TEST_INIT;
 //static ATCommandsParameters ATCommands[ESP_AT_COMMANDS_COUNT];
 
@@ -177,10 +184,12 @@ void StartProg(){
   char TestChar = 'N';
   char * ParsePoint;
   char * ParsePoint2;
+  char * ParsePoint3;
   const char OK[] = AT_RESPONSE_OK;
   const char ERROR[] = AT_RESPONSE_ERROR;
   const char ready[] = AT_RESPONSE_READY;
   const char start[] = AT_RESPONSE_START;
+  const char WIFI[] = AT_RESPONSE_WIFI;
   if(expectation == RECEIVE_EXPECTATION_OK){
     ParsePoint = strstr(tempBuf, OK);
   }
@@ -191,6 +200,7 @@ void StartProg(){
     ParsePoint = strstr(tempBuf, start);
   }
   ParsePoint2 = strstr(tempBuf, ERROR);
+  ParsePoint3 = strstr(tempBuf, WIFI);
   if(len > 1 ){
     TestChar = *ParsePoint;
     if(TestChar == 'O'){
@@ -206,59 +216,14 @@ void StartProg(){
     if(TestChar == 'E'){
       status = RECEIVE_STATUS_ERROR;
     }
+    TestChar = *ParsePoint3;
+    if(TestChar == 'W'){
+      ConnectionMade = true;
+    }
   }
   return(status);
 
-//    for (uint16_t i = 0; i < len; i++) {
-//        char c = buffer[i];
-//        // TODO: Add logic to parsebuffer depending on sent AT command
-//        // Make sure to keep track of beginning /r/n of the OK response: /r/nOK/r/n
-//        // Add the new character to the temp buffer
-//        //TempBuffer[TempIndex++] = c;
-//
-//        // Check if we've reached the end of a line (i.e., "\r\n")
-//        if (c == '\n' && TempIndex > 1 && TempBuffer[TempIndex - 2] == '\r') {
-//            // Null-terminate the string
-//            TempBuffer[TempIndex] = '\0';
-//            if (CommandEchoed) {
-//              // Command is echoed.
-//              // Copying last response to buffer.
-//              if(strstr(TempBuffer, AT_RESPONSE_OK) != NULL) {
-//                Debug("Found OK, stop parsing.");
-//                ATCommandIndex += 1;
-//                EspState = ESP_STATE_SEND_AT;
-//                break;
-//              }
-//              if(strstr(TempBuffer, AT_RESPONSE_OK) != NULL) {
-//                Debug("Found ERROR, stop parsing.");
-//                EspState = ESP_STATE_ERROR;
-//                break;
-//              }
-//              memcpy(LastATResponse, TempBuffer, ESP_MAX_BUFFER_SIZE);
-//              // Response handled, resetting buffer.
-//              TempIndex = 0;
-//              // Clear the buffer
-//              memset(TempBuffer, 0, ESP_MAX_BUFFER_SIZE);
-//            }
-//            // Check if the received string matches the last sent command (echo)
-//            if (!CommandEchoed && strstr(TempBuffer, CommandBuffer) != NULL) {
-//                CommandEchoed = true;
-//                // Reseting index and clearing buffer.
-//                TempIndex = 0;
-//                memset(TempBuffer, 0, ESP_MAX_BUFFER_SIZE);
-//            }
-//
-//          // If TempIndex reaches TEMP_BUFFER_SIZE, reset to prevent overflow
-//          if (TempIndex >= ESP_MAX_BUFFER_SIZE) {
-//              TempIndex = 0;
-//          }
-//       }
-//    }
 }
-/* line 228 to 383 contain the AT commands. This could be optimized by loading the commands into
- * an array and having the function handling the sending. This was the simple but verbose
- * implementation.
- */
  //PollAwake, RFPOWER and CheckRFPower necesarry when comming out of sleep mode.
 bool PollAwake(){
   char* atCommand = "ATE0\r\n";
@@ -441,7 +406,7 @@ uint8_t DMA_ProcessBuffer(uint8_t expectation) {
       if(retry >4){
         retry = 0;
         //EspState = ESP_STATE_SEND;
-        if(ATCommands == AT_WAKEUP && testRound == true){
+        if(ATCommand == AT_WAKEUP && testRound == true){
           status = RECEIVE_STATUS_UNPROGGED;
         }
         else{
@@ -556,7 +521,7 @@ bool AT_Send(AT_Commands state){
     break;
 
   case AT_CIPMUX:
-    Debug("SET in station/soft-ap mode");
+    Debug("SET multiple communication channels");
     ATCommandSend = CIPMUX();
     ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
     break;
@@ -616,7 +581,7 @@ void ESP_WakeTest(void) {
 
     case ESP_TEST_SEND:
       if(TimestampIsReached(ESPTimeStamp)){
-        ATSend = AT_Send(nextATCommand);
+        ATSend = AT_Send(ATCommand);
         if(ATSend){
           TestState = ESP_TEST_RECEIVE;
         }
@@ -696,12 +661,6 @@ void ESP_Upkeep(void) {
       break;
 
     case ESP_STATE_INIT:
-      //uint8_t offset = 0;
-//      ATCommands[offset++] = (ATCommands) {};
-      // TODO: Add turning on the ESP32 and wait for ready after, so we know for sure that the ESP is on.
-      // Initialization state
-//      StartUpTime = GetCurrentHalTicks() + ESP_START_UP_TIME;
-//      StartUpDone = false;
       if(!EspTurnedOn){
         HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_RESET);
         HAL_Delay(500);
@@ -719,12 +678,44 @@ void ESP_Upkeep(void) {
       // Wait for ESP to be ready
       // Start reading DMA buffer for AT commands
       if(ESP_Receive(RxBuffer, ESP_MAX_BUFFER_SIZE)) {
-        EspState = ESP_STATE_SEND;
+        EspState = ESP_STATE_MODE_SELECT;
       }
       break;
 
+    case ESP_STATE_MODE_SELECT:
+      memset(ATCommandArray, AT_END, 10);
+      if(!InitIsDone || WifiReset){
+        memcpy(ATCommandArray, AT_INIT, 8);
+        EspState = ESP_STATE_SEND;
+        ATCounter = 0;
+        Mode = AT_MODE_INIT;
+        ATCommand = ATCommandArray[ATCounter];
+        ATExpectation = RECEIVE_EXPECTATION_OK;
+      }
+      if(InitIsDone && !ConnectionMade){
+        memcpy(ATCommandArray, AT_WIFI_CONFIG, 6);
+        EspState = ESP_STATE_SEND;
+        ATCounter = 0;
+        Mode = AT_MODE_CONFIG;
+        ATCommand = ATCommandArray[ATCounter];
+        ATExpectation = RECEIVE_EXPECTATION_OK;
+      }
+      if(InitIsDone && ConnectionMade && !WifiReset){
+        memcpy(ATCommandArray, AT_SEND, 3);
+        EspState = ESP_STATE_SEND;
+        ATCounter = 0;
+        Mode = AT_MODE_SEND;
+        TIM2 -> CCR1 = 40000;
+        TIM2 -> CCR3 = 40000;
+        TIM2 -> CCR4 = 20000;
+        ATCommand = ATCommandArray[ATCounter];
+        ATExpectation = RECEIVE_EXPECTATION_OK;
+      }
+
+    break;
+
     case ESP_STATE_SEND:
-        ATSend = AT_Send(nextATCommand);
+        ATSend = AT_Send(ATCommand);
         if(ATSend){
           EspState = ESP_STATE_WAIT_FOR_REPLY;
         }
@@ -742,12 +733,12 @@ void ESP_Upkeep(void) {
           ESPTimeStamp = HAL_GetTick() + 10;
         }
         if(ATReceived == RECEIVE_STATUS_TIMEOUT){
-          if(nextATCommand != AT_SENDDATA){
+          if(ATCommand != AT_SENDDATA){
             EspState = ESP_STATE_SEND;
           }
           else{
-            nextATCommand = AT_HTTPCPOST;
-            ATCommands = AT_HTTPCPOST;
+            ATCommand = AT_HTTPCPOST;
+            ATCounter -= 1;
             ATExpectation = RECEIVE_EXPECTATION_START;
             EspState = ESP_STATE_SEND;
           }
@@ -759,35 +750,41 @@ void ESP_Upkeep(void) {
       break;
 
     case ESP_STATE_NEXT_AT:
-      if(ATCommands < AT_SLEEP){
-        ATCommands = ATCommands+1;
-        if(ATCommands == AT_RESTORE){
-            ATExpectation = RECEIVE_EXPECTATION_READY;
-        }
-        if(ATCommands == AT_HTTPCPOST){
-          ATExpectation = RECEIVE_EXPECTATION_START;
-        }
-        if(ATCommands != AT_HTTPCPOST && ATCommands != AT_RESTORE){
-          ATExpectation = RECEIVE_EXPECTATION_OK;
-        }
-        EspState = ESP_STATE_SEND;
-        nextATCommand = ATCommands;
+      ATCounter += 1;
+      ATCommand = ATCommandArray[ATCounter];
+      if(ATCommand == AT_RESTORE){
+         ATExpectation = RECEIVE_EXPECTATION_READY;
       }
-      else{
-        ESPTimeStamp = HAL_GetTick() + 300000;
+      if(ATCommand == AT_HTTPCPOST){
+        ATExpectation = RECEIVE_EXPECTATION_START;
+      }
+      if(ATCommand != AT_HTTPCPOST && ATCommand != AT_RESTORE){
+        ATExpectation = RECEIVE_EXPECTATION_OK;
+      }
+      EspState = ESP_STATE_SEND;
+      if(ATCommand == AT_END){
+        if(Mode == AT_MODE_SEND){
+          ESPTimeStamp = HAL_GetTick() + 300000;
+          TIM2 -> CCR1 = 40000;
+          TIM2 -> CCR3 = 0;
+          TIM2 -> CCR4 = 40000;
+        }
         EspState = ESP_STATE_RESET;
-        break;
       }
-
-
     break;
 
     case ESP_STATE_RESET:
       if(TimestampIsReached(ESPTimeStamp)){
-        nextATCommand = AT_HTTPCPOST;
-        ATCommands = AT_HTTPCPOST;
-        EspState = ESP_STATE_SEND;
-        ATExpectation = RECEIVE_EXPECTATION_START;
+        if(Mode == AT_MODE_INIT){
+          InitIsDone = true;
+        }
+        if(Mode == AT_MODE_CONFIG){
+          ConnectionMade = true;
+        }
+        TIM2 -> CCR1 = 40000;
+        TIM2 -> CCR3 = 40000;
+        TIM2 -> CCR4 = 40000;
+        EspState = ESP_STATE_MODE_SELECT;
       }
 
       break;

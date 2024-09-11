@@ -30,6 +30,7 @@
 #define AT_RESPONSE_ERROR "ERROR"
 #define AT_RESPONSE_READY "ready"
 #define AT_RESPONSE_START ">"
+#define AT_RESPONSE_WIFI "WIFI CONNECTED"
 
 #define AT_COMMANDS_SIZE 18
 
@@ -42,6 +43,11 @@ typedef enum {
   ESP_TEST_BOOT
 }ESP_TEST;
 
+typedef enum {
+  AT_MODE_INIT,
+  AT_MODE_CONFIG,
+  AT_MODE_SEND
+}AT_MODE;
 typedef enum {
   RECEIVE_STATUS_OK,
   RECEIVE_STATUS_ERROR,
@@ -71,7 +77,8 @@ typedef enum {
   ESP_STATE_ERROR,
   ESP_STATE_WAIT_TO_SEND,
   ESP_STATE_RESET,
-  ESP_STATE_RECEIVE_DATA
+  ESP_STATE_RECEIVE_DATA,
+  ESP_STATE_MODE_SELECT
 } ESP_States;
 
 typedef enum {
@@ -89,7 +96,8 @@ typedef enum {
   AT_WEBSERVER,
   AT_HTTPCPOST,
   AT_SENDDATA,
-  AT_SLEEP
+  AT_SLEEP,
+  AT_END
 } AT_Commands;
 
 void ESP_Init(UART_HandleTypeDef* espUart);
