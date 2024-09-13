@@ -100,6 +100,22 @@ typedef enum {
   AT_END
 } AT_Commands;
 
+typedef struct {
+  char SSID[50];
+  char Password[50];
+}WifiConfig;
+
+typedef struct {
+  char User[50];
+  char ChipId[32];
+  char BoxAddress[30];
+  char TempAddress[30];
+  char HumidAddress[30];
+  char SoundAddress[30];
+  char VOCAddress[30];
+  char BatteryChargeAddress[30];
+}APIConfig;
+
 void ESP_Init(UART_HandleTypeDef* espUart);
 void ESP_Upkeep(void);
 void ESP_Reset(void);

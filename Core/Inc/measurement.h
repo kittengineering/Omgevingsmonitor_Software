@@ -23,7 +23,8 @@ typedef enum {
     MEAS_STATE_WAIT_FOR_COMPLETION,
     MEAS_STATE_PROCESS_RESULTS,
     MEAS_STATE_WAIT_FOR_READY,
-    MEAS_STATE_OFF
+    MEAS_STATE_OFF,
+    MEAS_STATE_WAIT
 } MeasurementState;
 
 // TODO: add battery measurement
@@ -40,6 +41,7 @@ typedef struct {
   bool MIC_Tested;
   bool ESP_Tested;
 }MeasurementTested;
+
 
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_HandleTypeDef* ADC_HANDLER);
 void Meas_Upkeep(void);

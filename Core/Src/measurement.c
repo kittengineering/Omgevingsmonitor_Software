@@ -40,6 +40,7 @@ static EnabledMeasurements MeasEnabled;
 static MeasurementTested MeasTest;
 static MeasurementState MeasState = MEAS_STATE_INIT;
 static uint8_t CurrentMeasurementIndex = 0;
+static uint32_t MeasStamp;
 
 static void HT_StartMeasurementWrapper(void) {
   HT_StartMeasurement();
@@ -200,8 +201,16 @@ void Meas_Upkeep(void) {
     Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
     setMeasurement(MeasurementCtx.temperature, MeasurementCtx.humidityPerc, MeasurementCtx.vocIndex);
     checkCharges();
-    //setStamp
-    MeasState = MEAS_STATE_INIT;
+    MeasStamp = HAL_GetTick() + 10000;
+    MeasState = MEAS_STATE_WAIT;
+    break;
+
+  case MEAS_STATE_WAIT:
+    Debug("Waiting until next loop");
+    if(TimestampIsReached(MeasStamp)){
+      MeasState = MEAS_STATE_INIT;
+    }
+
     break;
 
   default:

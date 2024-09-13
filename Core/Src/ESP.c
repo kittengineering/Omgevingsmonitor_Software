@@ -22,6 +22,11 @@ static bool EspTurnedOn = false;
 static bool InitIsDone = false;
 static bool WifiReset = false;
 static bool ConnectionMade = false;
+
+static WifiConfig BeursConfig;
+static APIConfig OpenSenseApi;
+static APIConfig BeursApi;
+
 //static bool measurementDone = false;
 //char SSID[] = "KITT-guest";
 //char Password[] = "ZonderSnoerCommuniceren053";
@@ -46,6 +51,7 @@ static char sensorID3[] = "\"66c7394026df8b0008c359a7\"";
 static char sensorID4[] = "\"66c7394026df8b0008c359a8\"";
 static char sensorID5[] = "\"66c7394026df8b0008c359a9\"";
 static char userID[] = "\"55\"";
+static char user[] = "\"Piet\"";
 static AT_Commands ATCommandArray[10];
 static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER, AT_CWINIT, AT_CWMODE3, AT_CWSAP, AT_CIPMUX, AT_WEBSERVER};
 static AT_Commands AT_SEND[] = {AT_WAKEUP,  AT_HTTPCPOST, AT_SENDDATA};

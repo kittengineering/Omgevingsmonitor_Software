@@ -20,7 +20,6 @@ static I2S_HandleTypeDef* I2SHandle = NULL;
 static NrOfSamples Samples = NUMBER_OF_SAMPLES;
 static int16_t AudioRxBuffer[NUMBER_OF_SAMPLES*4] = {0};
 //q15_t output[NUMBER_OF_SAMPLES*2];
-uint32_t sum_Buffer;
 
 
 static volatile uint32_t StartTime = 0;
@@ -28,6 +27,10 @@ static volatile uint32_t StartupDoneTime = 0;
 static volatile bool StartUpDone = false;
 static volatile bool DataReady = false;
 float dBc = 0;
+float dBcSamples[10];
+float dBcAverage;
+uint8_t counter = 0;
+bool averageReached = false;
 //float OCT[10];
 float sample[NUMBER_OF_SAMPLES];
 
@@ -168,8 +171,8 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
   UpdateSampleRate(sampleRate);
   Samples = (NrOfSamples)nrSamples;
 
-  StartTime = GetCurrentHalTicks();
-  StartupDoneTime = StartTime + 20;
+  //StartTime = GetCurrentHalTicks();
+  StartupDoneTime = HAL_GetTick() + 20;
   StartUpDone = false;
   DataReady = false;
 
@@ -228,7 +231,28 @@ void MIC_Print(void) {
   Min = MinimalValue(NUMBER_OF_SAMPLES);
   Max = MaximalValue(NUMBER_OF_SAMPLES);
   dBc = MIC_GetDB();
-  setMic(dBc);
+  if(counter < 10){
+    dBcSamples[counter] = dBc;
+    counter += 1;
+  }
+  else{
+    counter = 0;
+    dBcSamples[counter] = dBc;
+    counter += 1;
+    averageReached = true;
+  }
+  if(!averageReached){
+    setMic(dBc);
+  }
+  else{
+    dBcAverage = 0;
+    for(uint8_t i=0;i<10;i++){
+      dBcAverage += dBcSamples[i];
+    }
+    dBcAverage = dBcAverage/10;
+    setMic(dBcAverage);
+  }
+  //Currently is set as the individual dBc, should be set to average.
 //  HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
 //  HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
 //  HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
