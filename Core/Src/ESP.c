@@ -150,15 +150,15 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
 }
 uint16_t CreateMessage(){
   uint16_t messageLength = 0;
-  sprintf(messagePart1, "\"name\":\"temp\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"graden\"", sensorID1, Temperature);
+  sprintf(messagePart1, "\"name\":\"temp\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%3.2f, \"unit\": \"graden\"", sensorID1, Temperature);
   messageLength += strlen(messagePart1);
-  sprintf(messagePart2, "\"name\":\"humid\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"%%\"", sensorID2, Humidity);
+  sprintf(messagePart2, "\"name\":\"humid\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%3.2f, \"unit\": \"%%\"", sensorID2, Humidity);
   messageLength += strlen(messagePart2);
-  sprintf(messagePart3, "\"name\":\"Sound\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"dBC\"", sensorID3, dBC);
+  sprintf(messagePart3, "\"name\":\"Sound\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%3.2f, \"unit\": \"dBC\"", sensorID3, dBC);
   messageLength += strlen(messagePart3);
   sprintf(messagePart4, "\"name\":\"voc\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%d, \"unit\": \"VOC index\"", sensorID4, VOCIndex);
   messageLength += strlen(messagePart4);
-  sprintf(messagePart5, "\"name\":\"battery\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"Volt\"", sensorID5, batteryCharge);
+  sprintf(messagePart5, "\"name\":\"battery\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%3.2f, \"unit\": \"Volt\"", sensorID5, batteryCharge);
   messageLength += strlen(messagePart5);
   messageLength += 20;
   return(messageLength);

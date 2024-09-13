@@ -200,6 +200,7 @@ void Meas_Upkeep(void) {
     Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
     setMeasurement(MeasurementCtx.temperature, MeasurementCtx.humidityPerc, MeasurementCtx.vocIndex);
     checkCharges();
+    //setStamp
     MeasState = MEAS_STATE_INIT;
     break;
 

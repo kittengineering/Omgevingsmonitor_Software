@@ -7,23 +7,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   1 .text         000195dc  080000c0  080000c0  000010c0  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       00001050  080196a0  080196a0  0001a6a0  2**3
+  2 .rodata       00001058  080196a0  080196a0  0001a6a0  2**3
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  0801a6f0  0801a6f0  0001c4a8  2**0
+  3 .ARM.extab    00000000  0801a6f8  0801a6f8  0001c4a8  2**0
                   CONTENTS
-  4 .ARM          00000008  0801a6f0  0801a6f0  0001b6f0  2**2
+  4 .ARM          00000008  0801a6f8  0801a6f8  0001b6f8  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  5 .preinit_array 00000000  0801a6f8  0801a6f8  0001c4a8  2**0
+  5 .preinit_array 00000000  0801a700  0801a700  0001c4a8  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  6 .init_array   00000004  0801a6f8  0801a6f8  0001b6f8  2**2
+  6 .init_array   00000004  0801a700  0801a700  0001b700  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  7 .fini_array   00000004  0801a6fc  0801a6fc  0001b6fc  2**2
+  7 .fini_array   00000004  0801a704  0801a704  0001b704  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  8 .data         000004a8  20000000  0801a700  0001c000  2**3
+  8 .data         000004a8  20000000  0801a708  0001c000  2**3
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          00003f08  200004a8  0801aba8  0001c4a8  2**2
+  9 .bss          00003f08  200004a8  0801abb0  0001c4a8  2**2
                   ALLOC
- 10 ._user_heap_stack 00000500  200043b0  0801aba8  0001d3b0  2**0
+ 10 ._user_heap_stack 00000500  200043b0  0801abb0  0001d3b0  2**0
                   ALLOC
  11 .ARM.attributes 00000028  00000000  00000000  0001c4a8  2**0
                   CONTENTS, READONLY
@@ -1643,8 +1643,8 @@ Disassembly of section .text:
  8000cfe:	e769      	b.n	8000bd4 <__aeabi_fdiv+0x104>
  8000d00:	4644      	mov	r4, r8
  8000d02:	e7ad      	b.n	8000c60 <__aeabi_fdiv+0x190>
- 8000d04:	0801a0b0 	.word	0x0801a0b0
- 8000d08:	0801a0f0 	.word	0x0801a0f0
+ 8000d04:	0801a0b8 	.word	0x0801a0b8
+ 8000d08:	0801a0f8 	.word	0x0801a0f8
  8000d0c:	f7ffffff 	.word	0xf7ffffff
 
 08000d10 <__eqsf2>:
@@ -4091,7 +4091,7 @@ Disassembly of section .text:
  800202a:	e689      	b.n	8001d40 <__aeabi_ddiv+0x90>
  800202c:	000007ff 	.word	0x000007ff
  8002030:	fffffc01 	.word	0xfffffc01
- 8002034:	0801a12c 	.word	0x0801a12c
+ 8002034:	0801a134 	.word	0x0801a134
  8002038:	000003ff 	.word	0x000003ff
  800203c:	feffffff 	.word	0xfeffffff
  8002040:	000007fe 	.word	0x000007fe
@@ -7193,7 +7193,7 @@ uint16_t CreateMessage(){
  800384e:	1dbb      	adds	r3, r7, #6
  8003850:	2200      	movs	r2, #0
  8003852:	801a      	strh	r2, [r3, #0]
-  sprintf(messagePart1, "\"name\":\"temp\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"graden\"", sensorID1, Temperature);
+  sprintf(messagePart1, "\"name\":\"temp\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%3.2f, \"unit\": \"graden\"", sensorID1, Temperature);
  8003854:	4b42      	ldr	r3, [pc, #264]	@ (8003960 <CreateMessage+0x118>)
  8003856:	681b      	ldr	r3, [r3, #0]
  8003858:	1c18      	adds	r0, r3, #0
@@ -7218,7 +7218,7 @@ uint16_t CreateMessage(){
  8003882:	8812      	ldrh	r2, [r2, #0]
  8003884:	188a      	adds	r2, r1, r2
  8003886:	801a      	strh	r2, [r3, #0]
-  sprintf(messagePart2, "\"name\":\"humid\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"%%\"", sensorID2, Humidity);
+  sprintf(messagePart2, "\"name\":\"humid\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%3.2f, \"unit\": \"%%\"", sensorID2, Humidity);
  8003888:	4b39      	ldr	r3, [pc, #228]	@ (8003970 <CreateMessage+0x128>)
  800388a:	681b      	ldr	r3, [r3, #0]
  800388c:	1c18      	adds	r0, r3, #0
@@ -7243,7 +7243,7 @@ uint16_t CreateMessage(){
  80038b6:	8812      	ldrh	r2, [r2, #0]
  80038b8:	188a      	adds	r2, r1, r2
  80038ba:	801a      	strh	r2, [r3, #0]
-  sprintf(messagePart3, "\"name\":\"Sound\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"dBC\"", sensorID3, dBC);
+  sprintf(messagePart3, "\"name\":\"Sound\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%3.2f, \"unit\": \"dBC\"", sensorID3, dBC);
  80038bc:	4b30      	ldr	r3, [pc, #192]	@ (8003980 <CreateMessage+0x138>)
  80038be:	681b      	ldr	r3, [r3, #0]
  80038c0:	1c18      	adds	r0, r3, #0
@@ -7286,7 +7286,7 @@ uint16_t CreateMessage(){
  800390e:	8812      	ldrh	r2, [r2, #0]
  8003910:	188a      	adds	r2, r1, r2
  8003912:	801a      	strh	r2, [r3, #0]
-  sprintf(messagePart5, "\"name\":\"battery\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"Volt\"", sensorID5, batteryCharge);
+  sprintf(messagePart5, "\"name\":\"battery\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%3.2f, \"unit\": \"Volt\"", sensorID5, batteryCharge);
  8003914:	4b22      	ldr	r3, [pc, #136]	@ (80039a0 <CreateMessage+0x158>)
  8003916:	681b      	ldr	r3, [r3, #0]
  8003918:	1c18      	adds	r0, r3, #0
@@ -7332,19 +7332,19 @@ uint16_t CreateMessage(){
  800396c:	200005f4 	.word	0x200005f4
  8003970:	200005e0 	.word	0x200005e0
  8003974:	20000080 	.word	0x20000080
- 8003978:	08019744 	.word	0x08019744
+ 8003978:	08019748 	.word	0x08019748
  800397c:	20000674 	.word	0x20000674
  8003980:	200005f0 	.word	0x200005f0
  8003984:	2000009c 	.word	0x2000009c
- 8003988:	08019798 	.word	0x08019798
+ 8003988:	0801979c 	.word	0x0801979c
  800398c:	200006f4 	.word	0x200006f4
  8003990:	200005ec 	.word	0x200005ec
  8003994:	200000b8 	.word	0x200000b8
- 8003998:	080197ec 	.word	0x080197ec
+ 8003998:	080197f4 	.word	0x080197f4
  800399c:	20000774 	.word	0x20000774
  80039a0:	200005e4 	.word	0x200005e4
  80039a4:	200000d4 	.word	0x200000d4
- 80039a8:	08019844 	.word	0x08019844
+ 80039a8:	0801984c 	.word	0x0801984c
  80039ac:	200007f4 	.word	0x200007f4
 
 080039b0 <SetCommandBuffer>:
@@ -7787,10 +7787,10 @@ void StartProg(){
  8003cae:	46b8      	mov	r8, r7
  8003cb0:	bdf0      	pop	{r4, r5, r6, r7, pc}
  8003cb2:	46c0      	nop			@ (mov r8, r8)
- 8003cb4:	0801989c 	.word	0x0801989c
- 8003cb8:	080198a0 	.word	0x080198a0
- 8003cbc:	080198a8 	.word	0x080198a8
- 8003cc0:	080198b0 	.word	0x080198b0
+ 8003cb4:	080198a4 	.word	0x080198a4
+ 8003cb8:	080198a8 	.word	0x080198a8
+ 8003cbc:	080198b0 	.word	0x080198b0
+ 8003cc0:	080198b8 	.word	0x080198b8
  8003cc4:	200005da 	.word	0x200005da
 
 08003cc8 <PollAwake>:
@@ -7832,7 +7832,7 @@ bool PollAwake(){
  8003cfe:	b002      	add	sp, #8
  8003d00:	bd80      	pop	{r7, pc}
  8003d02:	46c0      	nop			@ (mov r8, r8)
- 8003d04:	080198c0 	.word	0x080198c0
+ 8003d04:	080198c8 	.word	0x080198c8
 
 08003d08 <RFPower>:
 bool RFPower(){
@@ -7872,7 +7872,7 @@ bool RFPower(){
  8003d3e:	b002      	add	sp, #8
  8003d40:	bd80      	pop	{r7, pc}
  8003d42:	46c0      	nop			@ (mov r8, r8)
- 8003d44:	080198c8 	.word	0x080198c8
+ 8003d44:	080198d0 	.word	0x080198d0
 
 08003d48 <CheckRFPower>:
 bool CheckRFPower(){
@@ -7912,7 +7912,7 @@ bool CheckRFPower(){
  8003d7e:	b002      	add	sp, #8
  8003d80:	bd80      	pop	{r7, pc}
  8003d82:	46c0      	nop			@ (mov r8, r8)
- 8003d84:	080198d8 	.word	0x080198d8
+ 8003d84:	080198e0 	.word	0x080198e0
 
 08003d88 <ATRestore>:
 //Only necesarry on first init
@@ -7953,7 +7953,7 @@ bool ATRestore(){
  8003dbe:	b002      	add	sp, #8
  8003dc0:	bd80      	pop	{r7, pc}
  8003dc2:	46c0      	nop			@ (mov r8, r8)
- 8003dc4:	080198e8 	.word	0x080198e8
+ 8003dc4:	080198f0 	.word	0x080198f0
 
 08003dc8 <CWINIT>:
 bool CWINIT(){
@@ -7993,7 +7993,7 @@ bool CWINIT(){
  8003dfe:	b002      	add	sp, #8
  8003e00:	bd80      	pop	{r7, pc}
  8003e02:	46c0      	nop			@ (mov r8, r8)
- 8003e04:	080198f8 	.word	0x080198f8
+ 8003e04:	08019900 	.word	0x08019900
 
 08003e08 <CWMODE1>:
 bool CWMODE1(){
@@ -8033,7 +8033,7 @@ bool CWMODE1(){
  8003e3e:	b002      	add	sp, #8
  8003e40:	bd80      	pop	{r7, pc}
  8003e42:	46c0      	nop			@ (mov r8, r8)
- 8003e44:	08019908 	.word	0x08019908
+ 8003e44:	08019910 	.word	0x08019910
 
 08003e48 <CWAUTOCONN>:
 bool CWAUTOCONN(){
@@ -8073,7 +8073,7 @@ bool CWAUTOCONN(){
  8003e7e:	b002      	add	sp, #8
  8003e80:	bd80      	pop	{r7, pc}
  8003e82:	46c0      	nop			@ (mov r8, r8)
- 8003e84:	08019918 	.word	0x08019918
+ 8003e84:	08019920 	.word	0x08019920
 
 08003e88 <CWJAP>:
 bool CWJAP(){
@@ -8209,7 +8209,7 @@ bool CWJAP(){
  8003f7a:	bdf0      	pop	{r4, r5, r6, r7, pc}
  8003f7c:	20000010 	.word	0x20000010
  8003f80:	20000004 	.word	0x20000004
- 8003f84:	0801992c 	.word	0x0801992c
+ 8003f84:	08019934 	.word	0x08019934
 
 08003f88 <CWMODE3>:
 bool CWMODE3(){
@@ -8249,7 +8249,7 @@ bool CWMODE3(){
  8003fbe:	b002      	add	sp, #8
  8003fc0:	bd80      	pop	{r7, pc}
  8003fc2:	46c0      	nop			@ (mov r8, r8)
- 8003fc4:	08019944 	.word	0x08019944
+ 8003fc4:	0801994c 	.word	0x0801994c
 
 08003fc8 <CWSAP>:
 bool CWSAP(){
@@ -8289,7 +8289,7 @@ bool CWSAP(){
  8003ffe:	b002      	add	sp, #8
  8004000:	bd80      	pop	{r7, pc}
  8004002:	46c0      	nop			@ (mov r8, r8)
- 8004004:	08019954 	.word	0x08019954
+ 8004004:	0801995c 	.word	0x0801995c
 
 08004008 <CIPMUX>:
 bool CIPMUX(){
@@ -8329,7 +8329,7 @@ bool CIPMUX(){
  800403e:	b002      	add	sp, #8
  8004040:	bd80      	pop	{r7, pc}
  8004042:	46c0      	nop			@ (mov r8, r8)
- 8004044:	08019978 	.word	0x08019978
+ 8004044:	08019980 	.word	0x08019980
 
 08004048 <WEBSERVER>:
 //This command sets the webserver, only necessary for first initialization.
@@ -8370,7 +8370,7 @@ bool WEBSERVER(){
  800407e:	b002      	add	sp, #8
  8004080:	bd80      	pop	{r7, pc}
  8004082:	46c0      	nop			@ (mov r8, r8)
- 8004084:	08019988 	.word	0x08019988
+ 8004084:	08019990 	.word	0x08019990
 
 08004088 <HTTPCPOST>:
 //These are the commands necesarry for sending data.
@@ -8532,7 +8532,7 @@ bool HTTPCPOST(){
  80041ac:	fffffd80 	.word	0xfffffd80
  80041b0:	00000266 	.word	0x00000266
  80041b4:	20000028 	.word	0x20000028
- 80041b8:	080199a0 	.word	0x080199a0
+ 80041b8:	080199a8 	.word	0x080199a8
  80041bc:	00000265 	.word	0x00000265
 
 080041c0 <SENDDATA>:
@@ -8704,7 +8704,7 @@ bool SENDDATA(){
  80042f8:	fffffd38 	.word	0xfffffd38
  80042fc:	20000674 	.word	0x20000674
  8004300:	200005f4 	.word	0x200005f4
- 8004304:	080199d8 	.word	0x080199d8
+ 8004304:	080199e0 	.word	0x080199e0
  8004308:	200007f4 	.word	0x200007f4
  800430c:	20000774 	.word	0x20000774
  8004310:	200006f4 	.word	0x200006f4
@@ -8748,7 +8748,7 @@ bool SLEEP(){
  800434e:	b002      	add	sp, #8
  8004350:	bd80      	pop	{r7, pc}
  8004352:	46c0      	nop			@ (mov r8, r8)
- 8004354:	080199f8 	.word	0x080199f8
+ 8004354:	08019a00 	.word	0x08019a00
 
 08004358 <DMA_ProcessBuffer>:
 
@@ -9419,21 +9419,21 @@ bool AT_Send(AT_Commands state){
  80047b6:	b005      	add	sp, #20
  80047b8:	bd90      	pop	{r4, r7, pc}
  80047ba:	46c0      	nop			@ (mov r8, r8)
- 80047bc:	0801a16c 	.word	0x0801a16c
+ 80047bc:	0801a174 	.word	0x0801a174
  80047c0:	20000880 	.word	0x20000880
- 80047c4:	08019a08 	.word	0x08019a08
+ 80047c4:	08019a10 	.word	0x08019a10
  80047c8:	080196c0 	.word	0x080196c0
- 80047cc:	08019a1c 	.word	0x08019a1c
- 80047d0:	08019a30 	.word	0x08019a30
- 80047d4:	08019a40 	.word	0x08019a40
- 80047d8:	08019a54 	.word	0x08019a54
- 80047dc:	08019a6c 	.word	0x08019a6c
- 80047e0:	08019a84 	.word	0x08019a84
- 80047e4:	08019a98 	.word	0x08019a98
- 80047e8:	08019ab4 	.word	0x08019ab4
- 80047ec:	08019ad0 	.word	0x08019ad0
- 80047f0:	08019af4 	.word	0x08019af4
- 80047f4:	08019b04 	.word	0x08019b04
+ 80047cc:	08019a24 	.word	0x08019a24
+ 80047d0:	08019a38 	.word	0x08019a38
+ 80047d4:	08019a48 	.word	0x08019a48
+ 80047d8:	08019a5c 	.word	0x08019a5c
+ 80047dc:	08019a74 	.word	0x08019a74
+ 80047e0:	08019a8c 	.word	0x08019a8c
+ 80047e4:	08019aa0 	.word	0x08019aa0
+ 80047e8:	08019abc 	.word	0x08019abc
+ 80047ec:	08019ad8 	.word	0x08019ad8
+ 80047f0:	08019afc 	.word	0x08019afc
+ 80047f4:	08019b0c 	.word	0x08019b0c
 
 080047f8 <ESP_WakeTest>:
 
@@ -9758,7 +9758,7 @@ void ESP_WakeTest(void) {
  80049e8:	bd90      	pop	{r4, r7, pc}
  80049ea:	46c0      	nop			@ (mov r8, r8)
  80049ec:	20000a8c 	.word	0x20000a8c
- 80049f0:	0801a1a8 	.word	0x0801a1a8
+ 80049f0:	0801a1b0 	.word	0x0801a1b0
  80049f4:	200005d7 	.word	0x200005d7
  80049f8:	50000800 	.word	0x50000800
  80049fc:	50001c00 	.word	0x50001c00
@@ -10364,7 +10364,7 @@ void ESP_Upkeep(void) {
  8004da8:	e03b      	b.n	8004e22 <ESP_Upkeep+0x406>
  8004daa:	46c0      	nop			@ (mov r8, r8)
  8004dac:	20000102 	.word	0x20000102
- 8004db0:	0801a1c0 	.word	0x0801a1c0
+ 8004db0:	0801a1c8 	.word	0x0801a1c8
  8004db4:	200005d7 	.word	0x200005d7
  8004db8:	50000800 	.word	0x50000800
  8004dbc:	50001c00 	.word	0x50001c00
@@ -10385,7 +10385,7 @@ void ESP_Upkeep(void) {
  8004df8:	00004e20 	.word	0x00004e20
  8004dfc:	20000104 	.word	0x20000104
  8004e00:	000493e0 	.word	0x000493e0
- 8004e04:	08019b28 	.word	0x08019b28
+ 8004e04:	08019b30 	.word	0x08019b30
  8004e08:	080196c0 	.word	0x080196c0
       break;
  8004e0c:	46c0      	nop			@ (mov r8, r8)
@@ -10903,8 +10903,8 @@ void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, UART_H
  80050fc:	bd80      	pop	{r7, pc}
  80050fe:	46c0      	nop			@ (mov r8, r8)
  8005100:	20000108 	.word	0x20000108
- 8005104:	08019b3c 	.word	0x08019b3c
- 8005108:	08019b50 	.word	0x08019b50
+ 8005104:	08019b44 	.word	0x08019b44
+ 8005108:	08019b58 	.word	0x08019b58
 
 0800510c <Gadget_Test>:
 
@@ -13166,13 +13166,13 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_Hand
  8005e1a:	bdb0      	pop	{r4, r5, r7, pc}
  8005e1c:	20000d08 	.word	0x20000d08
  8005e20:	20000d00 	.word	0x20000d00
- 8005e24:	08019b54 	.word	0x08019b54
- 8005e28:	08019b84 	.word	0x08019b84
+ 8005e24:	08019b5c 	.word	0x08019b5c
+ 8005e28:	08019b8c 	.word	0x08019b8c
  8005e2c:	20000d04 	.word	0x20000d04
- 8005e30:	08019b88 	.word	0x08019b88
- 8005e34:	08019bb4 	.word	0x08019bb4
- 8005e38:	08019bb8 	.word	0x08019bb8
- 8005e3c:	08019bd4 	.word	0x08019bd4
+ 8005e30:	08019b90 	.word	0x08019b90
+ 8005e34:	08019bbc 	.word	0x08019bbc
+ 8005e38:	08019bc0 	.word	0x08019bc0
+ 8005e3c:	08019bdc 	.word	0x08019bdc
  8005e40:	50000400 	.word	0x50000400
  8005e44:	20000cc0 	.word	0x20000cc0
  8005e48:	08005b21 	.word	0x08005b21
@@ -13456,6 +13456,7 @@ void Meas_Upkeep(void) {
  8006018:	f7fd fb4a 	bl	80036b0 <setMeasurement>
     checkCharges();
  800601c:	f7fd faa4 	bl	8003568 <checkCharges>
+    //setStamp
     MeasState = MEAS_STATE_INIT;
  8006020:	4b05      	ldr	r3, [pc, #20]	@ (8006038 <Meas_Upkeep+0xc8>)
  8006022:	2200      	movs	r2, #0
@@ -13479,13 +13480,13 @@ void Meas_Upkeep(void) {
  8006034:	46bd      	mov	sp, r7
  8006036:	bdb0      	pop	{r4, r5, r7, pc}
  8006038:	20000d08 	.word	0x20000d08
- 800603c:	0801a1f0 	.word	0x0801a1f0
- 8006040:	08019bec 	.word	0x08019bec
- 8006044:	08019bb4 	.word	0x08019bb4
- 8006048:	08019c0c 	.word	0x08019c0c
+ 800603c:	0801a1f8 	.word	0x0801a1f8
+ 8006040:	08019bf4 	.word	0x08019bf4
+ 8006044:	08019bbc 	.word	0x08019bbc
+ 8006048:	08019c14 	.word	0x08019c14
  800604c:	20000cb0 	.word	0x20000cb0
- 8006050:	08019c20 	.word	0x08019c20
- 8006054:	08019c38 	.word	0x08019c38
+ 8006050:	08019c28 	.word	0x08019c28
+ 8006054:	08019c40 	.word	0x08019c40
 
 08006058 <Meas_SetEnabledSensors>:
 float getHumidity(){
@@ -13682,8 +13683,8 @@ void Meas_Test(){
  800618e:	46c0      	nop			@ (mov r8, r8)
  8006190:	20000d04 	.word	0x20000d04
  8006194:	00009c40 	.word	0x00009c40
- 8006198:	08019c6c 	.word	0x08019c6c
- 800619c:	08019bb4 	.word	0x08019bb4
+ 8006198:	08019c74 	.word	0x08019c74
+ 800619c:	08019bbc 	.word	0x08019bbc
 
 080061a0 <SetESPMeasurementDone>:
 
@@ -13955,18 +13956,18 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
  8006328:	bdb0      	pop	{r4, r5, r7, pc}
  800632a:	46c0      	nop			@ (mov r8, r8)
  800632c:	20000d0c 	.word	0x20000d0c
- 8006330:	08019c7c 	.word	0x08019c7c
- 8006334:	08019c9c 	.word	0x08019c9c
- 8006338:	08019ca0 	.word	0x08019ca0
- 800633c:	08019cb0 	.word	0x08019cb0
+ 8006330:	08019c84 	.word	0x08019c84
+ 8006334:	08019ca4 	.word	0x08019ca4
+ 8006338:	08019ca8 	.word	0x08019ca8
+ 800633c:	08019cb8 	.word	0x08019cb8
  8006340:	2000010c 	.word	0x2000010c
  8006344:	20001d10 	.word	0x20001d10
  8006348:	20001d14 	.word	0x20001d14
  800634c:	20001d18 	.word	0x20001d18
  8006350:	20001d19 	.word	0x20001d19
  8006354:	20000d10 	.word	0x20000d10
- 8006358:	08019cb4 	.word	0x08019cb4
- 800635c:	08019cc0 	.word	0x08019cc0
+ 8006358:	08019cbc 	.word	0x08019cbc
+ 800635c:	08019cc8 	.word	0x08019cc8
 
 08006360 <MinimalValue>:
 
@@ -14198,8 +14199,8 @@ bool MIC_Check(void) {
  80064e2:	b004      	add	sp, #16
  80064e4:	bdb0      	pop	{r4, r5, r7, pc}
  80064e6:	46c0      	nop			@ (mov r8, r8)
- 80064e8:	08019cc4 	.word	0x08019cc4
- 80064ec:	08019cc0 	.word	0x08019cc0
+ 80064e8:	08019ccc 	.word	0x08019ccc
+ 80064ec:	08019cc8 	.word	0x08019cc8
  80064f0:	20000d10 	.word	0x20000d10
  80064f4:	20001d20 	.word	0x20001d20
 
@@ -14533,8 +14534,8 @@ void MIC_Print(void) {
  800675e:	b004      	add	sp, #16
  8006760:	bdb0      	pop	{r4, r5, r7, pc}
  8006762:	46c0      	nop			@ (mov r8, r8)
- 8006764:	08019cc4 	.word	0x08019cc4
- 8006768:	08019cc0 	.word	0x08019cc0
+ 8006764:	08019ccc 	.word	0x08019ccc
+ 8006768:	08019cc8 	.word	0x08019cc8
  800676c:	20000d10 	.word	0x20000d10
  8006770:	20001d20 	.word	0x20001d20
  8006774:	20001d1c 	.word	0x20001d1c
@@ -14578,8 +14579,8 @@ bool MIC_MeasurementDone(void) {
  80067be:	bd80      	pop	{r7, pc}
  80067c0:	20001d19 	.word	0x20001d19
  80067c4:	2000010c 	.word	0x2000010c
- 80067c8:	08019cd0 	.word	0x08019cd0
- 80067cc:	08019cb0 	.word	0x08019cb0
+ 80067c8:	08019cd8 	.word	0x08019cd8
+ 80067cc:	08019cb8 	.word	0x08019cb8
 
 080067d0 <MIC_TestMeasurementDone>:
 bool MIC_TestMeasurementDone(void) {
@@ -17601,26 +17602,26 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
  8007c0a:	e055      	b.n	8007cb8 <SGP_GetMeasurementValues+0x420>
  8007c0c:	20002532 	.word	0x20002532
  8007c10:	200025dd 	.word	0x200025dd
- 8007c14:	08019cfc 	.word	0x08019cfc
- 8007c18:	08019d28 	.word	0x08019d28
+ 8007c14:	08019d04 	.word	0x08019d04
+ 8007c18:	08019d30 	.word	0x08019d30
  8007c1c:	200025dc 	.word	0x200025dc
  8007c20:	20000120 	.word	0x20000120
  8007c24:	20000134 	.word	0x20000134
  8007c28:	20000118 	.word	0x20000118
  8007c2c:	20002533 	.word	0x20002533
  8007c30:	20002531 	.word	0x20002531
- 8007c34:	08019d2c 	.word	0x08019d2c
+ 8007c34:	08019d34 	.word	0x08019d34
  8007c38:	20002528 	.word	0x20002528
- 8007c3c:	08019d5c 	.word	0x08019d5c
- 8007c40:	08019d80 	.word	0x08019d80
- 8007c44:	08019d84 	.word	0x08019d84
- 8007c48:	08019da4 	.word	0x08019da4
- 8007c4c:	08019da8 	.word	0x08019da8
+ 8007c3c:	08019d64 	.word	0x08019d64
+ 8007c40:	08019d88 	.word	0x08019d88
+ 8007c44:	08019d8c 	.word	0x08019d8c
+ 8007c48:	08019dac 	.word	0x08019dac
+ 8007c4c:	08019db0 	.word	0x08019db0
  8007c50:	20000130 	.word	0x20000130
  8007c54:	20000128 	.word	0x20000128
- 8007c58:	08019dc8 	.word	0x08019dc8
+ 8007c58:	08019dd0 	.word	0x08019dd0
  8007c5c:	20002534 	.word	0x20002534
- 8007c60:	08019ddc 	.word	0x08019ddc
+ 8007c60:	08019de4 	.word	0x08019de4
  8007c64:	40590000 	.word	0x40590000
  8007c68:	3ff00000 	.word	0x3ff00000
  8007c6c:	20000138 	.word	0x20000138
@@ -17629,7 +17630,7 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
  8007c78:	200025de 	.word	0x200025de
  8007c7c:	40000400 	.word	0x40000400
  8007c80:	40790000 	.word	0x40790000
- 8007c84:	08019df0 	.word	0x08019df0
+ 8007c84:	08019df8 	.word	0x08019df8
     }
   }
   if (SGP_MeasurementDone() && HeatUpIsDone && MeasurementIsReady) {
@@ -17667,8 +17668,8 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
  8007cbe:	bdb0      	pop	{r4, r5, r7, pc}
  8007cc0:	20002532 	.word	0x20002532
  8007cc4:	20002533 	.word	0x20002533
- 8007cc8:	08019e14 	.word	0x08019e14
- 8007ccc:	08019d28 	.word	0x08019d28
+ 8007cc8:	08019e1c 	.word	0x08019e1c
+ 8007ccc:	08019d30 	.word	0x08019d30
  8007cd0:	200025dd 	.word	0x200025dd
 
 08007cd4 <SGP_DeviceConnected>:
@@ -17736,8 +17737,8 @@ bool SGP_DeviceConnected(void) {
  8007d42:	46c0      	nop			@ (mov r8, r8)
  8007d44:	20000114 	.word	0x20000114
  8007d48:	20002528 	.word	0x20002528
- 8007d4c:	08019e34 	.word	0x08019e34
- 8007d50:	08019da4 	.word	0x08019da4
+ 8007d4c:	08019e3c 	.word	0x08019e3c
+ 8007d50:	08019dac 	.word	0x08019dac
 
 08007d54 <CheckCRC>:
 
@@ -17955,8 +17956,8 @@ static bool CheckCRC(uint8_t *data, uint8_t dataLength, uint8_t segmentSize) {
  8007eda:	b00f      	add	sp, #60	@ 0x3c
  8007edc:	bdf0      	pop	{r4, r5, r6, r7, pc}
  8007ede:	46c0      	nop			@ (mov r8, r8)
- 8007ee0:	08019e54 	.word	0x08019e54
- 8007ee4:	08019d80 	.word	0x08019d80
+ 8007ee0:	08019e5c 	.word	0x08019e5c
+ 8007ee4:	08019d88 	.word	0x08019d88
 
 08007ee8 <CalculateCRC>:
 
@@ -19882,7 +19883,7 @@ static void AddTimestamp(char *stamp) {
  800895e:	46bd      	mov	sp, r7
  8008960:	b002      	add	sp, #8
  8008962:	bd80      	pop	{r7, pc}
- 8008964:	08019efc 	.word	0x08019efc
+ 8008964:	08019f04 	.word	0x08019f04
 
 08008968 <CreateLine>:
 
@@ -19998,10 +19999,10 @@ void CreateLine(VerboseLevel verboseLevel, char *tag, char *format, ...) {
  8008a1c:	fffffbf0 	.word	0xfffffbf0
  8008a20:	fffffbf7 	.word	0xfffffbf7
  8008a24:	20000140 	.word	0x20000140
- 8008a28:	08019f08 	.word	0x08019f08
+ 8008a28:	08019f10 	.word	0x08019f10
  8008a2c:	0000040c 	.word	0x0000040c
  8008a30:	0000041c 	.word	0x0000041c
- 8008a34:	08019f0c 	.word	0x08019f0c
+ 8008a34:	08019f14 	.word	0x08019f14
 
 08008a38 <_write>:
 
@@ -20099,14 +20100,14 @@ void BinaryReleaseInfo() {
  8008ace:	46bd      	mov	sp, r7
  8008ad0:	bd80      	pop	{r7, pc}
  8008ad2:	46c0      	nop			@ (mov r8, r8)
- 8008ad4:	08019f14 	.word	0x08019f14
- 8008ad8:	08019f40 	.word	0x08019f40
- 8008adc:	08019f44 	.word	0x08019f44
- 8008ae0:	08019f50 	.word	0x08019f50
- 8008ae4:	08019f64 	.word	0x08019f64
- 8008ae8:	08019f70 	.word	0x08019f70
- 8008aec:	08019f7c 	.word	0x08019f7c
- 8008af0:	08019f84 	.word	0x08019f84
+ 8008ad4:	08019f1c 	.word	0x08019f1c
+ 8008ad8:	08019f48 	.word	0x08019f48
+ 8008adc:	08019f4c 	.word	0x08019f4c
+ 8008ae0:	08019f58 	.word	0x08019f58
+ 8008ae4:	08019f6c 	.word	0x08019f6c
+ 8008ae8:	08019f78 	.word	0x08019f78
+ 8008aec:	08019f84 	.word	0x08019f84
+ 8008af0:	08019f8c 	.word	0x08019f8c
 
 08008af4 <ReadRegister>:
 static bool MeasurementDone = false;
@@ -20492,9 +20493,9 @@ static bool CheckCRC(uint8_t* data) {
  8008d4a:	b005      	add	sp, #20
  8008d4c:	bd90      	pop	{r4, r7, pc}
  8008d4e:	46c0      	nop			@ (mov r8, r8)
- 8008d50:	08019fc0 	.word	0x08019fc0
- 8008d54:	08019fe8 	.word	0x08019fe8
- 8008d58:	08019fec 	.word	0x08019fec
+ 8008d50:	08019fc8 	.word	0x08019fc8
+ 8008d54:	08019ff0 	.word	0x08019ff0
+ 8008d58:	08019ff4 	.word	0x08019ff4
 
 08008d5c <HIDS_DeviceConnected>:
 
@@ -20562,8 +20563,8 @@ bool HIDS_DeviceConnected(void) {
  8008dc8:	b002      	add	sp, #8
  8008dca:	bd80      	pop	{r7, pc}
  8008dcc:	20002870 	.word	0x20002870
- 8008dd0:	0801a018 	.word	0x0801a018
- 8008dd4:	08019fbc 	.word	0x08019fbc
+ 8008dd0:	0801a020 	.word	0x0801a020
+ 8008dd4:	08019fc4 	.word	0x08019fc4
 
 08008dd8 <HIDS_SetMeasurementMode>:
 
@@ -20902,8 +20903,8 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
  800900c:	2000014c 	.word	0x2000014c
  8009010:	20000148 	.word	0x20000148
  8009014:	20002880 	.word	0x20002880
- 8009018:	0801a038 	.word	0x0801a038
- 800901c:	0801a064 	.word	0x0801a064
+ 8009018:	0801a040 	.word	0x0801a040
+ 800901c:	0801a06c 	.word	0x0801a06c
  8009020:	20002878 	.word	0x20002878
  8009024:	40efffe0 	.word	0x40efffe0
  8009028:	42340000 	.word	0x42340000
@@ -21003,7 +21004,7 @@ LoopForever:
   ldr r1, =_edata
  8009078:	200004a8 	.word	0x200004a8
   ldr r2, =_sidata
- 800907c:	0801a700 	.word	0x0801a700
+ 800907c:	0801a708 	.word	0x0801a708
   ldr r2, =_sbss
  8009080:	200004a8 	.word	0x200004a8
   ldr r4, =_ebss
@@ -37613,7 +37614,7 @@ HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef  *RCC_OscInitStruct)
  800eb60:	fffeffff 	.word	0xfffeffff
  800eb64:	fffbffff 	.word	0xfffbffff
  800eb68:	ffffe0ff 	.word	0xffffe0ff
- 800eb6c:	0801a208 	.word	0x0801a208
+ 800eb6c:	0801a210 	.word	0x0801a210
  800eb70:	2000013c 	.word	0x2000013c
  800eb74:	20000150 	.word	0x20000150
  800eb78:	ffff1fff 	.word	0xffff1fff
@@ -38895,7 +38896,7 @@ HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef  *RCC_ClkInitStruct, ui
  800f240:	40021000 	.word	0x40021000
  800f244:	fffff8ff 	.word	0xfffff8ff
  800f248:	ffffc7ff 	.word	0xffffc7ff
- 800f24c:	0801a208 	.word	0x0801a208
+ 800f24c:	0801a210 	.word	0x0801a210
  800f250:	2000013c 	.word	0x2000013c
  800f254:	20000150 	.word	0x20000150
 
@@ -39120,7 +39121,7 @@ uint32_t HAL_RCC_GetSysClockFreq(void)
  800f394:	003d0900 	.word	0x003d0900
  800f398:	00f42400 	.word	0x00f42400
  800f39c:	007a1200 	.word	0x007a1200
- 800f3a0:	0801a220 	.word	0x0801a220
+ 800f3a0:	0801a228 	.word	0x0801a228
 
 0800f3a4 <HAL_RCC_GetHCLKFreq>:
   * @note   The SystemCoreClock CMSIS variable is used to store System Clock Frequency
@@ -39169,7 +39170,7 @@ uint32_t HAL_RCC_GetPCLK1Freq(void)
  800f3d8:	bd80      	pop	{r7, pc}
  800f3da:	46c0      	nop			@ (mov r8, r8)
  800f3dc:	40021000 	.word	0x40021000
- 800f3e0:	0801a218 	.word	0x0801a218
+ 800f3e0:	0801a220 	.word	0x0801a220
 
 0800f3e4 <HAL_RCC_GetPCLK2Freq>:
   * @note   Each time PCLK2 changes, this function must be called to update the
@@ -39199,7 +39200,7 @@ uint32_t HAL_RCC_GetPCLK2Freq(void)
  800f404:	bd80      	pop	{r7, pc}
  800f406:	46c0      	nop			@ (mov r8, r8)
  800f408:	40021000 	.word	0x40021000
- 800f40c:	0801a218 	.word	0x0801a218
+ 800f40c:	0801a220 	.word	0x0801a220
 
 0800f410 <HAL_RCCEx_PeriphCLKConfig>:
   * @retval HAL status
@@ -44020,11 +44021,11 @@ HAL_StatusTypeDef UART_SetConfig(UART_HandleTypeDef *huart)
  8010dde:	46bd      	mov	sp, r7
  8010de0:	b00e      	add	sp, #56	@ 0x38
  8010de2:	bdb0      	pop	{r4, r5, r7, pc}
- 8010de4:	0801a22c 	.word	0x0801a22c
+ 8010de4:	0801a234 	.word	0x0801a234
  8010de8:	40021000 	.word	0x40021000
  8010dec:	003d0900 	.word	0x003d0900
  8010df0:	00f42400 	.word	0x00f42400
- 8010df4:	0801a250 	.word	0x0801a250
+ 8010df4:	0801a258 	.word	0x0801a258
 
 08010df8 <UART_AdvFeatureConfig>:
   * @brief Configure the UART peripheral advanced features.
@@ -53043,7 +53044,7 @@ USBD_StatusTypeDef  USBD_StdDevReq(USBD_HandleTypeDef *pdev,
  801457a:	b004      	add	sp, #16
  801457c:	bd80      	pop	{r7, pc}
  801457e:	46c0      	nop			@ (mov r8, r8)
- 8014580:	0801a274 	.word	0x0801a274
+ 8014580:	0801a27c 	.word	0x0801a27c
 
 08014584 <USBD_StdItfReq>:
 * @param  req: usb request
@@ -54379,8 +54380,8 @@ static void USBD_GetDescriptor(USBD_HandleTypeDef *pdev,
  8014cf6:	46bd      	mov	sp, r7
  8014cf8:	b004      	add	sp, #16
  8014cfa:	bd80      	pop	{r7, pc}
- 8014cfc:	0801a29c 	.word	0x0801a29c
- 8014d00:	0801a2bc 	.word	0x0801a2bc
+ 8014cfc:	0801a2a4 	.word	0x0801a2a4
+ 8014d00:	0801a2c4 	.word	0x0801a2c4
 
 08014d04 <USBD_SetAddress>:
 * @param  req: usb request
@@ -55648,7 +55649,7 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
  80153ba:	46bd      	mov	sp, r7
  80153bc:	b002      	add	sp, #8
  80153be:	bd80      	pop	{r7, pc}
- 80153c0:	0801a2d4 	.word	0x0801a2d4
+ 80153c0:	0801a2dc 	.word	0x0801a2dc
 
 080153c4 <CDC_Receive_FS>:
   * @param  Buf: Buffer of data to be received
@@ -55787,7 +55788,7 @@ uint8_t * USBD_FS_ProductStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length
  8015470:	bd80      	pop	{r7, pc}
  8015472:	46c0      	nop			@ (mov r8, r8)
  8015474:	20003b50 	.word	0x20003b50
- 8015478:	0801a068 	.word	0x0801a068
+ 8015478:	0801a070 	.word	0x0801a070
 
 0801547c <USBD_FS_ManufacturerStrDescriptor>:
   * @param  speed : Current device speed
@@ -55818,7 +55819,7 @@ uint8_t * USBD_FS_ManufacturerStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *l
  801549c:	b002      	add	sp, #8
  801549e:	bd80      	pop	{r7, pc}
  80154a0:	20003b50 	.word	0x20003b50
- 80154a4:	0801a080 	.word	0x0801a080
+ 80154a4:	0801a088 	.word	0x0801a088
 
 080154a8 <USBD_FS_SerialStrDescriptor>:
   * @param  speed : Current device speed
@@ -55903,7 +55904,7 @@ uint8_t * USBD_FS_ConfigStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *length)
  8015508:	bd80      	pop	{r7, pc}
  801550a:	46c0      	nop			@ (mov r8, r8)
  801550c:	20003b50 	.word	0x20003b50
- 8015510:	0801a094 	.word	0x0801a094
+ 8015510:	0801a09c 	.word	0x0801a09c
 
 08015514 <USBD_FS_InterfaceStrDescriptor>:
   * @param  speed : Current device speed
@@ -55951,7 +55952,7 @@ uint8_t * USBD_FS_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *leng
  801554c:	bd80      	pop	{r7, pc}
  801554e:	46c0      	nop			@ (mov r8, r8)
  8015550:	20003b50 	.word	0x20003b50
- 8015554:	0801a0a0 	.word	0x0801a0a0
+ 8015554:	0801a0a8 	.word	0x0801a0a8
 
 08015558 <Get_SerialNum>:
   * @brief  Create the serial number string descriptor
@@ -57849,11 +57850,11 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8016134:	3301      	adds	r3, #1
  8016136:	e7ea      	b.n	801610e <_printf_float+0x2ca>
  8016138:	7fefffff 	.word	0x7fefffff
- 801613c:	0801a364 	.word	0x0801a364
- 8016140:	0801a368 	.word	0x0801a368
- 8016144:	0801a36c 	.word	0x0801a36c
- 8016148:	0801a370 	.word	0x0801a370
- 801614c:	0801a374 	.word	0x0801a374
+ 801613c:	0801a36c 	.word	0x0801a36c
+ 8016140:	0801a370 	.word	0x0801a370
+ 8016144:	0801a374 	.word	0x0801a374
+ 8016148:	0801a378 	.word	0x0801a378
+ 801614c:	0801a37c 	.word	0x0801a37c
  8016150:	9b14      	ldr	r3, [sp, #80]	@ 0x50
  8016152:	6dae      	ldr	r6, [r5, #88]	@ 0x58
  8016154:	930c      	str	r3, [sp, #48]	@ 0x30
@@ -58405,8 +58406,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  80165ae:	2500      	movs	r5, #0
  80165b0:	e7f7      	b.n	80165a2 <_printf_i+0x202>
  80165b2:	46c0      	nop			@ (mov r8, r8)
- 80165b4:	0801a376 	.word	0x0801a376
- 80165b8:	0801a387 	.word	0x0801a387
+ 80165b4:	0801a37e 	.word	0x0801a37e
+ 80165b8:	0801a38f 	.word	0x0801a38f
 
 080165bc <std>:
  80165bc:	2300      	movs	r3, #0
@@ -58937,10 +58938,10 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  80169f2:	4798      	blx	r3
  80169f4:	3601      	adds	r6, #1
  80169f6:	e7f2      	b.n	80169de <__libc_init_array+0x1e>
- 80169f8:	0801a6f8 	.word	0x0801a6f8
- 80169fc:	0801a6f8 	.word	0x0801a6f8
- 8016a00:	0801a6fc 	.word	0x0801a6fc
- 8016a04:	0801a6f8 	.word	0x0801a6f8
+ 80169f8:	0801a700 	.word	0x0801a700
+ 80169fc:	0801a700 	.word	0x0801a700
+ 8016a00:	0801a704 	.word	0x0801a704
+ 8016a04:	0801a700 	.word	0x0801a700
 
 08016a08 <__retarget_lock_init_recursive>:
  8016a08:	4770      	bx	lr
@@ -59513,14 +59514,14 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8016e92:	3308      	adds	r3, #8
  8016e94:	e7e2      	b.n	8016e5c <_dtoa_r+0x308>
  8016e96:	46c0      	nop			@ (mov r8, r8)
- 8016e98:	0801a3a5 	.word	0x0801a3a5
- 8016e9c:	0801a3bc 	.word	0x0801a3bc
+ 8016e98:	0801a3ad 	.word	0x0801a3ad
+ 8016e9c:	0801a3c4 	.word	0x0801a3c4
  8016ea0:	7ff00000 	.word	0x7ff00000
  8016ea4:	0000270f 	.word	0x0000270f
- 8016ea8:	0801a3a1 	.word	0x0801a3a1
- 8016eac:	0801a3a4 	.word	0x0801a3a4
- 8016eb0:	0801a375 	.word	0x0801a375
- 8016eb4:	0801a374 	.word	0x0801a374
+ 8016ea8:	0801a3a9 	.word	0x0801a3a9
+ 8016eac:	0801a3ac 	.word	0x0801a3ac
+ 8016eb0:	0801a37d 	.word	0x0801a37d
+ 8016eb4:	0801a37c 	.word	0x0801a37c
  8016eb8:	3ff00000 	.word	0x3ff00000
  8016ebc:	fffffc01 	.word	0xfffffc01
  8016ec0:	3ff80000 	.word	0x3ff80000
@@ -59530,12 +59531,12 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8016ed0:	3fc68a28 	.word	0x3fc68a28
  8016ed4:	509f79fb 	.word	0x509f79fb
  8016ed8:	3fd34413 	.word	0x3fd34413
- 8016edc:	0801a4b8 	.word	0x0801a4b8
+ 8016edc:	0801a4c0 	.word	0x0801a4c0
  8016ee0:	00000432 	.word	0x00000432
  8016ee4:	00000412 	.word	0x00000412
  8016ee8:	fe100000 	.word	0xfe100000
- 8016eec:	0801a414 	.word	0x0801a414
- 8016ef0:	0801a490 	.word	0x0801a490
+ 8016eec:	0801a41c 	.word	0x0801a41c
+ 8016ef0:	0801a498 	.word	0x0801a498
  8016ef4:	9b04      	ldr	r3, [sp, #16]
  8016ef6:	2402      	movs	r4, #2
  8016ef8:	2b00      	cmp	r3, #0
@@ -59933,8 +59934,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  801725c:	9803      	ldr	r0, [sp, #12]
  801725e:	f000 fbb7 	bl	80179d0 <_Bfree>
  8017262:	e7c9      	b.n	80171f8 <_dtoa_r+0x6a4>
- 8017264:	0801a4b8 	.word	0x0801a4b8
- 8017268:	0801a490 	.word	0x0801a490
+ 8017264:	0801a4c0 	.word	0x0801a4c0
+ 8017268:	0801a498 	.word	0x0801a498
  801726c:	3ff00000 	.word	0x3ff00000
  8017270:	40240000 	.word	0x40240000
  8017274:	401c0000 	.word	0x401c0000
@@ -60337,8 +60338,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  80175cc:	40240000 	.word	0x40240000
  80175d0:	00000433 	.word	0x00000433
  80175d4:	7ff00000 	.word	0x7ff00000
- 80175d8:	0801a414 	.word	0x0801a414
- 80175dc:	0801a3bc 	.word	0x0801a3bc
+ 80175d8:	0801a41c 	.word	0x0801a41c
+ 80175dc:	0801a3c4 	.word	0x0801a3c4
  80175e0:	000002ef 	.word	0x000002ef
  80175e4:	9b0d      	ldr	r3, [sp, #52]	@ 0x34
  80175e6:	2b00      	cmp	r3, #0
@@ -60496,8 +60497,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  801772e:	9005      	str	r0, [sp, #20]
  8017730:	e7eb      	b.n	801770a <_dtoa_r+0xbb6>
  8017732:	46c0      	nop			@ (mov r8, r8)
- 8017734:	0801a398 	.word	0x0801a398
- 8017738:	0801a3a0 	.word	0x0801a3a0
+ 8017734:	0801a3a0 	.word	0x0801a3a0
+ 8017738:	0801a3a8 	.word	0x0801a3a8
 
 0801773c <_free_r>:
  801773c:	b570      	push	{r4, r5, r6, lr}
@@ -60814,8 +60815,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  80179c2:	60c3      	str	r3, [r0, #12]
  80179c4:	e7f8      	b.n	80179b8 <_Balloc+0x70>
  80179c6:	46c0      	nop			@ (mov r8, r8)
- 80179c8:	0801a3a5 	.word	0x0801a3a5
- 80179cc:	0801a425 	.word	0x0801a425
+ 80179c8:	0801a3ad 	.word	0x0801a3ad
+ 80179cc:	0801a42d 	.word	0x0801a42d
 
 080179d0 <_Bfree>:
  80179d0:	b570      	push	{r4, r5, r6, lr}
@@ -60848,8 +60849,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8017a0a:	6022      	str	r2, [r4, #0]
  8017a0c:	601c      	str	r4, [r3, #0]
  8017a0e:	bd70      	pop	{r4, r5, r6, pc}
- 8017a10:	0801a3a5 	.word	0x0801a3a5
- 8017a14:	0801a425 	.word	0x0801a425
+ 8017a10:	0801a3ad 	.word	0x0801a3ad
+ 8017a14:	0801a42d 	.word	0x0801a42d
 
 08017a18 <__multadd>:
  8017a18:	b5f7      	push	{r0, r1, r2, r4, r5, r6, r7, lr}
@@ -60912,8 +60913,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8017a92:	0020      	movs	r0, r4
  8017a94:	bdfe      	pop	{r1, r2, r3, r4, r5, r6, r7, pc}
  8017a96:	46c0      	nop			@ (mov r8, r8)
- 8017a98:	0801a414 	.word	0x0801a414
- 8017a9c:	0801a425 	.word	0x0801a425
+ 8017a98:	0801a41c 	.word	0x0801a41c
+ 8017a9c:	0801a42d 	.word	0x0801a42d
 
 08017aa0 <__hi0bits>:
  8017aa0:	2280      	movs	r2, #128	@ 0x80
@@ -61018,8 +61019,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8017b62:	6103      	str	r3, [r0, #16]
  8017b64:	bd10      	pop	{r4, pc}
  8017b66:	46c0      	nop			@ (mov r8, r8)
- 8017b68:	0801a425 	.word	0x0801a425
- 8017b6c:	0801a414 	.word	0x0801a414
+ 8017b68:	0801a42d 	.word	0x0801a42d
+ 8017b6c:	0801a41c 	.word	0x0801a41c
 
 08017b70 <__multiply>:
  8017b70:	b5f0      	push	{r4, r5, r6, r7, lr}
@@ -61194,8 +61195,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8017cc6:	9303      	str	r3, [sp, #12]
  8017cc8:	e79b      	b.n	8017c02 <__multiply+0x92>
  8017cca:	46c0      	nop			@ (mov r8, r8)
- 8017ccc:	0801a414 	.word	0x0801a414
- 8017cd0:	0801a425 	.word	0x0801a425
+ 8017ccc:	0801a41c 	.word	0x0801a41c
+ 8017cd0:	0801a42d 	.word	0x0801a42d
 
 08017cd4 <__pow5mult>:
  8017cd4:	b5f7      	push	{r0, r1, r2, r4, r5, r6, r7, lr}
@@ -61275,9 +61276,9 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8017d76:	0030      	movs	r0, r6
  8017d78:	bdfe      	pop	{r1, r2, r3, r4, r5, r6, r7, pc}
  8017d7a:	46c0      	nop			@ (mov r8, r8)
- 8017d7c:	0801a480 	.word	0x0801a480
- 8017d80:	0801a3a5 	.word	0x0801a3a5
- 8017d84:	0801a425 	.word	0x0801a425
+ 8017d7c:	0801a488 	.word	0x0801a488
+ 8017d80:	0801a3ad 	.word	0x0801a3ad
+ 8017d84:	0801a42d 	.word	0x0801a42d
  8017d88:	00000271 	.word	0x00000271
 
 08017d8c <__lshift>:
@@ -61382,8 +61383,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8017e56:	d8fb      	bhi.n	8017e50 <__lshift+0xc4>
  8017e58:	e7f0      	b.n	8017e3c <__lshift+0xb0>
  8017e5a:	46c0      	nop			@ (mov r8, r8)
- 8017e5c:	0801a414 	.word	0x0801a414
- 8017e60:	0801a425 	.word	0x0801a425
+ 8017e5c:	0801a41c 	.word	0x0801a41c
+ 8017e60:	0801a42d 	.word	0x0801a42d
 
 08017e64 <__mcmp>:
  8017e64:	b530      	push	{r4, r5, lr}
@@ -61558,8 +61559,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8017fba:	3901      	subs	r1, #1
  8017fbc:	9100      	str	r1, [sp, #0]
  8017fbe:	e7e6      	b.n	8017f8e <__mdiff+0xf2>
- 8017fc0:	0801a414 	.word	0x0801a414
- 8017fc4:	0801a425 	.word	0x0801a425
+ 8017fc0:	0801a41c 	.word	0x0801a41c
+ 8017fc4:	0801a42d 	.word	0x0801a42d
  8017fc8:	00000237 	.word	0x00000237
  8017fcc:	00000245 	.word	0x00000245
 
@@ -61643,8 +61644,8 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8018070:	f7ff fd16 	bl	8017aa0 <__hi0bits>
  8018074:	0176      	lsls	r6, r6, #5
  8018076:	e7e3      	b.n	8018040 <__d2b+0x70>
- 8018078:	0801a414 	.word	0x0801a414
- 801807c:	0801a425 	.word	0x0801a425
+ 8018078:	0801a41c 	.word	0x0801a41c
+ 801807c:	0801a42d 	.word	0x0801a42d
  8018080:	0000030f 	.word	0x0000030f
  8018084:	fffffbcd 	.word	0xfffffbcd
  8018088:	fffffbce 	.word	0xfffffbce
@@ -61980,9 +61981,9 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8018330:	9803      	ldr	r0, [sp, #12]
  8018332:	f7fe f835 	bl	80163a0 <_printf_i>
  8018336:	e7eb      	b.n	8018310 <_svfiprintf_r+0x1c0>
- 8018338:	0801a580 	.word	0x0801a580
- 801833c:	0801a586 	.word	0x0801a586
- 8018340:	0801a58a 	.word	0x0801a58a
+ 8018338:	0801a588 	.word	0x0801a588
+ 801833c:	0801a58e 	.word	0x0801a58e
+ 8018340:	0801a592 	.word	0x0801a592
  8018344:	08015e45 	.word	0x08015e45
  8018348:	08018091 	.word	0x08018091
 
@@ -62292,9 +62293,9 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  80185b8:	f7fd fef2 	bl	80163a0 <_printf_i>
  80185bc:	e7e3      	b.n	8018586 <_vfiprintf_r+0x1ea>
  80185be:	46c0      	nop			@ (mov r8, r8)
- 80185c0:	0801a580 	.word	0x0801a580
- 80185c4:	0801a586 	.word	0x0801a586
- 80185c8:	0801a58a 	.word	0x0801a58a
+ 80185c0:	0801a588 	.word	0x0801a588
+ 80185c4:	0801a58e 	.word	0x0801a58e
+ 80185c8:	0801a592 	.word	0x0801a592
  80185cc:	08015e45 	.word	0x08015e45
  80185d0:	08018377 	.word	0x08018377
 
@@ -62692,9 +62693,9 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  80188e8:	f000 f886 	bl	80189f8 <fiprintf>
  80188ec:	f000 f924 	bl	8018b38 <abort>
  80188f0:	200002d4 	.word	0x200002d4
- 80188f4:	0801a59b 	.word	0x0801a59b
- 80188f8:	0801a5d6 	.word	0x0801a5d6
- 80188fc:	0801a5a8 	.word	0x0801a5a8
+ 80188f4:	0801a5a3 	.word	0x0801a5a3
+ 80188f8:	0801a5de 	.word	0x0801a5de
+ 80188fc:	0801a5b0 	.word	0x0801a5b0
 
 08018900 <_calloc_r>:
  8018900:	b570      	push	{r4, r5, r6, lr}
@@ -63115,7 +63116,7 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  8018c48:	000f      	movs	r7, r1
  8018c4a:	e7f2      	b.n	8018c32 <log10+0x4a>
  8018c4c:	fff00000 	.word	0xfff00000
- 8018c50:	0801a5d6 	.word	0x0801a5d6
+ 8018c50:	0801a5de 	.word	0x0801a5de
 
 08018c54 <sqrt>:
  8018c54:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
@@ -63843,15 +63844,15 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status)
  80192a0:	42cff1b5 	.word	0x42cff1b5
  80192a4:	3eb17218 	.word	0x3eb17218
  80192a8:	3f851591 	.word	0x3f851591
- 80192ac:	0801a6e0 	.word	0x0801a6e0
- 80192b0:	0801a6d8 	.word	0x0801a6d8
+ 80192ac:	0801a6e8 	.word	0x0801a6e8
+ 80192b0:	0801a6e0 	.word	0x0801a6e0
  80192b4:	3331bb4c 	.word	0x3331bb4c
  80192b8:	35ddea0e 	.word	0x35ddea0e
  80192bc:	388ab355 	.word	0x388ab355
  80192c0:	3b360b61 	.word	0x3b360b61
  80192c4:	3e2aaaab 	.word	0x3e2aaaab
  80192c8:	3fb8aa3b 	.word	0x3fb8aa3b
- 80192cc:	0801a6e8 	.word	0x0801a6e8
+ 80192cc:	0801a6f0 	.word	0x0801a6f0
  80192d0:	3f317180 	.word	0x3f317180
  80192d4:	3717f7d1 	.word	0x3717f7d1
  80192d8:	7149f2ca 	.word	0x7149f2ca
