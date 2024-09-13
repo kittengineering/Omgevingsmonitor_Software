@@ -108,6 +108,7 @@ void ESP_DeInit(void);
 void ESP_WakeTest();
 void setMeasurement(float temp, float humid, uint16_t voc);
 void setCharges(float charge, float solar);
+void setMic(float dB);
 
 #endif /* INC_ESP_H_ */
 

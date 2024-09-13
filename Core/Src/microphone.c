@@ -18,17 +18,18 @@
 
 static I2S_HandleTypeDef* I2SHandle = NULL;
 static NrOfSamples Samples = NUMBER_OF_SAMPLES;
-static uint16_t AudioRxBuffer[NUMBER_OF_SAMPLES*4] = {0};
-q15_t output[NUMBER_OF_SAMPLES*2];
-uint32_t numStages = 1;
+static int16_t AudioRxBuffer[NUMBER_OF_SAMPLES*4] = {0};
+//q15_t output[NUMBER_OF_SAMPLES*2];
+uint32_t sum_Buffer;
 
 
 static volatile uint32_t StartTime = 0;
 static volatile uint32_t StartupDoneTime = 0;
 static volatile bool StartUpDone = false;
 static volatile bool DataReady = false;
-float OCT[10];
-q15_t sample[NUMBER_OF_SAMPLES];
+float dBc = 0;
+//float OCT[10];
+float sample[NUMBER_OF_SAMPLES];
 
 
 
@@ -81,14 +82,26 @@ static void UpdateSampleRate(uint32_t sampleRate) {
   HAL_I2S_Init(I2SHandle);
 }
 
-static q15_t ConvertAudio(uint16_t* data) {
-  //bool Sign = 0;
-  //float dBc = 0;
-  float Division = 2147483647.0; //Reference?
-  int32_t audioValue = 0;
-  //Sign = data[0] >> 14;
-  audioValue = (data[0]<<17)|(data[1]<<1);
-  audioValue = (audioValue/Division)*0x7FFF;
+static float ConvertAudio(uint16_t* data) {
+  uint32_t MSP;
+  uint32_t LSP;
+  int32_t signedAudioValue;
+  float Division = 8388607.0; //Reference?
+  float adjustedAudioValue = 0;
+  uint32_t audioValue = 0;
+
+  int32_t value = 12345;
+  uint16_t msb=(value & 0x0FFFFFF)>>9;
+  uint16_t lsb=(value & 0x1FF)<<7;
+  MSP = data[0]<<9;
+  LSP = (data[1]&0xFF80)>>7;
+  audioValue = MSP | LSP;
+  if((0x800000 & audioValue) != 0){
+    audioValue = 0xFF000000 | audioValue;
+  }
+  signedAudioValue = (int32_t)audioValue;
+  adjustedAudioValue = ((float)signedAudioValue/Division);
+
   //dBc = 10*log(audioValue/Division);
 //  if(Sign){
 //    audioValue = 0x3FFFFFFF;
@@ -110,51 +123,41 @@ static q15_t ConvertAudio(uint16_t* data) {
 //  }
 //  dB = 20 * log10(audioValue / Division);
 
-  return audioValue;
+  return adjustedAudioValue;
 }
 
-q15_t X2(q15_t num){
-  q15_t result = num*num;
-  return(result);
-}
+//q15_t GetOctave(uint16_t width, uint16_t minFreq){
+//  q15_t retVal = 0;
+//  q15_t buffer = 0;
+//  float dB;
+//  float Division = (32768.0)-1; //Reference?
+//  for(uint16_t i = minFreq; i < minFreq+width; i++){
+//    buffer += X2(output[i]);
+//  }
+//  arm_sqrt_q15(buffer, &retVal);
+//  dB = 10*log10(retVal/Division);
+//  return(dB);
+//}
 
-q15_t GetOctave(uint16_t width, uint16_t minFreq){
-  q15_t retVal = 0;
-  q15_t buffer = 0;
-  float dB;
-  float Division = (32768.0)-1; //Reference?
-  for(uint16_t i = minFreq; i < minFreq+width; i++){
-    buffer += X2(output[i]);
-  }
-  arm_sqrt_q15(buffer, &retVal);
-  dB = 10*log10(retVal/Division);
-  return(dB);
-}
+//void GetAllOctaves(){
+//  OCT[0] = GetOctave(2, 3); // 31.5 centre should be at 4
+//  OCT[1] = GetOctave(4, 6); // 63 centre should be at 8
+//  OCT[2] = GetOctave(6, 13); // 125 centre should be at 16
+//  OCT[3] = GetOctave(13, 27); // 250 centre should be at 33
+//  OCT[4] = GetOctave(22 ,55); // 500 centre should be at 66
+//  OCT[5] = GetOctave(46 , 109); // 1000 centre should be at 132
+//  //OCT[6] = output[64]*0; //2000
+//
+//}
 
-void GetAllOctaves(){
-  OCT[0] = GetOctave(2, 3); // 31.5 centre should be at 4
-  OCT[1] = GetOctave(4, 6); // 63 centre should be at 8
-  OCT[2] = GetOctave(6, 13); // 125 centre should be at 16
-  OCT[3] = GetOctave(13, 27); // 250 centre should be at 33
-  OCT[4] = GetOctave(22 ,55); // 500 centre should be at 66
-  OCT[5] = GetOctave(46 , 109); // 1000 centre should be at 132
-  //OCT[6] = output[64]*0; //2000
-
-}
-void Downscale(uint16_t downscaleFactor){
-  for(uint16_t i = 0; i <NUMBER_OF_SAMPLES; i++){
-    output[i] = output[i] / downscaleFactor;
-  }
-}
-
-void FFT(){
-  static arm_rfft_instance_q15 fft_instance;
-  arm_status status;
-  status = arm_rfft_init_q15(&fft_instance, NUMBER_OF_SAMPLES, 1, 1);
-  arm_rfft_q15(&fft_instance, sample, output);
-  arm_abs_q15(output, output, NUMBER_OF_SAMPLES);
-  GetAllOctaves();
-}
+//void FFT(){
+//  static arm_rfft_instance_q15 fft_instance;
+//  arm_status status;
+//  status = arm_rfft_init_q15(&fft_instance, NUMBER_OF_SAMPLES, 1, 1);
+//  arm_rfft_q15(&fft_instance, sample, output);
+//  arm_abs_q15(output, output, NUMBER_OF_SAMPLES);
+//  GetAllOctaves();
+//}
 
 void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
   if (I2SHandle == NULL) {
@@ -177,11 +180,8 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
   Info("Status %d", status);
 }
 
-//static void MIC_ProcessFFT() {
-  CalculateFFT();
-//}
-int16_t MinimalValue(uint16_t length){
-  int16_t MinVal = 32767;
+float MinimalValue(uint16_t length){
+  float MinVal = 1;
   int16_t i;
   for(i =0; i<length;i++){
     if(sample[i] < MinVal){
@@ -191,8 +191,8 @@ int16_t MinimalValue(uint16_t length){
   return(MinVal);
 }
 
-int16_t MaximalValue(uint16_t length){
-  int16_t MaxVal = -32768;
+float MaximalValue(uint16_t length){
+  float MaxVal = -1;
   int16_t i;
   for(i =0; i<length;i++){
     if(sample[i] > MaxVal){
@@ -209,9 +209,9 @@ bool MIC_Check(void) {
     sample[i] = ConvertAudio(&AudioRxBuffer[4*i+2]);
     //Info("0x%08x", sample);
   }
-  Min = MinimalValue(NUMBER_OF_SAMPLES);
   Max = MaximalValue(NUMBER_OF_SAMPLES);
-  if(Max > 0 || Min < 0){
+  Min = MinimalValue(NUMBER_OF_SAMPLES);
+  if(Max > 0.0 || Min < 0.0){
     return(true);
   }
   return(false);
@@ -227,42 +227,49 @@ void MIC_Print(void) {
   //filter();
   Min = MinimalValue(NUMBER_OF_SAMPLES);
   Max = MaximalValue(NUMBER_OF_SAMPLES);
-  //float act_DB = 126.0 + Max;
+  dBc = MIC_GetDB();
+  setMic(dBc);
 //  HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
 //  HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
 //  HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
-//  if(act_DB < 90 && act_DB >= 80){
-//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
-//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
-//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
-//  }
-//  if(act_DB < 80 && act_DB >= 70){
-//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
-//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
-//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
-//  }
-//  if(act_DB < 70 && act_DB >= 60){
-//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
-//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
-//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
-//  }
-//  if(act_DB < 60 && act_DB >= 50){
-//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
-//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
-//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
-//  }
-//  if(act_DB < 50 && act_DB >= 40){
-//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
-//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
-//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
-//  }
-//  if(act_DB < 40 && act_DB >= 30){
-//    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
-//    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
-//    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
-//  }
+  if(dBc > 85){ //white
+    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
+    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
+    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+  }
+  if(dBc < 85 && dBc >= 80){ //red
+    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
+    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
+    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+  }
+  if(dBc < 80 && dBc >= 75){//purple
+    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
+    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
+    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+  }
+  if(dBc < 75 && dBc >= 70){//yellow
+    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
+    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
+    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+  }
+  if(dBc < 70 && dBc >= 65){//Green
+    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
+    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
+    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+  }
+  if(dBc < 65 && dBc >= 60){//blue
+    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
+    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
+    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+  }
+  if(dBc < 60){//light blue
+    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
+    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
+    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+  }
 
-  FFT();
+
+  //FFT();
 }
 
 bool MIC_MeasurementDone(void) {
@@ -300,21 +307,21 @@ void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef* hi2s) {
   }
 }
 
-//float MIC_GetDB(void) {
-//    float sum = 0.0f;
-//    float dBValue = 0.0f;
-//
-//    // Calculate the sum of the magnitudes in FFTResult
-//    for (uint16_t i = 0; i < NR_SAMPLES_128; i++) {
-//      // Sum of squares of magnitudes
-//      sum += FFTResult[i] * FFTResult[i];
-//    }
-//
-//    // Calculate the root mean square (RMS)
-//    float rms = sqrtf(sum / NR_SAMPLES_128);
-//
-//    // Convert the RMS value to dB
-//    dBValue = 20.0f * log10f(rms);
-//
-//    return dBValue;
-//}
+float MIC_GetDB(void) {
+    float sum = 0.0f;
+    float dBValue = 0.0f;
+
+    // Calculate the sum of the magnitudes in FFTResult
+    for (uint16_t i = NUMBER_OF_SAMPLES/2; i < NUMBER_OF_SAMPLES; i++) {
+      // Sum of squares of magnitudes
+      sum += sample[i]*sample[i];
+    }
+
+    // Calculate the root mean square (RMS)
+    float rms = sqrt(sum/(float)(NUMBER_OF_SAMPLES/2));
+
+    // Convert the RMS value to dB
+    dBValue = 20.0f * log10(rms) +120.0;
+
+    return dBValue;
+}

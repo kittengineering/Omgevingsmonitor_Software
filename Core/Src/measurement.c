@@ -94,18 +94,11 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_Hand
        MeasTest.HT_Tested = false;
        MeasEnabled.HT_measurementEnabled = false;
        // HT Device NOT connected, turning LED on RED.
-       // CCR1 = Red, CCR3 = Green, CCR4 = Blue.
-//       TIM2 -> CCR1 = 0;
-//       TIM2 -> CCR3 = 4000;
-//       TIM2 -> CCR4 = 4000;
     }else {
       // HT Device is connected, turning led on GREEN.
       // CCR1 = Red, CCR3 = Green, CCR4 = Blue.
       MeasTest.HT_Tested = true;
       Debug("Humidity / Temperature sensor initialised.");
-//      TIM2 -> CCR1 = 4000;
-//      TIM2 -> CCR3 = 0;
-//      TIM2 -> CCR4 = 4000;
     }
     if(!Gas_DeviceConnected()) {
       MeasTest.VOC_Tested = false;
@@ -255,6 +248,11 @@ void Meas_Test(){
       MeasTest.MIC_Tested = true;
       TIM2 -> CCR1 = 40000;
       TIM2 -> CCR3 = 0;
+      TIM2 -> CCR4 = 40000;
+    }
+    else{
+      TIM2 -> CCR1 = 0;
+      TIM2 -> CCR3 = 40000;
       TIM2 -> CCR4 = 40000;
     }
   }

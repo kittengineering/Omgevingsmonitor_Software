@@ -32,12 +32,14 @@ float Humidity = 0;
 float batteryCharge = 0;
 float solarCharge = 0;
 uint16_t VOCIndex = 0;
+float dBC = 0;
 static char messagePart1[128];
 static char messagePart2[128];
 static char messagePart3[128];
 static char messagePart4[128];
 static char messagePart5[128];
-static char API[] = "\"https://api.opensensemap.org/boxes/66c7394026df8b0008c359a4/data\"";
+static char APIBeurs[] = "\"https://deomgevingsmonitor.nl//api/set_device_data.php\"";
+//static char API[] = "\"https://api.opensensemap.org/boxes/66c7394026df8b0008c359a4/data\"";
 static char sensorID1[] = "\"66c7394026df8b0008c359a5\"";
 static char sensorID2[] = "\"66c7394026df8b0008c359a6\"";
 static char sensorID3[] = "\"66c7394026df8b0008c359a7\"";
@@ -81,6 +83,9 @@ void setMeasurement(float temp, float humid, uint16_t voc){
   Temperature = temp;
   Humidity = humid;
   VOCIndex = voc;
+}
+void setMic(float dB){
+  dBC = dB;
 }
 // Taken from firmware https://github.com/opendata-stuttgart/sensors-software/blob/master/airrohr-firmware/airrohr-firmware.ino
 
@@ -145,15 +150,15 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
 }
 uint16_t CreateMessage(){
   uint16_t messageLength = 0;
-  sprintf(messagePart1, "\"name\":\"temp\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f", sensorID1, Temperature);
+  sprintf(messagePart1, "\"name\":\"temp\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"graden\"", sensorID1, Temperature);
   messageLength += strlen(messagePart1);
-  sprintf(messagePart2, "\"name\":\"humid\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f", sensorID2, Humidity);
+  sprintf(messagePart2, "\"name\":\"humid\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"%%\"", sensorID2, Humidity);
   messageLength += strlen(messagePart2);
-  sprintf(messagePart3, "\"name\":\"Sound\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":77", sensorID3);
+  sprintf(messagePart3, "\"name\":\"Sound\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"dBC\"", sensorID3, dBC);
   messageLength += strlen(messagePart3);
-  sprintf(messagePart4, "\"name\":\"voc\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%d", sensorID4, VOCIndex);
+  sprintf(messagePart4, "\"name\":\"voc\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%d, \"unit\": \"VOC index\"", sensorID4, VOCIndex);
   messageLength += strlen(messagePart4);
-  sprintf(messagePart5, "\"name\":\"battery\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f", sensorID5, batteryCharge);
+  sprintf(messagePart5, "\"name\":\"battery\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%f, \"unit\": \"Volt\"", sensorID5, batteryCharge);
   messageLength += strlen(messagePart5);
   messageLength += 20;
   return(messageLength);
@@ -357,7 +362,7 @@ bool WEBSERVER(){
 bool HTTPCPOST(){
   char atCommandBuff[600];
   uint16_t length = CreateMessage();
-  sprintf(atCommandBuff, "AT+HTTPCPOST=%s,%d,1,\"content-type: application/json\"\r\n", API, length);
+  sprintf(atCommandBuff, "AT+HTTPCPOST=%s,%d,1,\"content-type: application/json\"\r\n", APIBeurs, length);
   uint8_t len = strlen(atCommandBuff);
   char atCommand[len+1];
   strncpy(atCommand, atCommandBuff, len);
