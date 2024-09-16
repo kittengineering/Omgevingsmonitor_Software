@@ -22,6 +22,7 @@ static bool EspTurnedOn = false;
 static bool InitIsDone = false;
 static bool WifiReset = false;
 static bool ConnectionMade = false;
+static uint32_t uid[3];
 
 static WifiConfig BeursConfig;
 static APIConfig OpenSenseApi;
@@ -116,6 +117,7 @@ static ESP_TEST TestState = ESP_TEST_INIT;
 void ESP_Init(UART_HandleTypeDef* espUart) {
   EspUart = espUart;
   EspState = ESP_STATE_INIT;
+  ESP_GetUID();
 }
 
 static bool ESP_Send(uint8_t* command, uint16_t length) {
@@ -127,6 +129,12 @@ static bool ESP_Send(uint8_t* command, uint16_t length) {
   return true;
 }
 
+void ESP_GetUID(){
+  uid[0] = HAL_GetUIDw0();
+  uid[1] = HAL_GetUIDw1();
+  uid[2] = HAL_GetUIDw2();
+  Debug("ID read");
+}
 static bool ESP_Receive(uint8_t* reply, uint8_t length) {
 //  HAL_UART_DMAStop(EspUart);
   RxComplete = false;
@@ -175,6 +183,7 @@ void SetCommandBuffer(const char* command) {
     CommandEchoed = false; // Reset the flag when a new command is sent
 }
 void StartProg(){
+  //InitWifiConfig();
   HAL_Delay(1000);
   HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_RESET);
   HAL_Delay(100);
@@ -716,9 +725,7 @@ void ESP_Upkeep(void) {
         EspState = ESP_STATE_SEND;
         ATCounter = 0;
         Mode = AT_MODE_SEND;
-        TIM2 -> CCR1 = 40000;
-        TIM2 -> CCR3 = 40000;
-        TIM2 -> CCR4 = 20000;
+        TIM2 -> CCR4 = 3000;
         ATCommand = ATCommandArray[ATCounter];
         ATExpectation = RECEIVE_EXPECTATION_OK;
       }
@@ -776,9 +783,7 @@ void ESP_Upkeep(void) {
       if(ATCommand == AT_END){
         if(Mode == AT_MODE_SEND){
           ESPTimeStamp = HAL_GetTick() + 300000;
-          TIM2 -> CCR1 = 40000;
-          TIM2 -> CCR3 = 0;
-          TIM2 -> CCR4 = 40000;
+          TIM2 -> CCR4 = 4000;
         }
         EspState = ESP_STATE_RESET;
       }

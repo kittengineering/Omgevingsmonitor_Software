@@ -100,13 +100,13 @@ typedef enum {
   AT_END
 } AT_Commands;
 
-typedef struct {
+typedef struct BeursConfig {
   char SSID[50];
   char Password[50];
 }WifiConfig;
 
 typedef struct {
-  char User[50];
+  char User[30];
   char ChipId[32];
   char BoxAddress[30];
   char TempAddress[30];

@@ -68,8 +68,8 @@ void SetTestDone(){
   HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
   HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
   HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
-  TIM2 -> CCR1 = 40000;
-  TIM2 -> CCR3 = 40000;
+  TIM2 -> CCR1 = 4000;
+  TIM2 -> CCR3 = 4000;
   TIM2 -> CCR4 = 0;
   TIM3 -> CCR1 = 4000;
   TIM3 -> CCR2 = 4000;
@@ -78,9 +78,9 @@ void SetTestDone(){
   HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
   HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
   HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
-  TIM2 -> CCR1 = 40000;
-  TIM2 -> CCR3 = 40000;
-  TIM2 -> CCR4 = 40000;
+  TIM2 -> CCR1 = 4000;
+  TIM2 -> CCR3 = 4000;
+  TIM2 -> CCR4 = 4000;
   TIM3 -> CCR1 = 4000;
   TIM3 -> CCR2 = 4000;
   TIM3 -> CCR3 = 4000;

@@ -128,13 +128,13 @@ void GPIO_InitPWMLEDs(TIM_HandleTypeDef* timer2, TIM_HandleTypeDef* timer3) {
   HAL_TIM_PWM_Start(timer2, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(timer2, TIM_CHANNEL_3);
   HAL_TIM_PWM_Start(timer2, TIM_CHANNEL_4);
-  TIM2 -> ARR = 40000;
+  TIM2 -> ARR = 4000;
 
   // Resetting the LEDs.
   // CCR1 = Red, CCR3 = Green, CCR4 = Blue.
-  TIM2 -> CCR1 = 40000;
-  TIM2 -> CCR3 = 40000;
-  TIM2 -> CCR4 = 40000;
+  TIM2 -> CCR1 = 4000;
+  TIM2 -> CCR3 = 4000;
+  TIM2 -> CCR4 = 4000;
 
   // Timer 3 PWM init
   HAL_TIM_PWM_Start(timer3, TIM_CHANNEL_1);

@@ -167,6 +167,7 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
     Error("Microphone is not initialised.");
     return;
   }
+  TIM2 -> CCR1 = 3000;
   Debug("In mic start");
   UpdateSampleRate(sampleRate);
   Samples = (NrOfSamples)nrSamples;
@@ -300,6 +301,7 @@ bool MIC_MeasurementDone(void) {
   if(DataReady) {
     MIC_Print();
     Debug("MIC measurement is done with %i samples.", Samples);
+    TIM2 -> CCR1 = 4000;
     return true;
   }
   return false;
@@ -308,6 +310,7 @@ bool MIC_TestMeasurementDone(void) {
   bool Check;
   if(DataReady) {
     Check = MIC_Check();
+    TIM2 -> CCR1 = 4000;
     return Check;
   }
   return false;

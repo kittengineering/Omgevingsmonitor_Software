@@ -183,6 +183,7 @@ void Meas_Upkeep(void) {
 
   case MEAS_STATE_START_MEASUREMENTS:
     StartMeasurements();
+    TIM2 -> CCR3 = 3000;
     MeasState = MEAS_STATE_WAIT_FOR_COMPLETION;
    break;
 
@@ -201,6 +202,7 @@ void Meas_Upkeep(void) {
     Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
     setMeasurement(MeasurementCtx.temperature, MeasurementCtx.humidityPerc, MeasurementCtx.vocIndex);
     checkCharges();
+    TIM2 -> CCR3 = 4000;
     MeasStamp = HAL_GetTick() + 10000;
     MeasState = MEAS_STATE_WAIT;
     break;
