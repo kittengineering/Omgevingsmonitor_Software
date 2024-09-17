@@ -57,7 +57,7 @@ static AT_Commands ATCommandArray[10];
 static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER, AT_CWINIT, AT_CWMODE3, AT_CWSAP, AT_CIPMUX, AT_WEBSERVER};
 static AT_Commands AT_SEND[] = {AT_WAKEUP,  AT_HTTPCPOST, AT_SENDDATA};
 static AT_Commands AT_WIFI_CONFIG[] = {AT_WAKEUP, AT_CWINIT, AT_CWMODE1, AT_CWAUTOCONN, AT_CWJAP, AT_CIPMUX};
-static AT_Commands AT_WIFI_RECONFIG[] = {AT_WAKEUP, AT_RESTORE};
+static AT_Commands AT_WIFI_RECONFIG[] = {AT_WAKEUP, AT_RESTORE, };
 uint8_t ATState;
 uint8_t ATCounter = 0;
 //static bool StartUpDone = false;
@@ -686,14 +686,14 @@ void ESP_Upkeep(void) {
     case ESP_STATE_INIT:
       if(!EspTurnedOn){
         HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_RESET);
-        HAL_Delay(500);
+        HAL_Delay(50);
         HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_SET);
-        HAL_Delay(1000);
+        HAL_Delay(10);
         // Reset ESP, so we're sure that we're in the right state.
         HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_RESET);
-        HAL_Delay(100);
+        HAL_Delay(10);
         HAL_GPIO_WritePin(ESP32_BOOT_GPIO_Port, ESP32_BOOT_Pin, 1);
-        HAL_Delay(100);
+        HAL_Delay(10);
         HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_SET);
         ESPTimeStamp = HAL_GetTick() + ESP_START_UP_TIME;
         EspTurnedOn = true;
