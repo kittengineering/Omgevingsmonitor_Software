@@ -138,7 +138,7 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_Hand
   Measurements[offset++] = (MeasurementParameters) {HT_StartMeasurementWrapper, HT_IsMeasurementDoneWrapper, &MeasurementCtx.HT_measurementDone, MeasEnabled.HT_measurementEnabled};
   Measurements[offset++] = (MeasurementParameters) {VOC_StartMeasurementWrapper, VOC_IsMeasurementDoneWrapper, &MeasurementCtx.VOC_measurementDone, MeasEnabled.VOC_measurementEnabled};
   Measurements[offset++] = (MeasurementParameters) {PM_StartMeasurementWrapper, PM_IsMeasurementDoneWrapper, &MeasurementCtx.PM_measurementDone, MeasEnabled.PM_measurementEnabled};
-  Measurements[offset++] = (MeasurementParameters) {MIC_StartMeasurementWrapper, MIC_IsMeasurementDoneWrapper, &MeasurementCtx.MIC_measurementDone, MeasEnabled.MIC_measurementEnabled};
+//  Measurements[offset++] = (MeasurementParameters) {MIC_StartMeasurementWrapper, MIC_IsMeasurementDoneWrapper, &MeasurementCtx.MIC_measurementDone, MeasEnabled.MIC_measurementEnabled};
 }
 
 void StartMeasurements(void) {
@@ -149,6 +149,28 @@ void StartMeasurements(void) {
   }
 }
 
+void Meas_Test(){
+  if(!MeasTest.ESP_Tested){
+    ESP_WakeTest();
+  }
+  if(!MeasTest.MIC_Tested){
+    if(MIC_IsTestMeasurementDoneWrapper()){
+      MeasTest.MIC_Tested = true;
+      TIM2 -> CCR1 = 4000;
+      TIM2 -> CCR3 = 0;
+      TIM2 -> CCR4 = 4000;
+    }
+    else{
+      TIM2 -> CCR1 = 0;
+      TIM2 -> CCR3 = 4000;
+      TIM2 -> CCR4 = 4000;
+    }
+  }
+  if(MeasTest.HT_Tested && MeasTest.VOC_Tested && MeasTest.ESP_Tested && MeasTest.MIC_Tested){
+    Debug("Test completed");
+    SetTestDone();
+  }
+}
 void ResetMeasurements(void) {
   MeasurementCtx.humidityPerc = 0;
   MeasurementCtx.temperature = 0;
@@ -285,35 +307,8 @@ static void Meas_TurnOff(void) {
   Measurements[offset++].enabled = false;
 }
 
-
-void Meas_Test(){
-  if(!MeasTest.ESP_Tested){
-    ESP_WakeTest();
-  }
-  if(!MeasTest.MIC_Tested){
-    if(MIC_IsTestMeasurementDoneWrapper()){
-      MeasTest.MIC_Tested = true;
-      TIM2 -> CCR1 = 4000;
-      TIM2 -> CCR3 = 0;
-      TIM2 -> CCR4 = 4000;
-    }
-    else{
-      TIM2 -> CCR1 = 0;
-      TIM2 -> CCR3 = 4000;
-      TIM2 -> CCR4 = 4000;
-    }
-  }
-  if(MeasTest.HT_Tested && MeasTest.VOC_Tested && MeasTest.ESP_Tested && MeasTest.MIC_Tested){
-    Debug("Test completed");
-    SetTestDone();
-  }
-}
-
 void SetESPMeasurementDone(){
   MeasTest.ESP_Tested = true;
-}
-void SetMICMeasurementDone(){
-  MeasTest.MIC_Tested = true;
 }
 
 MeasurementState Meas_GetState(void) {
