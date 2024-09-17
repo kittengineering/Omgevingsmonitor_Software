@@ -54,10 +54,10 @@ static char sensorID5[] = "\"66c7394026df8b0008c359a9\"";
 static char userID[] = "\"55\"";
 static char user[] = "\"Piet\"";
 static AT_Commands ATCommandArray[10];
-static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER, AT_CWINIT, AT_CWMODE3, AT_CWSAP, AT_CIPMUX, AT_WEBSERVER};
+static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER, AT_CWINIT, AT_CWMODE3, AT_CIPMUX, AT_WEBSERVER};
 static AT_Commands AT_SEND[] = {AT_WAKEUP,  AT_HTTPCPOST, AT_SENDDATA};
 static AT_Commands AT_WIFI_CONFIG[] = {AT_WAKEUP, AT_CWINIT, AT_CWMODE1, AT_CWAUTOCONN, AT_CWJAP, AT_CIPMUX};
-static AT_Commands AT_WIFI_RECONFIG[] = {AT_WAKEUP, AT_RESTORE, };
+static AT_Commands AT_WIFI_RECONFIG[] = {AT_WAKEUP, AT_RESTORE, AT_CWMODE3, AT_CWSAP};
 uint8_t ATState;
 uint8_t ATCounter = 0;
 //static bool StartUpDone = false;
@@ -708,7 +708,7 @@ void ESP_Upkeep(void) {
     case ESP_STATE_MODE_SELECT:
       memset(ATCommandArray, AT_END, 10);
       if(!InitIsDone || WifiReset){
-        memcpy(ATCommandArray, AT_INIT, 8);
+        memcpy(ATCommandArray, AT_INIT, 7);
         EspState = ESP_STATE_SEND;
         ATCounter = 0;
         Mode = AT_MODE_INIT;
