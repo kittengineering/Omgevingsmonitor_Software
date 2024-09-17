@@ -81,10 +81,16 @@ void Error_Handler(void);
 #define MCU_LED_A_G_GPIO_Port GPIOC
 #define MCU_LED_A_B_Pin GPIO_PIN_8
 #define MCU_LED_A_B_GPIO_Port GPIOC
+#define Charger_status_Pin GPIO_PIN_9
+#define Charger_status_GPIO_Port GPIOC
 #define Wireless_PSU_PG_Pin GPIO_PIN_8
 #define Wireless_PSU_PG_GPIO_Port GPIOA
+#define BOOT0_Pin GPIO_PIN_15
+#define BOOT0_GPIO_Port GPIOA
 #define Wireless_PSU_EN_Pin GPIO_PIN_11
 #define Wireless_PSU_EN_GPIO_Port GPIOC
+#define Boost_Enable_Pin GPIO_PIN_12
+#define Boost_Enable_GPIO_Port GPIOC
 #define User_Button_Pin GPIO_PIN_2
 #define User_Button_GPIO_Port GPIOD
 #define MCU_LED_C_G_Pin GPIO_PIN_8
@@ -95,8 +101,9 @@ void Error_Handler(void);
 /* USER CODE BEGIN Private defines */
 #define SRC_VERSION "1.00"
 #define LED_BLINK_INTERVAL 1000
-/* USER CODE END Private defines */
 void SetTestDone();
+/* USER CODE END Private defines */
+
 #ifdef __cplusplus
 }
 #endif

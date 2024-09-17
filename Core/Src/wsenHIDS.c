@@ -209,7 +209,7 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
 	  // Measurements done, calculating average and returning it.
     float sumTemperature = 0.0;
     float sumHumidity = 0.0;
-    for (uint32_t i = 0; i < measurements; i++) {
+    for (uint8_t i = 0; i < measurements; i++) {
         sumTemperature += temperatures[i];
         sumHumidity += humidities[i];
     }

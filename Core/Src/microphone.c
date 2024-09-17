@@ -85,17 +85,13 @@ static void UpdateSampleRate(uint32_t sampleRate) {
   HAL_I2S_Init(I2SHandle);
 }
 
-static float ConvertAudio(uint16_t* data) {
+static float ConvertAudio(int16_t* data) {
   uint32_t MSP;
   uint32_t LSP;
   int32_t signedAudioValue;
   float Division = 8388607.0; //Reference?
   float adjustedAudioValue = 0;
   uint32_t audioValue = 0;
-
-  int32_t value = 12345;
-  //uint16_t msb=(value & 0x0FFFFFF)>>9;
-  //uint16_t lsb=(value & 0x1FF)<<7;
   MSP = data[0]<<9;
   LSP = (data[1]&0xFF80)>>7;
   audioValue = MSP | LSP;

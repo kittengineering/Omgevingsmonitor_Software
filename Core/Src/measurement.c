@@ -24,6 +24,7 @@ typedef struct {
     bool MIC_measurementDone;
 } MeasurementContext;
 
+uint32_t StartTiming = 0;
 typedef void (*StartMeasurementFunc)(void);
 typedef bool (*IsMeasurementDoneFunc)(void);
 
@@ -89,7 +90,6 @@ void testInit(){
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_HandleTypeDef* ADC_HANDLER) {
   MeasState = MEAS_STATE_INIT;
   testInit();
-  batteryInit(ADC_HANDLER);
   if(MeasEnabled.HT_measurementEnabled || MeasEnabled.VOC_measurementEnabled) {
     I2CSensors_Init(sensorI2C);
     if(!HT_DeviceConnected()) {
@@ -230,6 +230,7 @@ void Mic_Upkeep(){
 void Meas_Upkeep(void) {
   switch(MeasState) {
   case MEAS_STATE_OFF:
+
     Debug("Measurements are turned off.");
     break;
 
@@ -258,7 +259,6 @@ void Meas_Upkeep(void) {
     Debug("SGP40 index value: %d", MeasurementCtx.vocIndex);
     Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
     setMeasurement(MeasurementCtx.temperature, MeasurementCtx.humidityPerc, MeasurementCtx.vocIndex);
-    checkCharges();
     TIM2 -> CCR3 = 4000;
     MeasStamp = HAL_GetTick() + 10000;
     MeasState = MEAS_STATE_WAIT;

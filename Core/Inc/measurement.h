@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include "ESP.h"
 #include "utils.h"
-#include "Battery_utils.h"
+
 
 #define MEAS_MAX_RETRY_ATTEMPTS 3
 #define MEAS_MEASUREMENT_COUNT 3

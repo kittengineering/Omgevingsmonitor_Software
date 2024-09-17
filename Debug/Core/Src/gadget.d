@@ -29,6 +29,8 @@ Core/Src/gadget.o: ../Core/Src/gadget.c ../Core/Inc/gadget.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_i2s.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pwr.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pwr_ex.h \
+ C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_rtc.h \
+ C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_rtc_ex.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_tim.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_tim_ex.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart.h \
@@ -37,7 +39,8 @@ Core/Src/gadget.o: ../Core/Src/gadget.c ../Core/Inc/gadget.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_ll_usb.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pcd_ex.h \
  ../Core/Inc/ESP.h ../Core/Inc/utils.h ../Core/Inc/gpio.h \
- ../Core/Inc/main.h ../Core/Inc/Battery_utils.h ../Core/Inc/adc.h
+ ../Core/Inc/main.h ../Core/Inc/statusCheck.h ../Core/Inc/PowerUtils.h \
+ ../Core/Inc/adc.h
 ../Core/Inc/gadget.h:
 ../Core/Inc/gadget.h:
 ../Core/Inc/measurement.h:
@@ -70,6 +73,8 @@ C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HA
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_i2s.h:
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pwr.h:
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_pwr_ex.h:
+C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_rtc.h:
+C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_rtc_ex.h:
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_tim.h:
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_tim_ex.h:
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HAL_Driver/Inc/stm32l0xx_hal_uart.h:
@@ -81,5 +86,6 @@ C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/STM32L0xx_HA
 ../Core/Inc/utils.h:
 ../Core/Inc/gpio.h:
 ../Core/Inc/main.h:
-../Core/Inc/Battery_utils.h:
+../Core/Inc/statusCheck.h:
+../Core/Inc/PowerUtils.h:
 ../Core/Inc/adc.h:

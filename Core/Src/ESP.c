@@ -21,6 +21,7 @@ static bool testRound = true;
 static bool EspTurnedOn = false;
 static bool InitIsDone = false;
 static bool WifiReset = false;
+static bool ReconfigSet = false;
 static bool ConnectionMade = false;
 static uint32_t uid[3];
 
@@ -72,7 +73,6 @@ static uint8_t retry = 0;
 //static char TempBuffer[ESP_MAX_BUFFER_SIZE];      // Buffer to build up the received message
 static char CommandBuffer[ESP_TX_BUFFER_SIZE]; // Buffer to store the last sent command
 static bool CommandEchoed = false;            // Flag to indicate if the command was echoed
-
 /* TODO: Add done function per ATCommand and save the response in there.
  * Response handle functions
 */
@@ -113,7 +113,11 @@ static ESP_Test TestState = ESP_TEST_INIT;
 
 //TODO: Add de-init if ESP is off. Otherwise there is going to be 3.3V on the ESP.
 
-
+void ESP_GetUID(){
+  uid[0] = HAL_GetUIDw0();
+  uid[1] = HAL_GetUIDw1();
+  uid[2] = HAL_GetUIDw2();
+}
 void ESP_Init(UART_HandleTypeDef* espUart) {
   EspUart = espUart;
   EspState = ESP_STATE_INIT;
@@ -127,13 +131,6 @@ static bool ESP_Send(uint8_t* command, uint16_t length) {
     return false;
   }
   return true;
-}
-
-void ESP_GetUID(){
-  uid[0] = HAL_GetUIDw0();
-  uid[1] = HAL_GetUIDw1();
-  uid[2] = HAL_GetUIDw2();
-  Debug("ID read");
 }
 static bool ESP_Receive(uint8_t* reply, uint8_t length) {
 //  HAL_UART_DMAStop(EspUart);
@@ -732,6 +729,15 @@ void ESP_Upkeep(void) {
         ATCommand = ATCommandArray[ATCounter];
         ATExpectation = RECEIVE_EXPECTATION_OK;
       }
+      if(ReconfigSet){
+        memcpy(ATCommandArray, AT_WIFI_RECONFIG, 3);
+        EspState = ESP_STATE_SEND;
+        ATCounter = 0;
+        Mode = AT_MODE_SEND;
+        TIM2 -> CCR4 = 3000;
+        ATCommand = ATCommandArray[ATCounter];
+        ATExpectation = RECEIVE_EXPECTATION_OK;
+      }
 
     break;
 
@@ -793,7 +799,7 @@ void ESP_Upkeep(void) {
     break;
 
     case ESP_STATE_RESET:
-      if(TimestampIsReached(ESPTimeStamp)){
+      if(TimestampIsReached(ESPTimeStamp) || ReconfigSet){
         if(Mode == AT_MODE_INIT){
           InitIsDone = true;
         }

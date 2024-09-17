@@ -65,10 +65,13 @@ void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_SET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(Boost_Enable_GPIO_Port, Boost_Enable_Pin, GPIO_PIN_RESET);
+
   /*Configure GPIO pins : PC13 PC0 PC1 PC2
-                           PC3 PC9 PC12 */
+                           PC3 */
   GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2
-                          |GPIO_PIN_3|GPIO_PIN_9|GPIO_PIN_12;
+                          |GPIO_PIN_3;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -80,14 +83,14 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOH, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PA4 PA5 PA6 PA15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_15;
+  /*Configure GPIO pins : PA4 PA5 PA6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6;
   GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PAPin PAPin */
-  GPIO_InitStruct.Pin = VusbDetect_Pin|Wireless_PSU_PG_Pin;
+  /*Configure GPIO pins : PAPin PAPin PAPin */
+  GPIO_InitStruct.Pin = VusbDetect_Pin|Wireless_PSU_PG_Pin|BOOT0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -108,16 +111,22 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = Wireless_PSU_EN_Pin;
+  GPIO_InitStruct.Pin = Charger_status_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(Charger_status_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : PCPin PCPin */
+  GPIO_InitStruct.Pin = Wireless_PSU_EN_Pin|Boost_Enable_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(Wireless_PSU_EN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = User_Button_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(User_Button_GPIO_Port, &GPIO_InitStruct);
 
 }
