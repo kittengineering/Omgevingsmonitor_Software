@@ -96,7 +96,7 @@ void Error_Handler(void);
 #define SRC_VERSION "1.00"
 #define LED_BLINK_INTERVAL 1000
 /* USER CODE END Private defines */
-
+void SetTestDone();
 #ifdef __cplusplus
 }
 #endif

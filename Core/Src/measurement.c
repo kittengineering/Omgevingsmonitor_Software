@@ -39,8 +39,10 @@ static MeasurementParameters Measurements[MEAS_MEASUREMENT_COUNT];
 static EnabledMeasurements MeasEnabled;
 static MeasurementTested MeasTest;
 static MeasurementState MeasState = MEAS_STATE_INIT;
+static MicrophoneState MicState = MIC_STATE_INIT;
 static uint8_t CurrentMeasurementIndex = 0;
 static uint32_t MeasStamp;
+static uint32_t MicStamp;
 
 static void HT_StartMeasurementWrapper(void) {
   HT_StartMeasurement();
@@ -66,7 +68,7 @@ static bool PM_IsMeasurementDoneWrapper(void) {
 }
 
 static void MIC_StartMeasurementWrapper(void) {
-  MIC_Start(SAMPLE_RATE_8K, NR_SAMPLES_128); // Dont init like this.
+  MIC_Start(SAMPLE_RATE_8K, NR_SAMPLES_128);
 }
 
 static bool MIC_IsMeasurementDoneWrapper(void) {
@@ -170,6 +172,39 @@ bool MeasurementsCompleted(void) {
   return true;
 }
 
+void Mic_Upkeep(){
+  switch(MicState){
+
+  case MIC_STATE_INIT:
+    //reset if necesarry
+    MicState = MIC_STATE_START_MEASUREMENT;
+    break;
+
+  case MIC_STATE_START_MEASUREMENT:
+    MIC_StartMeasurementWrapper();
+    MicState = MIC_STATE_WAIT_FOR_COMPLETION;
+    break;
+
+  case MIC_STATE_WAIT_FOR_COMPLETION:
+    if(MIC_IsMeasurementDoneWrapper()){
+      MicState = MIC_STATE_WAIT;
+      MicStamp = HAL_GetTick() + 1000;
+    }
+    break;
+
+  case MIC_STATE_WAIT:
+    if(TimestampIsReached(MicStamp)){
+      MicState = MIC_STATE_START_MEASUREMENT;
+    }
+    break;
+
+  default:
+    Debug("Unexpected ocurrence happened");
+    MicState = MIC_STATE_INIT;
+    break;
+  }
+}
+
 void Meas_Upkeep(void) {
   switch(MeasState) {
   case MEAS_STATE_OFF:
@@ -258,14 +293,14 @@ void Meas_Test(){
   if(!MeasTest.MIC_Tested){
     if(MIC_IsTestMeasurementDoneWrapper()){
       MeasTest.MIC_Tested = true;
-      TIM2 -> CCR1 = 40000;
+      TIM2 -> CCR1 = 4000;
       TIM2 -> CCR3 = 0;
-      TIM2 -> CCR4 = 40000;
+      TIM2 -> CCR4 = 4000;
     }
     else{
       TIM2 -> CCR1 = 0;
-      TIM2 -> CCR3 = 40000;
-      TIM2 -> CCR4 = 40000;
+      TIM2 -> CCR3 = 4000;
+      TIM2 -> CCR4 = 4000;
     }
   }
   if(MeasTest.HT_Tested && MeasTest.VOC_Tested && MeasTest.ESP_Tested && MeasTest.MIC_Tested){

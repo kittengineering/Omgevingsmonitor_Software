@@ -15,7 +15,15 @@
 #include "Battery_utils.h"
 
 #define MEAS_MAX_RETRY_ATTEMPTS 3
-#define MEAS_MEASUREMENT_COUNT 4
+#define MEAS_MEASUREMENT_COUNT 3
+
+typedef enum {
+  MIC_STATE_INIT,
+  MIC_STATE_START_MEASUREMENT,
+  MIC_STATE_WAIT_FOR_COMPLETION,
+  MIC_STATE_WAIT,
+  MIC_STATE_OFF
+}MicrophoneState;
 
 typedef enum {
     MEAS_STATE_INIT,
@@ -51,5 +59,6 @@ void Meas_DeInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s);
 void SetESPMeasurementDone();
 void SetMICMeasurementDone();
 void Meas_Test();
+void Mic_Upkeep();
 #endif /* INC_MEASUREMENT_H_ */
 

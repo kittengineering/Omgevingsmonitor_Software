@@ -30,4 +30,4 @@
 ../Core/Src/ESP.c:464:6:ATCompare	24	static
 ../Core/Src/ESP.c:478:6:AT_Send	32	static
 ../Core/Src/ESP.c:577:6:ESP_WakeTest	24	static
-../Core/Src/ESP.c:667:6:ESP_Upkeep	24	static
+../Core/Src/ESP.c:670:6:ESP_Upkeep	24	static

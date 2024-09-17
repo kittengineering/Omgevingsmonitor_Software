@@ -5,8 +5,8 @@
 ../Core/Src/microphone.c:187:7:MinimalValue	32	static
 ../Core/Src/microphone.c:198:7:MaximalValue	32	static
 ../Core/Src/microphone.c:208:6:MIC_Check	32	static
-../Core/Src/microphone.c:223:6:MIC_Print	32	static
-../Core/Src/microphone.c:300:6:MIC_MeasurementDone	8	static
-../Core/Src/microphone.c:309:6:MIC_TestMeasurementDone	24	static
-../Core/Src/microphone.c:321:6:HAL_I2S_RxCpltCallback	16	static
-../Core/Src/microphone.c:337:7:MIC_GetDB	32	static
+../Core/Src/microphone.c:223:6:MIC_Print	24	static
+../Core/Src/microphone.c:296:6:MIC_MeasurementDone	8	static
+../Core/Src/microphone.c:305:6:MIC_TestMeasurementDone	24	static
+../Core/Src/microphone.c:317:6:HAL_I2S_RxCpltCallback	16	static
+../Core/Src/microphone.c:333:7:MIC_GetDB	32	static

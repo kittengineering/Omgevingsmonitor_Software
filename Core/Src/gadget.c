@@ -45,7 +45,6 @@ void Gadget_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, UART_H
   ESP_Init(espUart);
 //  Gadget_SetSleepDuration();
   Debug("Gadget initialised.");
-  Debug("Simple check to check the branch");
 }
 
 void Gadget_DeInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {
@@ -78,6 +77,7 @@ void UpkeepGadget() {
    * 	Disable ESP
    */
   Meas_Upkeep();
+  Mic_Upkeep();
 
   // Check if measurements aren't still running.
 

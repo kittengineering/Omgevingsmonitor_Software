@@ -107,8 +107,8 @@ struct struct_wifiInfo
 static AT_Expectation ATExpectation = RECEIVE_EXPECTATION_OK;
 static AT_Commands ATCommand = AT_WAKEUP;
 static ESP_States EspState = ESP_STATE_INIT;
-static AT_MODE Mode;
-static ESP_TEST TestState = ESP_TEST_INIT;
+static AT_Mode Mode;
+static ESP_Test TestState = ESP_TEST_INIT;
 //static ATCommandsParameters ATCommands[ESP_AT_COMMANDS_COUNT];
 
 //TODO: Add de-init if ESP is off. Otherwise there is going to be 3.3V on the ESP.
@@ -184,7 +184,7 @@ void SetCommandBuffer(const char* command) {
 }
 void StartProg(){
   //InitWifiConfig();
-  HAL_Delay(1000);
+  HAL_Delay(100);
   HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_RESET);
   HAL_Delay(100);
   HAL_GPIO_WritePin(ESP32_BOOT_GPIO_Port, ESP32_BOOT_Pin, GPIO_PIN_RESET);
@@ -576,7 +576,7 @@ bool AT_Send(AT_Commands state){
 
 void ESP_WakeTest(void) {
   bool ATSend = false;
-  static RECEIVE_STATUS ATReceived = RECEIVE_STATUS_INCOMPLETE;
+  static Receive_Status ATReceived = RECEIVE_STATUS_INCOMPLETE;
   switch (TestState){
 
     case ESP_TEST_INIT:
@@ -650,7 +650,10 @@ void ESP_WakeTest(void) {
       HAL_GPIO_WritePin(ESP32_BOOT_GPIO_Port, ESP32_BOOT_Pin, 0);
       // Reset ESP, so we're sure that we're in the right state.
       SetESPMeasurementDone();
+      break;
 
+    default:
+      TestState = ESP_TEST_INIT;
       break;
 
 
@@ -666,7 +669,7 @@ void ESP_WakeTest(void) {
 
 void ESP_Upkeep(void) {
   bool ATSend = false;
-  static RECEIVE_STATUS ATReceived = RECEIVE_STATUS_INCOMPLETE;
+  static Receive_Status ATReceived = RECEIVE_STATUS_INCOMPLETE;
   switch (EspState) {
     case ESP_STATE_OFF:
       // Turning off the ESP

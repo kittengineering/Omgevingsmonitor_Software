@@ -94,8 +94,8 @@ static float ConvertAudio(uint16_t* data) {
   uint32_t audioValue = 0;
 
   int32_t value = 12345;
-  uint16_t msb=(value & 0x0FFFFFF)>>9;
-  uint16_t lsb=(value & 0x1FF)<<7;
+  //uint16_t msb=(value & 0x0FFFFFF)>>9;
+  //uint16_t lsb=(value & 0x1FF)<<7;
   MSP = data[0]<<9;
   LSP = (data[1]&0xFF80)>>7;
   audioValue = MSP | LSP;
@@ -221,16 +221,12 @@ bool MIC_Check(void) {
   return(false);
 }
 void MIC_Print(void) {
-  float Max;
-  float Min;
   Info("New samples");
   for (uint16_t i = 0; i < NUMBER_OF_SAMPLES; i += 1) {
     sample[i] = ConvertAudio(&AudioRxBuffer[4*i+2]);
     //Info("0x%08x", sample);
   }
   //filter();
-  Min = MinimalValue(NUMBER_OF_SAMPLES);
-  Max = MaximalValue(NUMBER_OF_SAMPLES);
   dBc = MIC_GetDB();
   if(counter < 10){
     dBcSamples[counter] = dBc;

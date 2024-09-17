@@ -41,13 +41,14 @@ typedef enum {
   ESP_TEST_VALIDATE,
   ESP_TEST_DEINIT,
   ESP_TEST_BOOT
-}ESP_TEST;
+}ESP_Test;
 
 typedef enum {
   AT_MODE_INIT,
   AT_MODE_CONFIG,
   AT_MODE_SEND
-}AT_MODE;
+}AT_Mode;
+
 typedef enum {
   RECEIVE_STATUS_OK,
   RECEIVE_STATUS_ERROR,
@@ -57,7 +58,7 @@ typedef enum {
   RECEIVE_STATUS_START,
   RECEIVE_STATUS_TIMEOUT,
   RECEIVE_STATUS_UNPROGGED
-}RECEIVE_STATUS;
+}Receive_Status;
 
 typedef enum {
   RECEIVE_EXPECTATION_OK,
