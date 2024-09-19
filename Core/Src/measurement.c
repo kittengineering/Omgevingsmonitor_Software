@@ -13,6 +13,7 @@
 #include "microphone.h"
 #include "gasSensor.h"
 #include "humidTemp.h"
+#include "statusCheck.h"
 
 typedef struct {
     float humidityPerc;
@@ -99,7 +100,6 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_Hand
        // HT Device NOT connected, turning LED on RED.
     }else {
       // HT Device is connected, turning led on GREEN.
-      // CCR1 = Red, CCR3 = Green, CCR4 = Blue.
       MeasTest.HT_Tested = true;
       Debug("Humidity / Temperature sensor initialised.");
     }
@@ -112,11 +112,10 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_Hand
       Debug("SGP sensor initialised.");
     }
     if(MeasTest.VOC_Tested && MeasTest.HT_Tested){
-      HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
-      HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
-      HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+      SetDBLED(false, true, false);
     }
     else{
+      SetDBLED(true, false, false);
       HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
       HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
       HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
@@ -148,14 +147,10 @@ void Meas_Test(){
   if(!MeasTest.MIC_Tested){
     if(MIC_IsTestMeasurementDoneWrapper()){
       MeasTest.MIC_Tested = true;
-      TIM2 -> CCR1 = 4000;
-      TIM2 -> CCR3 = 0;
-      TIM2 -> CCR4 = 4000;
+      SetStatusLED(4000, 3000, 4000);
     }
     else{
-      TIM2 -> CCR1 = 0;
-      TIM2 -> CCR3 = 4000;
-      TIM2 -> CCR4 = 4000;
+      SetStatusLED(3000, 4000, 4000);
     }
   }
   if(MeasTest.HT_Tested && MeasTest.VOC_Tested && MeasTest.ESP_Tested && MeasTest.MIC_Tested){
@@ -233,7 +228,7 @@ void Meas_Upkeep(void) {
 
   case MEAS_STATE_START_MEASUREMENTS:
     StartMeasurements();
-    TIM2 -> CCR3 = 3000;
+    SetMeasurementIndicator();
     MeasState = MEAS_STATE_WAIT_FOR_COMPLETION;
    break;
 
@@ -251,7 +246,7 @@ void Meas_Upkeep(void) {
     Debug("SGP40 index value: %d", MeasurementCtx.vocIndex);
     Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", MeasurementCtx.humidityPerc, MeasurementCtx.temperature);
     setMeasurement(MeasurementCtx.temperature, MeasurementCtx.humidityPerc, MeasurementCtx.vocIndex);
-    TIM2 -> CCR3 = 4000;
+    ResetMeasurementIndicator();
     MeasStamp = HAL_GetTick() + 10000;
     MeasState = MEAS_STATE_WAIT;
     break;

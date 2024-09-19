@@ -19,6 +19,7 @@
 #include "measurement.h"
 #include "stm32l0xx_hal.h"
 #include "utils.h"
+#include "statusCheck.h"
 
 #define NUMBER_OF_SAMPLES 512
 #define AUDIO_RX_BUFFER NR_SAMPLES_512*2

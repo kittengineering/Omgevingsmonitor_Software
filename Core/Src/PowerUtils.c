@@ -112,58 +112,8 @@ bool PulledDownStatus = false ;
 }
 
 
-// Sets Status LED to (RGB) color
-void SetStatusLED(uint8_t red, uint8_t green, uint8_t blue){
-  TIM2 -> CCR1 = red;
-  TIM2 -> CCR3 = green;
-  TIM2 -> CCR4 = blue;
-return;
-}
 
-// Sets dB LED to (RGB) color
-void SetDBLED(bool red, bool green, bool blue){
-  // RED LED
-  if (red) {
-    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, GPIO_PIN_RESET);
-  }
-  else
-  {
-    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, GPIO_PIN_SET);
-  }
-  // Green LED
-  if (green) {
-    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, GPIO_PIN_RESET);
-  }
-  else
-  {
-    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, GPIO_PIN_SET);
-  }
-  // Blue LED
-  if (blue) {
-    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, GPIO_PIN_RESET);
-  }
-  else
-  {
-    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, GPIO_PIN_SET);
-  }
-return;
-}
 
-// Sets VOC LED to (RGB) color
-void SetVocLED(uint8_t red, uint8_t green, uint8_t blue){
-  TIM3 -> CCR1 = red;
-  TIM3 -> CCR2 = green;
-  TIM3 -> CCR3 = blue;
-return;
-}
-
-// Sets all LEDs Off
-void SetLEDsOff(void){
-  SetStatusLED(0,0,0);
-  SetDBLED(0,0,0);
-  SetVocLED(0,0,0);
-return;
-}
 
 /* Button operations
  * User Button A  ( Boot0 PIN )

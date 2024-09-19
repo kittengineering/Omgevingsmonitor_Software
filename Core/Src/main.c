@@ -38,6 +38,8 @@
 #include "ESP.h"
 #include "PowerUtils.h"
 #include "usbd_cdc_if.h"
+#include "statusCheck.h"
+#include "RealTimeClock.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -72,25 +74,14 @@ void SystemClock_Config(void);
 void SetTestDone(){
   testDone = true;
   HAL_Delay(1000);
-  HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
-  HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
-  HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
-  TIM2 -> CCR1 = 4000;
-  TIM2 -> CCR3 = 4000;
-  TIM2 -> CCR4 = 0;
-  TIM3 -> CCR1 = 4000;
-  TIM3 -> CCR2 = 4000;
-  TIM3 -> CCR3 = 0;
+  SetDBLED(false, false, true);
+  SetStatusLED(4000, 4000, 3000);
+  SetVocLED(4000, 4000, 3000);
   HAL_Delay(1000);
-  HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
-  HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
-  HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
-  TIM2 -> CCR1 = 4000;
-  TIM2 -> CCR3 = 4000;
-  TIM2 -> CCR4 = 4000;
-  TIM3 -> CCR1 = 4000;
-  TIM3 -> CCR2 = 4000;
-  TIM3 -> CCR3 = 4000;
+  SetDBLED(false, false, false);
+  SetStatusLED(4000, 4000, 4000);
+  SetVocLED(4000, 4000, 4000);
+  InitDone();
 }
 void ESP_Programming_Read_Remaining_DMA()
 {
@@ -203,6 +194,7 @@ int main(void)
   //uint32_t LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
   SetVerboseLevel(VERBOSE_ALL);
   BinaryReleaseInfo();
+  InitClock(&hrtc);
   Gadget_Init(&hi2c1, &hi2s2, &huart4, &hadc);
   /* USER CODE END 2 */
 

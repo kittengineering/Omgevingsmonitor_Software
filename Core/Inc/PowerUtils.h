@@ -33,10 +33,7 @@ ChargeStatus  Read_Charge_Status(void);   // Returns Chargestatus
  * VOC    LED
  */
 
-void SetStatusLED(uint8_t red, uint8_t green, uint8_t blue);   // Sets Status LED to (RGB) color
-void SetDBLED(bool red, bool green, bool blue);       // Sets dB LED to (RGB) color
-void SetVocLED(uint8_t red, uint8_t green, uint8_t blue);      // Sets VOC LED to (RGB) color
-void SetLEDsOff(void);                                         // Global switches all LED's off
+                                       // Global switches all LED's off
 
 /* Button operations
  * User Button A  ( Boot0 PIN )

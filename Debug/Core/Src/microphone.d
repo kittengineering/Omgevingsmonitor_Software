@@ -49,6 +49,7 @@ Core/Src/microphone.o: ../Core/Src/microphone.c ../Core/Inc/microphone.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h \
+ ../Core/Inc/statusCheck.h ../Core/Inc/PowerUtils.h ../Core/Inc/adc.h \
  ../Core/Inc/GPIO.h \
  C:/Users/Danny/Documents/GitHub/MJSGadget/Drivers/CMSIS/DSP/Include/arm_math.h \
  C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/CMSIS/Include/core_cm0.h \
@@ -111,6 +112,9 @@ C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Middlewares/ST/STM32
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_core.h:
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h:
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h:
+../Core/Inc/statusCheck.h:
+../Core/Inc/PowerUtils.h:
+../Core/Inc/adc.h:
 ../Core/Inc/GPIO.h:
 C:/Users/Danny/Documents/GitHub/MJSGadget/Drivers/CMSIS/DSP/Include/arm_math.h:
 C:/Users/Danny/STM32Cube/Repository/STM32Cube_FW_L0_V1.12.2/Drivers/CMSIS/Include/core_cm0.h:

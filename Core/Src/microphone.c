@@ -163,7 +163,7 @@ void MIC_Start(uint32_t sampleRate, uint16_t nrSamples) {
     Error("Microphone is not initialised.");
     return;
   }
-  TIM2 -> CCR1 = 3000;
+  SetMICIndicator();
   Debug("In mic start");
   UpdateSampleRate(sampleRate);
   Samples = (NrOfSamples)nrSamples;
@@ -250,39 +250,25 @@ void MIC_Print(void) {
 //  HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
 //  HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
   if(dBc > 85){ //white
-    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
-    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
-    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+    SetDBLED(true, true, true);
   }
   if(dBc < 85 && dBc >= 80){ //red
-    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
-    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
-    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+    SetDBLED(true, false, false);
   }
   if(dBc < 80 && dBc >= 75){//purple
-    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
-    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
-    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+    SetDBLED(true, false, true);
   }
   if(dBc < 75 && dBc >= 70){//yellow
-    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
-    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
-    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+    SetDBLED(true, true, false);
   }
   if(dBc < 70 && dBc >= 65){//Green
-    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
-    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
-    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
+    SetDBLED(false, true, false);
   }
   if(dBc < 65 && dBc >= 60){//blue
-    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
-    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
-    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+    SetDBLED(false, false, true);
   }
   if(dBc < 60){//light blue
-    HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
-    HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
-    HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 0);
+    SetDBLED(false, true, true);
   }
 
 
@@ -293,7 +279,7 @@ bool MIC_MeasurementDone(void) {
   if(DataReady) {
     MIC_Print();
     Debug("MIC measurement is done with %i samples.", Samples);
-    TIM2 -> CCR1 = 4000;
+    ResetMICIndicator();
     return true;
   }
   return false;
@@ -302,7 +288,7 @@ bool MIC_TestMeasurementDone(void) {
   bool Check;
   if(DataReady) {
     Check = MIC_Check();
-    TIM2 -> CCR1 = 4000;
+    ResetMICIndicator();
     return Check;
   }
   return false;

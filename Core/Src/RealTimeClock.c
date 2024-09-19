@@ -1,4 +1,15 @@
 #include "rtc.h"
+#include "RealTimeClock.h"
+
+typedef struct {
+  uint8_t Hours;
+  uint8_t Minutes;
+  uint8_t Seconds;
+}Clock;
+
+static Clock RealTime = {.Hours = 0, .Minutes = 0, .Seconds = 0};
+static Clock NextAction = {.Hours = 0, .Minutes = 0, .Seconds = 0};
+RTC_HandleTypeDef* RealTime_Handle = NULL;
 
 // Functie om de tijd in te stellen
 void RTC_SetTime(RTC_HandleTypeDef *hrtc, uint8_t hours, uint8_t minutes, uint8_t seconds) {
@@ -17,6 +28,10 @@ void RTC_SetTime(RTC_HandleTypeDef *hrtc, uint8_t hours, uint8_t minutes, uint8_
     }
 }
 
+void InitClock(RTC_HandleTypeDef *hrtc){
+  RealTime_Handle = hrtc;
+  RTC_SetTime(RealTime_Handle, RealTime.Hours, RealTime.Minutes, RealTime.Seconds);
+}
 // Functie om de tijd uit te lezen
 void RTC_GetTime(RTC_HandleTypeDef *hrtc, uint8_t *hours, uint8_t *minutes, uint8_t *seconds) {
     RTC_TimeTypeDef gTime = {0};
@@ -29,7 +44,6 @@ void RTC_GetTime(RTC_HandleTypeDef *hrtc, uint8_t *hours, uint8_t *minutes, uint
     *minutes = gTime.Minutes;
     *seconds = gTime.Seconds;
 }
-
 // Functie om de datum in te stellen
 void RTC_SetDate(RTC_HandleTypeDef *hrtc, uint8_t weekday, uint8_t day, uint8_t month, uint8_t year) {
     RTC_DateTypeDef sDate = {0};

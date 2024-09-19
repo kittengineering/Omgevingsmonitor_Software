@@ -15,6 +15,7 @@
 #include "gpio.h"
 #include "measurement.h"
 #include "PC_Config.h"
+#include "statusCheck.h"
 
 
 #define ESP_MAX_UART_RETRIES 2

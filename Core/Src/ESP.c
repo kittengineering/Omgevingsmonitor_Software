@@ -26,6 +26,7 @@ static bool InitIsDone = false;
 static bool WifiReset = false;
 static bool ReconfigSet = false;
 static bool ConnectionMade = false;
+static bool beurs = false;
 static uint32_t uid[3];
 
 //static WifiConfig BeursConfig;
@@ -48,14 +49,15 @@ static char messagePart2[128];
 static char messagePart3[128];
 static char messagePart4[128];
 static char messagePart5[128];
-static char APIBeurs[] = "\"https://deomgevingsmonitor.nl//api/set_device_data.php\"";
-//static char API[] = "\"https://api.opensensemap.org/boxes/66c7394026df8b0008c359a4/data\"";
-static const char sensorID1[] = "\"66c7394026df8b0008c359a5\"";
-static const char sensorID2[] = "\"66c7394026df8b0008c359a6\"";
-static const char sensorID3[] = "\"66c7394026df8b0008c359a7\"";
-static const char sensorID4[] = "\"66c7394026df8b0008c359a8\"";
-static const char sensorID5[] = "\"66c7394026df8b0008c359a9\"";
-static char user[] = "\"Probeer Sel\"";
+static const char APIBeurs[] = "\"https://deomgevingsmonitor.nl//api/set_device_data.php\"";
+static const char API[] = "\"https://api.opensensemap.org/boxes/";
+//static char BoxConfig[] = "\"FFFFFFFFFFFFFFFFFFFFFFFf\"";
+//static char sensorID1[] = "\"66c7394026df8b0008c359a5\"";
+//static char sensorID2[] = "\"66c7394026df8b0008c359a6\"";
+//static char sensorID3[] = "\"66c7394026df8b0008c359a7\"";
+//static char sensorID4[] = "\"66c7394026df8b0008c359a8\"";
+//static char sensorID5[] = "\"66c7394026df8b0008c359a9\"";
+//static char user[] = "\"Super Mario de Pizzabakker\"";
 static AT_Commands ATCommandArray[10];
 static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER, AT_CWINIT, AT_CWAUTOCONN, AT_CWMODE1, AT_CIPMUX};
 static AT_Commands AT_SEND[] = {AT_WAKEUP,  AT_HTTPCPOST, AT_SENDDATA};
@@ -63,17 +65,13 @@ static AT_Commands AT_WIFI_CONFIG[] = {AT_WAKEUP, AT_CWINIT, AT_CWMODE3, AT_CWAU
 static AT_Commands AT_WIFI_RECONFIG[] = {AT_WAKEUP, AT_CWMODE3, AT_CWSAP, AT_CIPMUX, AT_WEBSERVER};
 uint8_t ATState;
 uint8_t ATCounter = 0;
-//static bool StartUpDone = false;
-//static bool ResponseFound = false;
 static volatile uint8_t OldPos = 0;
-//static uint16_t TempIndex = 0;
-//static uint16_t ATCommandIndex = 0;
 static uint32_t ESPTimeStamp = 0;
 static uint8_t retry = 0;
 
 
 //static char TempBuffer[ESP_MAX_BUFFER_SIZE];      // Buffer to build up the received message
-static char CommandBuffer[ESP_TX_BUFFER_SIZE]; // Buffer to store the last sent command
+static char CommandBuffer[656]; // Buffer to store the last sent command
 static bool CommandEchoed = false;            // Flag to indicate if the command was echoed
 /* TODO: Add done function per ATCommand and save the response in there.
  * Response handle functions
@@ -167,27 +165,52 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
     //EspState = ESP_STATE_ERROR;
   }
 }
+void uint8ArrayToString(char *destination, uint8_t data[])
+{
+  for (int i = 0; i < 12; i++)
+  {
+    sprintf(&destination[i * 2], "%02x", data[i]);
+  }
+}
 uint16_t CreateMessage(){
   uint16_t messageLength = 0;
-  uint8_t sensorID[IdSize];
+  static char Buffer[24];
+  static uint8_t tempConfig[IdSize];
+  static uint8_t humidConfig[IdSize];
+  static uint8_t soundConfig[IdSize];
+  static uint8_t vocConfig[IdSize];
+  static uint8_t batteryConfig[IdSize];
+  static uint8_t nameConfig[CustomNameMaxLength];
+  ReadUint8ArrayEEprom(TempConfigAddr, tempConfig, IdSize);
+  ReadUint8ArrayEEprom(HumidConfigAddr, humidConfig, IdSize);
+  ReadUint8ArrayEEprom(dBcConfigAddr, soundConfig, IdSize);
+  ReadUint8ArrayEEprom(VocIndexConfigAddr, vocConfig, IdSize);
+  ReadUint8ArrayEEprom(BatVoltConfigAddr, batteryConfig, IdSize);
+  ReadUint8ArrayEEprom(CustomNameConfigAddr, nameConfig, CustomNameMaxLength);
+  //(char*)nameConfig
+  //get name etc from EEprom
   setCharges();
-  ReadUint8ArrayEEprom(TempConfigAddr, sensorID, IdSize);
-  sprintf(messagePart1, "\"name\":\"temp\", \"id\": %d, \"user\": %s, \"sensor\": %s, \"value\":%3.2f, \"unit\": \"graden\"", uid[2], user, sensorID1, Temperature);
+  uint8ArrayToString(Buffer, tempConfig);
+  sprintf(messagePart1, "\"name\":\"temp\", \"id\": %d, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, Temperature);
   messageLength += strlen(messagePart1);
-  sprintf(messagePart2, "\"name\":\"humid\", \"id\": %d, \"user\": %s, \"sensor\": %s, \"value\":%3.2f, \"unit\": \"%%\"", uid[2], user, sensorID2, Humidity);
+  uint8ArrayToString(Buffer, humidConfig);
+  sprintf(messagePart2, "\"name\":\"humid\", \"id\": %d, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, Humidity);
   messageLength += strlen(messagePart2);
-  sprintf(messagePart3, "\"name\":\"Sound\", \"id\": %d, \"user\": %s, \"sensor\": %s, \"value\":%3.2f, \"unit\": \"dBC\"", uid[2], user, sensorID3, dBC);
+  uint8ArrayToString(Buffer, soundConfig);
+  sprintf(messagePart3, "\"name\":\"Sound\", \"id\": %d, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, dBC);
   messageLength += strlen(messagePart3);
-  sprintf(messagePart4, "\"name\":\"voc\", \"id\": %d, \"user\": %s, \"sensor\": %s, \"value\":%d, \"unit\": \"VOC index\"", uid[2], user, sensorID4, VOCIndex);
+  uint8ArrayToString(Buffer, vocConfig);
+  sprintf(messagePart4, "\"name\":\"voc\", \"id\": %d, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%d", uid[2], (char*)nameConfig, Buffer, VOCIndex);
   messageLength += strlen(messagePart4);
-  sprintf(messagePart5, "\"name\":\"battery\", \"id\": %d, \"user\": %s, \"sensor\": %s, \"value\":%3.2f, \"unit\": \"Volt\"", uid[2], user, sensorID5, batteryCharge);
+  uint8ArrayToString(Buffer, batteryConfig);
+  sprintf(messagePart5, "\"name\":\"battery\", \"id\": %d, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, batteryCharge);
   messageLength += strlen(messagePart5);
   messageLength += 20;
   return(messageLength);
 }
 
 void SetCommandBuffer(const char* command) {
-    strncpy(CommandBuffer, command, ESP_TX_BUFFER_SIZE);
+    strncpy(CommandBuffer, command, 656);
     CommandEchoed = false; // Reset the flag when a new command is sent
 }
 void StartProg(){
@@ -393,14 +416,24 @@ bool WEBSERVER(){
 }
 //These are the commands necesarry for sending data.
 bool HTTPCPOST(){
-  char atCommandBuff[600];
+  char atCommandBuff[256];
+  memset(atCommandBuff, '\0', 256);
   uint16_t length = CreateMessage();
-  sprintf(atCommandBuff, "AT+HTTPCPOST=%s,%d,1,\"content-type: application/json\"\r\n", APIBeurs, length);
-  uint8_t len = strlen(atCommandBuff);
-  char atCommand[len+1];
-  strncpy(atCommand, atCommandBuff, len);
-  SetCommandBuffer(atCommand);
-  if(ESP_Send((uint8_t*)atCommand, len)){
+  if(beurs){
+    sprintf(atCommandBuff, "AT+HTTPCPOST=%s,%d,1,\"content-type: application/json\"\r\n", APIBeurs, length);
+  }
+  else{
+    static uint8_t boxConfig[IdSize];
+    static char Buffer[24];
+    ReadUint8ArrayEEprom(BoxConfigAddr, boxConfig, IdSize);
+    uint8ArrayToString(Buffer, boxConfig);
+    sprintf(atCommandBuff, "AT+HTTPCPOST=%s%s/data\",%d,1,\"content-type: application/json\"\r\n", API, Buffer, length);
+  }
+    uint8_t len = strlen(atCommandBuff);
+  //char atCommand[len+1];
+  //strncpy(atCommand, atCommandBuff, len);
+  SetCommandBuffer(atCommandBuff);
+  if(ESP_Send((uint8_t*)atCommandBuff, len)){
     return true;
   }
   else{
@@ -412,11 +445,11 @@ bool SENDDATA(){
   memset(atCommandBuff, '\0', 656);
   sprintf(atCommandBuff,"[{%s}, {%s}, {%s}, {%s}, {%s}]", messagePart1, messagePart2, messagePart3, messagePart4, messagePart5);
   uint16_t len = strlen(atCommandBuff);
-  char atCommand[len+1];
-  memset(atCommand, '\0', len+1);
-  strncpy(atCommand, atCommandBuff, len);
-  SetCommandBuffer(atCommand);
-  if(ESP_Send((uint8_t*)atCommand, len)) {
+  //char atCommand[len+1];
+  //memset(atCommand, '\0', len+1);
+  //1strncpy(atCommand, atCommandBuff, len);
+  SetCommandBuffer(atCommandBuff);
+  if(ESP_Send((uint8_t*)atCommandBuff, len)) {
     return true;
   }
   else{
@@ -735,7 +768,7 @@ void ESP_Upkeep(void) {
     case ESP_STATE_MODE_SELECT:
       memset(ATCommandArray, AT_END, 9);
       if(!InitIsDone || WifiReset){
-        memcpy(ATCommandArray, AT_INIT, 8);
+        memcpy(ATCommandArray, AT_INIT, 7);
         EspState = ESP_STATE_SEND;
         ATCounter = 0;
         Mode = AT_MODE_INIT;
@@ -755,7 +788,7 @@ void ESP_Upkeep(void) {
         EspState = ESP_STATE_SEND;
         ATCounter = 0;
         Mode = AT_MODE_SEND;
-        TIM2 -> CCR4 = 3000;
+        SetESPIndicator();
         ATCommand = ATCommandArray[ATCounter];
         ATExpectation = RECEIVE_EXPECTATION_OK;
       }
@@ -764,7 +797,7 @@ void ESP_Upkeep(void) {
         EspState = ESP_STATE_SEND;
         ATCounter = 0;
         Mode = AT_MODE_RECONFIG;
-        TIM2 -> CCR4 = 3000;
+        SetESPIndicator();
         ATCommand = ATCommandArray[ATCounter];
         ATExpectation = RECEIVE_EXPECTATION_OK;
       }
@@ -784,6 +817,11 @@ void ESP_Upkeep(void) {
         ATReceived = DMA_ProcessBuffer(ATExpectation);
         bool proceed = ATCompare(ATReceived, ATExpectation);
         if(ATReceived == RECEIVE_STATUS_ERROR){
+          if(ATCommand == AT_SENDDATA){
+            ATCommand = AT_HTTPCPOST;
+            ATExpectation = RECEIVE_EXPECTATION_START;
+            ATCounter = 1;
+          }
           EspState = ESP_STATE_SEND;
         }
         if(ATReceived == RECEIVE_STATUS_INCOMPLETE){
@@ -822,7 +860,7 @@ void ESP_Upkeep(void) {
       if(ATCommand == AT_END){
         if(Mode == AT_MODE_SEND){
           ESPTimeStamp = HAL_GetTick() + 300000;
-          TIM2 -> CCR4 = 4000;
+          ResetESPIndicator();
           EspState = ESP_STATE_DEINIT;
         }
         else{

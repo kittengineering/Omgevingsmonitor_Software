@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "statusCheck.h"
 
 #define SGP_I2C_ADDRESS 0x59
 #define SGP_CRC_MSB_MASK 0x80

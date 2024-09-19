@@ -79,6 +79,18 @@ void ProcessCmd(Receive_MSG msg)
         case CustomNameConfigCmd:
             WriteUint8ArrayEepromSafe(CustomNameConfigAddr, msg.Payload, msg.PayloadLength, CustomNameMaxLength);
         break;
+        case SolVoltConfigCmd:
+            WriteUint8ArrayEepromSafe(SolVoltConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
+        break;
+        case BatVoltConfigCmd:
+            WriteUint8ArrayEepromSafe(BatVoltConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
+        break;
+        case PM10ConfigCmd:
+            WriteUint8ArrayEepromSafe(PM10ConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
+        break;
+        case PM2ConfigCmd:
+            WriteUint8ArrayEepromSafe(PM2ConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
+        break;
         case ClearConfigCmd:
             ClearEEprom(EEPromStartAddr, ConfigSize);
         break;

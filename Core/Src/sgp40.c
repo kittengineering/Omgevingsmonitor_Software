@@ -147,17 +147,13 @@ bool SGP_GetMeasurementValues(int32_t *vocIndex) {
       Green = (1.0-(*vocIndex/100.0))*TimeValue;
       Blue = (*vocIndex/100.0)*TimeValue;
       Red = TimeValue;
-      TIM3->CCR1 = Red;
-      TIM3->CCR2 = Green;
-      TIM3->CCR3 = Blue;
+      SetVocLED(Red, Green, Blue);
       }
       if(*vocIndex > 100){
         Green = (((*vocIndex-100.0)/400.0))*TimeValue;
         Red = (1.0-((*vocIndex-100.0)/400.0))*TimeValue;
         Blue = TimeValue;
-        TIM3->CCR1 = Red;
-        TIM3->CCR2 = Green;
-        TIM3->CCR3 = Blue;
+        SetVocLED(Red, Green, Blue);
       }
       SGP_AmountOfSamplesDone = 0;
       Debug("SGP_Measurement completely done.");
