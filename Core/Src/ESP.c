@@ -8,6 +8,9 @@
 #include "ESP.h"
 #include <String.h>
 #include <stdio.h>
+#include "EEprom.h"
+#include "Config.h"
+#include "PowerUtils.h"
 
 static UART_HandleTypeDef* EspUart = NULL;
 extern DMA_HandleTypeDef hdma_usart4_rx;
@@ -25,15 +28,15 @@ static bool ReconfigSet = false;
 static bool ConnectionMade = false;
 static uint32_t uid[3];
 
-static WifiConfig BeursConfig;
+//static WifiConfig BeursConfig;
 //static APIConfig OpenSenseApi;
-static APIConfig BeursApi;
+//static APIConfig BeursApi;
 
 //static bool measurementDone = false;
 //char SSID[] = "KITT-guest";
 //char Password[] = "ZonderSnoerCommuniceren053";
-char SSIDBeurs[] = "25ac316853";
-char PasswordBeurs[] = "HalloDitIsDeWifi!2024";
+static const char SSIDBeurs[] = "25ac316853";
+static const char PasswordBeurs[] = "HalloDitIsDeWifi!2024";
 float Temperature = 0;
 float Humidity = 0;
 float batteryCharge = 0;
@@ -47,18 +50,18 @@ static char messagePart4[128];
 static char messagePart5[128];
 static char APIBeurs[] = "\"https://deomgevingsmonitor.nl//api/set_device_data.php\"";
 //static char API[] = "\"https://api.opensensemap.org/boxes/66c7394026df8b0008c359a4/data\"";
-static char sensorID1[] = "\"66c7394026df8b0008c359a5\"";
-static char sensorID2[] = "\"66c7394026df8b0008c359a6\"";
-static char sensorID3[] = "\"66c7394026df8b0008c359a7\"";
-static char sensorID4[] = "\"66c7394026df8b0008c359a8\"";
-static char sensorID5[] = "\"66c7394026df8b0008c359a9\"";
+static const char sensorID1[] = "\"66c7394026df8b0008c359a5\"";
+static const char sensorID2[] = "\"66c7394026df8b0008c359a6\"";
+static const char sensorID3[] = "\"66c7394026df8b0008c359a7\"";
+static const char sensorID4[] = "\"66c7394026df8b0008c359a8\"";
+static const char sensorID5[] = "\"66c7394026df8b0008c359a9\"";
 static char userID[] = "\"55\"";
 static char user[] = "\"Piet\"";
 static AT_Commands ATCommandArray[10];
-static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER, AT_CWINIT, AT_CWMODE3, AT_CIPMUX, AT_WEBSERVER};
+static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER, AT_CWINIT, AT_CWAUTOCONN, AT_CWMODE1, AT_CIPMUX};
 static AT_Commands AT_SEND[] = {AT_WAKEUP,  AT_HTTPCPOST, AT_SENDDATA};
-static AT_Commands AT_WIFI_CONFIG[] = {AT_WAKEUP, AT_CWINIT, AT_CWMODE1, AT_CWAUTOCONN, AT_CWJAP, AT_CIPMUX};
-static AT_Commands AT_WIFI_RECONFIG[] = {AT_WAKEUP, AT_RESTORE, AT_CWMODE3, AT_CWSAP};
+static AT_Commands AT_WIFI_CONFIG[] = {AT_WAKEUP, AT_CWINIT, AT_CWMODE3, AT_CWAUTOCONN, AT_CWJAP, AT_CIPMUX};
+static AT_Commands AT_WIFI_RECONFIG[] = {AT_WAKEUP, AT_CWMODE3, AT_CWSAP, AT_CIPMUX, AT_WEBSERVER};
 uint8_t ATState;
 uint8_t ATCounter = 0;
 //static bool StartUpDone = false;
@@ -82,10 +85,12 @@ typedef struct {
     char* ATCommand;
     bool* doneFlag;
 } ATCommandsParameters;
-void setCharges(float battery, float solar){
-  batteryCharge = battery;
-  solarCharge = solar;
+
+void setCharges(){
+  batteryCharge = ReadBatteryVoltage();
+  solarCharge = ReadSolarVoltage();
 }
+
 void setMeasurement(float temp, float humid, uint16_t voc){
   Temperature = temp;
   Humidity = humid;
@@ -93,6 +98,10 @@ void setMeasurement(float temp, float humid, uint16_t voc){
 }
 void setMic(float dB){
   dBC = dB;
+}
+
+void SetConfigMode(){
+  ReconfigSet = true;
 }
 // Taken from firmware https://github.com/opendata-stuttgart/sensors-software/blob/master/airrohr-firmware/airrohr-firmware.ino
 
@@ -156,11 +165,14 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
   if (huart == EspUart) {
     // Handle error
-    EspState = ESP_STATE_ERROR;
+    //EspState = ESP_STATE_ERROR;
   }
 }
 uint16_t CreateMessage(){
   uint16_t messageLength = 0;
+  uint8_t sensorID[IdSize];
+  setCharges();
+  ReadUint8ArrayEEprom(TempConfigAddr, sensorID, IdSize);
   sprintf(messagePart1, "\"name\":\"temp\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%3.2f, \"unit\": \"graden\"", sensorID1, Temperature);
   messageLength += strlen(messagePart1);
   sprintf(messagePart2, "\"name\":\"humid\", \"id\":\"55\", \"user\":\"piet\", \"sensor\": %s, \"value\":%3.2f, \"unit\": \"%%\"", sensorID2, Humidity);
@@ -303,6 +315,16 @@ bool CWMODE1(){
     return false;
   }
 }
+bool CWMODE2(){
+  char* atCommand = "AT+CWMODE=2\r\n";
+  SetCommandBuffer(atCommand);
+  if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
+    return true;
+  }
+  else{
+    return false;
+  }
+}
 bool CWAUTOCONN(){
   char* atCommand = "AT+CWAUTOCONN=1\r\n";
   SetCommandBuffer(atCommand);
@@ -426,6 +448,9 @@ uint8_t DMA_ProcessBuffer(uint8_t expectation) {
         if(ATCommand == AT_WAKEUP && testRound == true){
           status = RECEIVE_STATUS_UNPROGGED;
         }
+        if(ATCommand == AT_CWJAP){
+          status = RECEIVE_STATUS_HOME;
+        }
         else{
           status = RECEIVE_STATUS_TIMEOUT;
         }
@@ -510,6 +535,12 @@ bool AT_Send(AT_Commands state){
   case AT_CWMODE1:
     Debug("Setting to station mode");
     ATCommandSend = CWMODE1();
+    ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
+    break;
+
+  case AT_CWMODE2:
+    Debug("Setting to station mode");
+    ATCommandSend = CWMODE2();
     ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
     break;
 
@@ -703,9 +734,9 @@ void ESP_Upkeep(void) {
       break;
 
     case ESP_STATE_MODE_SELECT:
-      memset(ATCommandArray, AT_END, 10);
+      memset(ATCommandArray, AT_END, 9);
       if(!InitIsDone || WifiReset){
-        memcpy(ATCommandArray, AT_INIT, 7);
+        memcpy(ATCommandArray, AT_INIT, 8);
         EspState = ESP_STATE_SEND;
         ATCounter = 0;
         Mode = AT_MODE_INIT;
@@ -730,10 +761,10 @@ void ESP_Upkeep(void) {
         ATExpectation = RECEIVE_EXPECTATION_OK;
       }
       if(ReconfigSet){
-        memcpy(ATCommandArray, AT_WIFI_RECONFIG, 3);
+        memcpy(ATCommandArray, AT_WIFI_RECONFIG, 5);
         EspState = ESP_STATE_SEND;
         ATCounter = 0;
-        Mode = AT_MODE_SEND;
+        Mode = AT_MODE_RECONFIG;
         TIM2 -> CCR4 = 3000;
         ATCommand = ATCommandArray[ATCounter];
         ATExpectation = RECEIVE_EXPECTATION_OK;
@@ -793,24 +824,48 @@ void ESP_Upkeep(void) {
         if(Mode == AT_MODE_SEND){
           ESPTimeStamp = HAL_GetTick() + 300000;
           TIM2 -> CCR4 = 4000;
+          EspState = ESP_STATE_DEINIT;
         }
-        EspState = ESP_STATE_RESET;
+        else{
+          EspState = ESP_STATE_RESET;
+        }
       }
     break;
+
+    case ESP_STATE_DEINIT:
+      EspTurnedOn = false;
+      HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_RESET);
+      HAL_Delay(1);
+      HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_RESET);
+      HAL_Delay(1);
+      HAL_GPIO_WritePin(ESP32_BOOT_GPIO_Port, ESP32_BOOT_Pin, 0);
+      EspState = ESP_STATE_RESET;
+      HAL_Delay(1);
+      break;
 
     case ESP_STATE_RESET:
       if(TimestampIsReached(ESPTimeStamp) || ReconfigSet){
         if(Mode == AT_MODE_INIT){
           InitIsDone = true;
+          EspState = ESP_STATE_MODE_SELECT;
         }
         if(Mode == AT_MODE_CONFIG){
           ConnectionMade = true;
+          EspState = ESP_STATE_MODE_SELECT;
         }
-        TIM2 -> CCR1 = 40000;
-        TIM2 -> CCR3 = 40000;
-        TIM2 -> CCR4 = 40000;
-        EspState = ESP_STATE_MODE_SELECT;
+        if(Mode == AT_MODE_SEND){
+          EspState = ESP_STATE_INIT;
+        }
+        if(Mode == AT_MODE_RECONFIG){
+          EspState = ESP_STATE_CONFIG;
+        }
       }
+
+      break;
+
+    case ESP_STATE_CONFIG:
+      Debug("Do nothing until reset");
+      Process_PC_Config(GetUsbRxPointer());
 
       break;
 
@@ -822,6 +877,7 @@ void ESP_Upkeep(void) {
 
     default:
       // Handle unexpected state
+      Debug("Something went wrong");
       EspState = ESP_STATE_ERROR;
       break;
   }

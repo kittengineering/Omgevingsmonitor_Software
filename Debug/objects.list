@@ -3,7 +3,7 @@
 "./Core/Src/I2CSensors.o"
 "./Core/Src/PC_Config.o"
 "./Core/Src/PowerUtils.o"
-"./Core/Src/TimingUtils.o"
+"./Core/Src/RealTimeClock.o"
 "./Core/Src/adc.o"
 "./Core/Src/dma.o"
 "./Core/Src/gadget.o"

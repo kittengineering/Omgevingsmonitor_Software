@@ -3,7 +3,11 @@
 
 #define EEPromStartAddr 0x08080000
 
+#define IdCount 13
+
 #define IdSize 12
+
+#define ConfigSize (IdCount*IdSize) + CustomNameMaxLength
 
 #define BoxConfigAddr EEPromStartAddr + (IdSize * 0)
 #define TempConfigAddr EEPromStartAddr + (IdSize * 1)
@@ -18,5 +22,7 @@
 #define SolVoltConfigAddr EEPromStartAddr + (IdSize * 10)
 #define ChargerStatConfigAddr EEPromStartAddr + (IdSize * 11)
 #define CustomNameConfigAddr EEPromStartAddr + (IdSize * 12)
+
+#define CustomNameMaxLength 30
 
 #endif

@@ -29,7 +29,7 @@ static uint8_t SGP_ReadBuffer[SGP_SERIAL_NUMBER_RESPONSE_LENGTH] = {0};
 // static uint8_t SGP_WriteBuffer[SGP_SERIAL_NUMBER_BUFFER_LENGTH] = {0};
 
 static uint8_t SGP_AmountOfSamplesDone = 0;
-static uint8_t SGP_TotalSamples = 5;
+static uint8_t SGP_TotalSamples = 1;
 static uint32_t SGP_HeatUpTime = SGP_SENSOR_HEATUP_TIME;
 static uint32_t SGP_MeasurementDutyCycle = SGP_SENSOR_DUTYCYCLE;
 static uint32_t SGP_IdleTime = SGP_SENSOR_IDLE_TIME;

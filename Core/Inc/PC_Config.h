@@ -33,6 +33,8 @@
 #define SolVoltConfigCmd 10
 #define ChargerStatConfigCmd 11
 #define CustomNameConfigCmd 12
+#define ClearConfigCmd 253
+#define ClearEepromCmd 254
 #define ErrorCmd 255
 
 typedef struct

@@ -106,18 +106,10 @@ void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_Hand
     if(!Gas_DeviceConnected()) {
       MeasTest.VOC_Tested = false;
        Error("SGP device not connected!");
-       // SGP Device is NOT connected, turning led on RED.
-//       HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 0);
-//       HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 1);
-//       HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
        MeasEnabled.VOC_measurementEnabled = false;
     }else{
       MeasTest.VOC_Tested = true;
       Debug("SGP sensor initialised.");
-      // HT Device is connected, turning led on GREEN.
-//      HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
-//      HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, 0);
-//      HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, 1);
     }
     if(MeasTest.VOC_Tested && MeasTest.HT_Tested){
       HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, 1);
@@ -265,7 +257,6 @@ void Meas_Upkeep(void) {
     break;
 
   case MEAS_STATE_WAIT:
-    Debug("Waiting until next loop");
     if(TimestampIsReached(MeasStamp)){
       MeasState = MEAS_STATE_INIT;
     }

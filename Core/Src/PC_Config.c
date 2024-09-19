@@ -56,26 +56,45 @@ void ProcessCmd(Receive_MSG msg)
     switch (msg.Command)
     {
         case BoxConfigCmd:
-            WriteUint8ArrayEeprom(BoxConfigAddr, msg.Payload, msg.PayloadLength);
+            WriteUint8ArrayEepromSafe(BoxConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case TempConfigCmd:
-            WriteUint8ArrayEeprom(TempConfigAddr, msg.Payload, msg.PayloadLength);
+            WriteUint8ArrayEepromSafe(TempConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case HumidConfigCmd:
-            WriteUint8ArrayEeprom(HumidConfigAddr, msg.Payload, msg.PayloadLength);
+            WriteUint8ArrayEepromSafe(HumidConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case VocRawConfigCmd:
-            WriteUint8ArrayEeprom(VocRawConfigAddr, msg.Payload, msg.PayloadLength);
+            WriteUint8ArrayEepromSafe(VocRawConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case VocIndexConfigCmd:
-            WriteUint8ArrayEeprom(VocIndexConfigAddr, msg.Payload, msg.PayloadLength);
+            WriteUint8ArrayEepromSafe(VocIndexConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case dBaConfigCmd:
-            WriteUint8ArrayEeprom(dBaConfigAddr, msg.Payload, msg.PayloadLength);
+            WriteUint8ArrayEepromSafe(dBaConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case dBcConfigCmd:
-            WriteUint8ArrayEeprom(dBcConfigAddr, msg.Payload, msg.PayloadLength);
+            WriteUint8ArrayEepromSafe(dBcConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
+        case CustomNameConfigCmd:
+            WriteUint8ArrayEepromSafe(CustomNameConfigAddr, msg.Payload, msg.PayloadLength, CustomNameMaxLength);
+        break;
+        case ClearConfigCmd:
+            ClearEEprom(EEPromStartAddr, ConfigSize);
+        break;
+        case ClearEepromCmd:
+        {
+            uint16_t size = ((uint16_t)msg.Payload[0] << 8 | msg.Payload[1]);
+            if (size < EEPROM_SIZE)
+            {
+                ClearEEprom(EEPromStartAddr, size);
+            }
+            else
+            {
+                ClearEEprom(EEPROM_START, EEPROM_SIZE);
+            }
+            break;
+        }
     }
 }
 
@@ -90,7 +109,7 @@ void Create_Message(uint8_t command, uint8_t *payload, uint8_t payloadLength)
     uint16_t calculatedCRC = CRC16_ARC(message, crcIndex);
     message[crcIndex] = calculatedCRC >> 8;
     message[crcIndex + 1] = calculatedCRC & 0xFF;
-    CDC_Transmit_FS((uint8_t*)message, (crcIndex + 2));
+    CDC_Transmit_FS(message, (crcIndex + 2));
 }
 
 static uint16_t CRC16_ARC(uint8_t data[], uint16_t size)

@@ -22,7 +22,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include <stdbool.h>
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -31,7 +31,10 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-
+bool ESPProg = false;
+UART_HandleTypeDef UsedUart;
+uint8_t TxData[64] = {0};
+uint32_t UsbRxDataSize = 0;
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
@@ -259,9 +262,19 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
-  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
-  return (USBD_OK);
+  if (ESPProg)
+  {
+    HAL_UART_Transmit(&UsedUart, Buf, *Len, HAL_MAX_DELAY);
+    USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
+    USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+  }
+  else
+   {
+     UsbRxDataSize += *Len;
+     USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
+     USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+   }
+   return (USBD_OK);
   /* USER CODE END 6 */
 }
 
@@ -291,7 +304,39 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 }
 
 /* USER CODE BEGIN PRIVATE_FUNCTIONS_IMPLEMENTATION */
+void EnableESPProg(){
+  ESPProg = true;
+}
+void DisbableESPProg(){
+  ESPProg = false;
+}
+void CDC_Set_UART(UART_HandleTypeDef *uart)
+{
+  UsedUart = *uart;
+}
 
+uint8_t* GetUsbRxPointer(void)
+{
+  return UserRxBufferFS;
+}
+
+void ResetUsbRxDataSize(void)
+{
+  UsbRxDataSize = 0;
+  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &UserRxBufferFS[0]);
+  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+}
+
+uint32_t GetUsbRxDataSize()
+{
+  return UsbRxDataSize;
+}
+
+void GetUsbRxNextChunk(uint32_t writePointer)
+{
+  USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &UserRxBufferFS[writePointer]);
+  USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+}
 /* USER CODE END PRIVATE_FUNCTIONS_IMPLEMENTATION */
 
 /**

@@ -16,9 +16,10 @@
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   uint32_t Vref = 2915;   // reference voltage in mV
 
-uint32_t ReadBatteryVoltage(void){
+float ReadBatteryVoltage(void){
   /* Channel 14 is de battery voltage */
   static uint32_t value = 0;
+  static float trueValue = 0;
    sConfig.Channel = ADC_CHANNEL_14;
    sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
    if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
@@ -28,6 +29,7 @@ uint32_t ReadBatteryVoltage(void){
    HAL_ADC_Start(&hadc);
    HAL_ADC_PollForConversion(&hadc, 1);
    value = (HAL_ADC_GetValue(&hadc)*Vref*2)/4095;
+   trueValue = (float)value/1000.0;
    /* Disable Channel 14 */
    sConfig.Channel = ADC_CHANNEL_14;
    sConfig.Rank = ADC_RANK_NONE;
@@ -35,14 +37,15 @@ uint32_t ReadBatteryVoltage(void){
    {
      Error_Handler();
    }
-   return value;
+   return trueValue;
  }
 
 /* function to read the actual battery voltage */
 
-uint32_t ReadSolarVoltage(void){
+float ReadSolarVoltage(void){
   /* Channel 15 is the Solar voltage */
   static uint32_t value = 0;
+  static float trueValue = 0;
    sConfig.Channel = ADC_CHANNEL_15;
    sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
    if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
@@ -52,6 +55,7 @@ uint32_t ReadSolarVoltage(void){
    HAL_ADC_Start(&hadc);
    HAL_ADC_PollForConversion(&hadc, 1);
    value = (HAL_ADC_GetValue(&hadc)*Vref*3)/4095;
+   trueValue = (float)value / 1000.0;
    /* Disable Channel 14 */
    sConfig.Channel = ADC_CHANNEL_15;
    sConfig.Rank = ADC_RANK_NONE;
@@ -59,7 +63,7 @@ uint32_t ReadSolarVoltage(void){
    {
      Error_Handler();
    }
-   return value;
+   return trueValue;
  }
 
 // True if 5V on USB Connector

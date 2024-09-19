@@ -46,7 +46,7 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+#define UART_CDC_DMABUFFERSIZE 16
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

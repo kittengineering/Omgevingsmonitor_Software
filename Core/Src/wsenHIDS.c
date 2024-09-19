@@ -172,8 +172,8 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
   static uint32_t measurements = 0;
   float currentTemperature;
   float currentHumidity;
-  static float temperatures[HIDS_MAX_MEASUREMENTS];
-  static float humidities[HIDS_MAX_MEASUREMENTS];
+  //static float temperatures[HIDS_MAX_MEASUREMENTS];
+  //static float humidities[HIDS_MAX_MEASUREMENTS];
 
   Debug("HT measurements: %d out of %d completed.", measurements + 1, amountOfMeasurements);
   ReadRegister(HIDS_I2C_ADDRESS, MeasureBuffer, HIDS_MEASURE_BUFFER_LENGTH);
@@ -199,32 +199,31 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
 	currentHumidity = ((125 * ((MeasureBuffer[3] << 8) | MeasureBuffer[4]) / HIDS_POW_2_16_MINUS_1));
 	currentHumidity += -6;
 
-	if(measurements < amountOfMeasurements) {
-	  temperatures[measurements] = currentTemperature;
-	  humidities[measurements] = currentHumidity;
-	  measurements++;
-	}
+//	if(measurements < amountOfMeasurements) {
+//	  temperatures[measurements] = currentTemperature;
+//	  humidities[measurements] = currentHumidity;
+//	  measurements++;
+//	}
 
-	if (measurements >= amountOfMeasurements) {
-	  // Measurements done, calculating average and returning it.
-    float sumTemperature = 0.0;
-    float sumHumidity = 0.0;
-    for (uint8_t i = 0; i < measurements; i++) {
-        sumTemperature += temperatures[i];
-        sumHumidity += humidities[i];
-    }
+//	if (measurements >= amountOfMeasurements) {
+//	  // Measurements done, calculating average and returning it.
+//    float sumTemperature = 0.0;
+//    float sumHumidity = 0.0;
+//    for (uint8_t i = 0; i < measurements; i++) {
+//        sumTemperature += temperatures[i];
+//        sumHumidity += humidities[i];
+//    }
 
-    *temperature = sumTemperature / measurements;
-    *humidity = sumHumidity / measurements;
+   *temperature = currentTemperature;
+   *humidity = currentHumidity;
 
-    SGP_GetHT(temperature, humidity);
+   SGP_GetHT(temperature, humidity);
 
-    measurements = 0;
-    MeasurementDone = true;
+   measurements = 0;
+   MeasurementDone = true;
     //Debug("HIDS measurement is done.");
-    return true;
-	}
+   return true;
 	// Starting another measurement, still not done with all measurements.
-	HIDS_StartMeasurement();
-	return false;
+	//HIDS_StartMeasurement();
+	//return false;
 }

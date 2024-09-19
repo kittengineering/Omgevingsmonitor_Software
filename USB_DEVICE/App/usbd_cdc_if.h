@@ -108,7 +108,13 @@ extern USBD_CDC_ItfTypeDef USBD_Interface_fops_FS;
 uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len);
 
 /* USER CODE BEGIN EXPORTED_FUNCTIONS */
-
+void EnableESPProg();
+void DisableESPProg();
+void CDC_Set_UART(UART_HandleTypeDef *uart);
+void ResetUsbRxDataSize();
+void GetUsbRxNextChunk(uint32_t writePointer);
+uint8_t * GetUsbRxPointer();
+uint32_t GetUsbRxDataSize();
 /* USER CODE END EXPORTED_FUNCTIONS */
 
 /**

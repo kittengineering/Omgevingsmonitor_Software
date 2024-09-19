@@ -14,6 +14,7 @@
 #include "utils.h"
 #include "gpio.h"
 #include "measurement.h"
+#include "PC_Config.h"
 
 
 #define ESP_MAX_UART_RETRIES 2
@@ -46,7 +47,8 @@ typedef enum {
 typedef enum {
   AT_MODE_INIT,
   AT_MODE_CONFIG,
-  AT_MODE_SEND
+  AT_MODE_SEND,
+  AT_MODE_RECONFIG
 }AT_Mode;
 
 typedef enum {
@@ -57,7 +59,8 @@ typedef enum {
   RECEIVE_STATUS_RETRY,
   RECEIVE_STATUS_START,
   RECEIVE_STATUS_TIMEOUT,
-  RECEIVE_STATUS_UNPROGGED
+  RECEIVE_STATUS_UNPROGGED,
+  RECEIVE_STATUS_HOME
 }Receive_Status;
 
 typedef enum {
@@ -79,7 +82,10 @@ typedef enum {
   ESP_STATE_WAIT_TO_SEND,
   ESP_STATE_RESET,
   ESP_STATE_RECEIVE_DATA,
-  ESP_STATE_MODE_SELECT
+  ESP_STATE_MODE_SELECT,
+  ESP_STATE_FAULT,
+  ESP_STATE_DEINIT,
+  ESP_STATE_CONFIG
 } ESP_States;
 
 typedef enum {
@@ -89,6 +95,7 @@ typedef enum {
   AT_RESTORE,
   AT_CWINIT,
   AT_CWMODE1,
+  AT_CWMODE2,
   AT_CWAUTOCONN,
   AT_CWJAP,
   AT_CWMODE3,
@@ -124,8 +131,8 @@ void ESP_Sleep(void);
 void ESP_DeInit(void);
 void ESP_WakeTest();
 void setMeasurement(float temp, float humid, uint16_t voc);
-void setCharges(float charge, float solar);
 void setMic(float dB);
+void SetConfigMode();
 
 #endif /* INC_ESP_H_ */
 

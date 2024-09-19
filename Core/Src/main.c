@@ -22,9 +22,9 @@
 #include "dma.h"
 #include "i2c.h"
 #include "i2s.h"
+#include "usart.h"
 #include "rtc.h"
 #include "tim.h"
-#include "usart.h"
 #include "usb_device.h"
 #include "gpio.h"
 
@@ -36,6 +36,8 @@
 #include "measurement.h"
 #include "globals.h"
 #include "ESP.h"
+#include "PowerUtils.h"
+#include "usbd_cdc_if.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,6 +60,10 @@
 /* USER CODE BEGIN PV */
   bool testDone = false;
   bool ESP_Programming = false;
+  uint8_t RxData[UART_CDC_DMABUFFERSIZE] = {0};
+  uint16_t IndexRxData = 0;
+  uint32_t LastRxTime = 0;
+  uint16_t size = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -85,8 +91,49 @@ void SetTestDone(){
   TIM3 -> CCR1 = 4000;
   TIM3 -> CCR2 = 4000;
   TIM3 -> CCR3 = 4000;
-
 }
+void ESP_Programming_Read_Remaining_DMA()
+{
+  //ESP programmer section
+
+  if (LastRxTime != 0 && ESP_Programming)
+  {
+    if ((LastRxTime + 100) < HAL_GetTick()) //120
+    {
+      HAL_UART_DMAPause(&hlpuart1);
+      size = __HAL_DMA_GET_COUNTER(hlpuart1.hdmarx);
+      if (size > (UART_CDC_DMABUFFERSIZE / 2))
+      {
+        size = UART_CDC_DMABUFFERSIZE - size;
+      }
+      else
+      {
+        size = (UART_CDC_DMABUFFERSIZE / 2) - size;
+      }
+      if (size > 0)
+      {
+        CDC_Transmit_FS(&RxData[IndexRxData], size);
+        LastRxTime = 0;
+        IndexRxData += size;
+      }
+      HAL_UART_DMAResume(&hlpuart1);
+    }
+  }
+}
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//  // printf_USB("\r\nDMA counter Full: %d\r\nDMA size Full: %d\r\n", __HAL_DMA_GET_COUNTER(hlpuart1.hdmarx), size);
+//  //printf_USB("DMA size Full: %d\r\n", size);
+//
+//  if (huart->Instance == LPUART1)
+//  {
+//    CDC_Transmit_FS(&RxData[IndexRxData], (UART_CDC_DMABUFFERSIZE / 2) - size);
+//
+//    size = 0;
+//    IndexRxData = 0;
+//    LastRxTime = HAL_GetTick();
+//  }
+//}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -134,6 +181,7 @@ int main(void)
   MX_ADC_Init();
   MX_USB_DEVICE_Init();
   MX_RTC_Init();
+  MX_LPUART1_UART_Init();
   /* USER CODE BEGIN 2 */
   // General TODO 's
 	/*
@@ -148,7 +196,11 @@ int main(void)
 	 * : Network not found? Sleep
 	 */
   GPIO_InitPWMLEDs(&htim2, &htim3);
-  uint32_t LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
+  if(UserButton_Pressed()){
+    EnableESPProg();
+    ESP_Programming = true;
+  }
+  //uint32_t LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
   SetVerboseLevel(VERBOSE_ALL);
   BinaryReleaseInfo();
   Gadget_Init(&hi2c1, &hi2s2, &huart4, &hadc);
@@ -158,11 +210,11 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
 	  // Upkeep gadget
-    if(testDone){
+    if(testDone && !ESP_Programming){
       UpkeepGadget();
       ESP_Upkeep();
     }
-    else{
+    if(!testDone && !ESP_Programming){
       Gadget_Test();
     }
 //    if(TimestampIsReached(LedBlinkTimestamp)) {
@@ -228,9 +280,11 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_I2C1
-                              |RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_USB;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_LPUART1
+                              |RCC_PERIPHCLK_I2C1|RCC_PERIPHCLK_RTC
+                              |RCC_PERIPHCLK_USB;
   PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
+  PeriphClkInit.Lpuart1ClockSelection = RCC_LPUART1CLKSOURCE_PCLK1;
   PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
   PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
   PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
