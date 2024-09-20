@@ -193,6 +193,7 @@ uint16_t CreateMessage(){
   ReadUint8ArrayEEprom(dBcConfigAddr, soundConfig, IdSize);
   ReadUint8ArrayEEprom(VocIndexConfigAddr, vocConfig, IdSize);
   ReadUint8ArrayEEprom(BatVoltConfigAddr, batteryConfig, IdSize);
+  ReadUint8ArrayEEprom(SolVoltConfigAddr, solarConfig, IdSize);
   ReadUint8ArrayEEprom(CustomNameConfigAddr, nameConfig, CustomNameMaxLength);
   //(char*)nameConfig
   //get name etc from EEprom
