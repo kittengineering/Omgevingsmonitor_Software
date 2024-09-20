@@ -7,6 +7,7 @@
 
 #include "wsenHIDS.h"
 #include "sgp40.h"
+#include "ESP.h"
 
 
 static HIDSHeaterModes HeaterMode = HHM_HIGH_PRECISION_1S_200MW;
@@ -25,16 +26,18 @@ static bool MeasurementDone = false;
 //static uint32_t SensorNextRunTime = HIDS_SENSOR_WAIT_TIME_HIGH;
 //static uint32_t SensorWaitTime_ms = HIDS_SENSOR_WAIT_TIME_HIGH;
 
-static void ReadRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
+static bool ReadRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
 	if (ReadFunction != NULL) {
-		ReadFunction(address, buffer, nrBytes);
+		return ReadFunction(address, buffer, nrBytes);
 	}
+	return false;
 }
 
-static void WriteRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
+static bool WriteRegister(uint8_t address, uint8_t* buffer, uint8_t nrBytes) {
   if (WriteFunction != NULL) {
-    WriteFunction(address, buffer, nrBytes);
+    return WriteFunction(address, buffer, nrBytes);
   }
+  return false;
 }
 
 static uint8_t CalculateCRC(uint8_t* data, uint8_t length) {
@@ -172,11 +175,11 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
   static uint32_t measurements = 0;
   float currentTemperature;
   float currentHumidity;
-  //static float temperatures[HIDS_MAX_MEASUREMENTS];
-  //static float humidities[HIDS_MAX_MEASUREMENTS];
+//  static float temperatures[HIDS_MAX_MEASUREMENTS];
+//  static float humidities[HIDS_MAX_MEASUREMENTS];
 
-  Debug("HT measurements: %d out of %d completed.", measurements + 1, amountOfMeasurements);
-  ReadRegister(HIDS_I2C_ADDRESS, MeasureBuffer, HIDS_MEASURE_BUFFER_LENGTH);
+  //Debug("HT measurements: %d out of %d completed.", measurements + 1, amountOfMeasurements);
+  bool read = ReadRegister(HIDS_I2C_ADDRESS, MeasureBuffer, HIDS_MEASURE_BUFFER_LENGTH);
 	if(!CheckCRC(MeasureBuffer)) {
 		//Error("HIDS measurements CRC check failed.");
 		//Info("Measure buffer structure:");
@@ -218,12 +221,14 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
    *humidity = currentHumidity;
 
    SGP_GetHT(temperature, humidity);
+   ESP_GetHT(currentTemperature, currentHumidity);
 
    measurements = 0;
    MeasurementDone = true;
+   //HIDS_StartMeasurement();
     //Debug("HIDS measurement is done.");
    return true;
 	// Starting another measurement, still not done with all measurements.
-	//HIDS_StartMeasurement();
+
 	//return false;
 }

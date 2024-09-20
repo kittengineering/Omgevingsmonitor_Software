@@ -1,6 +1,6 @@
 ../Core/Src/utils.c:16:6:TimestampIsReached	32	static
 ../Core/Src/utils.c:39:13:AddTimestamp	16	static
-../Core/Src/utils.c:43:6:CreateLine	1056	static
+../Core/Src/utils.c:43:6:CreateLine	88	static
 ../Core/Src/utils.c:68:5:_write	24	static
 ../Core/Src/utils.c:73:6:SetVerboseLevel	16	static
 ../Core/Src/utils.c:75:10:GetCurrentHalTicks	8	static

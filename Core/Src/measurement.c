@@ -214,6 +214,38 @@ void Mic_Upkeep(){
   }
 }
 
+//void VOC_Upkeep(){
+//  switch(VocState){
+//    case VOC_STATE_INIT:
+//      //reset if necesarry
+//      MicState = MIC_STATE_START_MEASUREMENT;
+//      break;
+//
+//    case VOC_STATE_START_MEASUREMENT:
+//      MIC_StartMeasurementWrapper();
+//      MicState = MIC_STATE_WAIT_FOR_COMPLETION;
+//      break;
+//
+//    case VOC_STATE_WAIT_FOR_COMPLETION:
+//      if(MIC_IsMeasurementDoneWrapper()){
+//        MicState = MIC_STATE_WAIT;
+//        MicStamp = HAL_GetTick() + 1000;
+//      }
+//      break;
+//
+//    case VOC_STATE_WAIT:
+//      if(TimestampIsReached(MicStamp)){
+//        MicState = MIC_STATE_START_MEASUREMENT;
+//      }
+//      break;
+//
+//    default:
+//      Debug("Unexpected ocurrence happened");
+//      MicState = MIC_STATE_INIT;
+//      break;
+//    }
+//}
+
 void Meas_Upkeep(void) {
   switch(MeasState) {
   case MEAS_STATE_OFF:

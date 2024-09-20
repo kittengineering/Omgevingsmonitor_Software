@@ -28,6 +28,13 @@
 #define ESP_DMA_TIMEOUT 100
 #define ESP_AT_COMMANDS_COUNT 4
 
+#define ESP_SEND_TEMP "\"temp\""
+#define ESP_SEND_HUMID "\"humid\""
+#define ESP_SEND_SOUND "\"sound\""
+#define ESP_SEND_VOC "\"voc\""
+#define ESP_SEND_BAT "\"Bat\""
+#define ESP_SEND_SOL "\"sol\""
+
 #define AT_RESPONSE_OK "OK"
 #define AT_RESPONSE_ERROR "ERROR"
 #define AT_RESPONSE_READY "ready"
@@ -134,6 +141,7 @@ void ESP_WakeTest();
 void setMeasurement(float temp, float humid, uint16_t voc);
 void setMic(float dB);
 void SetConfigMode();
+void ESP_GetHT(float temp, float humid);
 
 #endif /* INC_ESP_H_ */
 

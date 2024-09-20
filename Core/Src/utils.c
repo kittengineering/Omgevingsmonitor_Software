@@ -9,7 +9,7 @@
 
 // Default verbose level
 VerboseLevel CurrentVerboseLevel = VERBOSE_ALL;
-#define TEXTBUFFER_LEN 1024
+#define TEXTBUFFER_LEN 50
 
 extern UART_HandleTypeDef huart1;
 

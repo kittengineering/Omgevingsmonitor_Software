@@ -44,11 +44,12 @@ float batteryCharge = 0;
 float solarCharge = 0;
 uint16_t VOCIndex = 0;
 float dBC = 0;
-static char messagePart1[128];
-static char messagePart2[128];
-static char messagePart3[128];
-static char messagePart4[128];
-static char messagePart5[128];
+static char message[1024];
+//static char messagePart1[128];
+//static char messagePart2[128];
+//static char messagePart3[128];
+//static char messagePart4[128];
+//static char messagePart5[128];
 static const char APIBeurs[] = "\"https://deomgevingsmonitor.nl//api/set_device_data.php\"";
 static const char API[] = "\"https://api.opensensemap.org/boxes/";
 //static char BoxConfig[] = "\"FFFFFFFFFFFFFFFFFFFFFFFf\"";
@@ -71,7 +72,7 @@ static uint8_t retry = 0;
 
 
 //static char TempBuffer[ESP_MAX_BUFFER_SIZE];      // Buffer to build up the received message
-static char CommandBuffer[656]; // Buffer to store the last sent command
+static char CommandBuffer[ESP_TX_BUFFER_SIZE]; // Buffer to store the last sent command
 static bool CommandEchoed = false;            // Flag to indicate if the command was echoed
 /* TODO: Add done function per ATCommand and save the response in there.
  * Response handle functions
@@ -88,6 +89,10 @@ void setCharges(){
   solarCharge = ReadSolarVoltage();
 }
 
+void ESP_GetHT(float temp, float humid){
+  Temperature = temp;
+  Humidity = humid;
+}
 void setMeasurement(float temp, float humid, uint16_t voc){
   Temperature = temp;
   Humidity = humid;
@@ -163,6 +168,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
   if (huart == EspUart) {
     // Handle error
     //EspState = ESP_STATE_ERROR;
+    Debug("An error has ocurred");
   }
 }
 void uint8ArrayToString(char *destination, uint8_t data[])
@@ -174,12 +180,13 @@ void uint8ArrayToString(char *destination, uint8_t data[])
 }
 uint16_t CreateMessage(){
   uint16_t messageLength = 0;
-  static char Buffer[24];
+  static char Buffer[25];
   static uint8_t tempConfig[IdSize];
   static uint8_t humidConfig[IdSize];
   static uint8_t soundConfig[IdSize];
   static uint8_t vocConfig[IdSize];
   static uint8_t batteryConfig[IdSize];
+  static uint8_t solarConfig[IdSize];
   static uint8_t nameConfig[CustomNameMaxLength];
   ReadUint8ArrayEEprom(TempConfigAddr, tempConfig, IdSize);
   ReadUint8ArrayEEprom(HumidConfigAddr, humidConfig, IdSize);
@@ -190,27 +197,60 @@ uint16_t CreateMessage(){
   //(char*)nameConfig
   //get name etc from EEprom
   setCharges();
+//  uint8ArrayToString(Buffer, tempConfig);
+//  sprintf(messagePart1, "\"name\":\"temp\", \"id\": \"%lu\", \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, Temperature);
+//  messageLength += strlen(messagePart1);
+//  uint8ArrayToString(Buffer, humidConfig);
+//  sprintf(messagePart2, "\"name\":\"humid\", \"id\": \"%lu\", \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, Humidity);
+//  messageLength += strlen(messagePart2);
+//  uint8ArrayToString(Buffer, soundConfig);
+//  sprintf(messagePart3, "\"name\":\"Sound\", \"id\": \"%lu\", \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, dBC);
+//  messageLength += strlen(messagePart3);
+//  uint8ArrayToString(Buffer, vocConfig);
+//  sprintf(messagePart4, "\"name\":\"voc\", \"id\": \"%lu\", \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%d", uid[2], (char*)nameConfig, Buffer, VOCIndex);
+//  messageLength += strlen(messagePart4);
+//  uint8ArrayToString(Buffer, batteryConfig);
+//  sprintf(messagePart5, "\"name\":\"battery\", \"id\": \"%lu\", \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, batteryCharge);
+//  messageLength += strlen(messagePart5);
+//  messageLength += 20;
+//  return(messageLength);
+
+  memset(message, 0, sizeof(message));
+  uint16_t index = 0;
+  sprintf(&message[index], "[");
+  index = strlen(message);
+
   uint8ArrayToString(Buffer, tempConfig);
-  sprintf(messagePart1, "\"name\":\"temp\", \"id\": %d, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, Temperature);
-  messageLength += strlen(messagePart1);
+  sprintf(&message[index], "{\"name\":\"temp\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%.2f, \"unit\":\"C\"},", uid[2], (char*)nameConfig, Buffer, Temperature);
+  index = strlen(message);
+
   uint8ArrayToString(Buffer, humidConfig);
-  sprintf(messagePart2, "\"name\":\"humid\", \"id\": %d, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, Humidity);
-  messageLength += strlen(messagePart2);
+  sprintf(&message[index], "{\"name\":\"humid\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%.1f, \"unit\":\"%%\"},", uid[2], (char*)nameConfig, Buffer, Humidity);
+  index = strlen(message);
+
   uint8ArrayToString(Buffer, soundConfig);
-  sprintf(messagePart3, "\"name\":\"Sound\", \"id\": %d, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, dBC);
-  messageLength += strlen(messagePart3);
+  sprintf(&message[index], "{\"name\":\"Sound\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%.2f, \"unit\":\"dBc\"},", uid[2], (char*)nameConfig, Buffer, dBC);
+  index = strlen(message);
+
   uint8ArrayToString(Buffer, vocConfig);
-  sprintf(messagePart4, "\"name\":\"voc\", \"id\": %d, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%d", uid[2], (char*)nameConfig, Buffer, VOCIndex);
-  messageLength += strlen(messagePart4);
+  sprintf(&message[index], "{\"name\":\"voc\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%d, \"unit\":\"VOCi\"},", uid[2], (char*)nameConfig, Buffer, VOCIndex);
+  index = strlen(message);
+
   uint8ArrayToString(Buffer, batteryConfig);
-  sprintf(messagePart5, "\"name\":\"battery\", \"id\": %d, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, batteryCharge);
-  messageLength += strlen(messagePart5);
-  messageLength += 20;
-  return(messageLength);
+  sprintf(&message[index], "{\"name\":\"battery voltage\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%.2f, \"unit\":\"V\"},", uid[2], (char*)nameConfig, Buffer, batteryCharge);
+  index = strlen(message);
+
+  uint8ArrayToString(Buffer, solarConfig);
+  sprintf(&message[index], "{\"name\":\"solar voltage\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%.2f, \"unit\":\"V\"}", uid[2], (char*)nameConfig, Buffer, solarCharge);
+  index = strlen(message);
+
+  index = sprintf(&message[index], "]");
+
+  return strlen(message);
 }
 
 void SetCommandBuffer(const char* command) {
-    strncpy(CommandBuffer, command, 656);
+    strncpy(CommandBuffer, command, ESP_TX_BUFFER_SIZE);
     CommandEchoed = false; // Reset the flag when a new command is sent
 }
 void StartProg(){
@@ -424,12 +464,12 @@ bool HTTPCPOST(){
   }
   else{
     static uint8_t boxConfig[IdSize];
-    static char Buffer[24];
+    static char Buffer[25];
     ReadUint8ArrayEEprom(BoxConfigAddr, boxConfig, IdSize);
     uint8ArrayToString(Buffer, boxConfig);
     sprintf(atCommandBuff, "AT+HTTPCPOST=%s%s/data\",%d,1,\"content-type: application/json\"\r\n", API, Buffer, length);
   }
-    uint8_t len = strlen(atCommandBuff);
+    uint16_t len = strlen(atCommandBuff);
   //char atCommand[len+1];
   //strncpy(atCommand, atCommandBuff, len);
   SetCommandBuffer(atCommandBuff);
@@ -443,13 +483,13 @@ bool HTTPCPOST(){
 bool SENDDATA(){
   char atCommandBuff[656];
   memset(atCommandBuff, '\0', 656);
-  sprintf(atCommandBuff,"[{%s}, {%s}, {%s}, {%s}, {%s}]", messagePart1, messagePart2, messagePart3, messagePart4, messagePart5);
-  uint16_t len = strlen(atCommandBuff);
+  //sprintf(atCommandBuff,"[{%s}, {%s}, {%s}, {%s}, {%s}]", messagePart1, messagePart2, messagePart3, messagePart4, messagePart5);
+  uint16_t len = strlen(message);
   //char atCommand[len+1];
   //memset(atCommand, '\0', len+1);
   //1strncpy(atCommand, atCommandBuff, len);
   SetCommandBuffer(atCommandBuff);
-  if(ESP_Send((uint8_t*)atCommandBuff, len)) {
+  if(ESP_Send((uint8_t*)message, len)) {
     return true;
   }
   else{
@@ -746,14 +786,14 @@ void ESP_Upkeep(void) {
     case ESP_STATE_INIT:
       if(!EspTurnedOn){
         HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_RESET);
-        HAL_Delay(50);
+        HAL_Delay(1);
         HAL_GPIO_WritePin(Wireless_PSU_EN_GPIO_Port, Wireless_PSU_EN_Pin, GPIO_PIN_SET);
-        HAL_Delay(10);
+        HAL_Delay(1);
         // Reset ESP, so we're sure that we're in the right state.
         HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_RESET);
-        HAL_Delay(10);
+        HAL_Delay(1);
         HAL_GPIO_WritePin(ESP32_BOOT_GPIO_Port, ESP32_BOOT_Pin, 1);
-        HAL_Delay(10);
+        HAL_Delay(1);
         HAL_GPIO_WritePin(ESP32_EN_GPIO_Port, ESP32_EN_Pin, GPIO_PIN_SET);
         ESPTimeStamp = HAL_GetTick() + ESP_START_UP_TIME;
         EspTurnedOn = true;

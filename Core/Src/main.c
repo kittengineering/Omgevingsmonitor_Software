@@ -194,7 +194,7 @@ int main(void)
   //uint32_t LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
   SetVerboseLevel(VERBOSE_ALL);
   BinaryReleaseInfo();
-  InitClock(&hrtc);
+  //InitClock(&hrtc);
   Gadget_Init(&hi2c1, &hi2s2, &huart4, &hadc);
   /* USER CODE END 2 */
 
