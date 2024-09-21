@@ -34,4 +34,4 @@
 ../Core/Src/ESP.c:559:6:ATCompare	4
 ../Core/Src/ESP.c:573:6:AT_Send	18
 ../Core/Src/ESP.c:678:6:ESP_WakeTest	16
-../Core/Src/ESP.c:771:6:ESP_Upkeep	43
+../Core/Src/ESP.c:771:12:ESP_Upkeep	43

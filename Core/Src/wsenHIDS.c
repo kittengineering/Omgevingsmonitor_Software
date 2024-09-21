@@ -197,7 +197,7 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
   //  RH = ((-6 + 125 * SRH) / (2^16 - 1))
   // Temperature formula in degrees Celsius:
   //  T = ((-45 + (175 * ST) / (2^16 - 1)))
-	currentTemperature = (((175 * (MeasureBuffer[0] << 8) | MeasureBuffer[1])) / HIDS_POW_2_16_MINUS_1);
+	currentTemperature = (((175 * ((MeasureBuffer[0] << 8) | MeasureBuffer[1]))) / HIDS_POW_2_16_MINUS_1);
 	currentTemperature += -45;
 	currentHumidity = ((125 * ((MeasureBuffer[3] << 8) | MeasureBuffer[4]) / HIDS_POW_2_16_MINUS_1));
 	currentHumidity += -6;

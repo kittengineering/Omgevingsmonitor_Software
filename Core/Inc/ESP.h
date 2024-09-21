@@ -133,7 +133,7 @@ typedef struct {
 }APIConfig;
 
 void ESP_Init(UART_HandleTypeDef* espUart);
-void ESP_Upkeep(void);
+ESP_States ESP_Upkeep(void);
 void ESP_Reset(void);
 void ESP_Sleep(void);
 void ESP_DeInit(void);

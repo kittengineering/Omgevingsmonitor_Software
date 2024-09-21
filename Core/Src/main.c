@@ -66,6 +66,7 @@
   uint16_t IndexRxData = 0;
   uint32_t LastRxTime = 0;
   uint16_t size = 0;
+  ESP_States ESP_Status;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -204,11 +205,12 @@ int main(void)
 	  // Upkeep gadget
     if(testDone && !ESP_Programming){
       UpkeepGadget();
-      ESP_Upkeep();
+      ESP_Status = ESP_Upkeep();
     }
     if(!testDone && !ESP_Programming){
       Gadget_Test();
     }
+    status_Upkeep();
 //    if(TimestampIsReached(LedBlinkTimestamp)) {
 //      // Red LED
 //

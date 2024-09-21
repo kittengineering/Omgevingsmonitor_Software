@@ -768,7 +768,7 @@ void ESP_WakeTest(void) {
   }
 }
 
-void ESP_Upkeep(void) {
+ESP_States ESP_Upkeep(void) {
   bool ATSend = false;
   static Receive_Status ATReceived = RECEIVE_STATUS_INCOMPLETE;
   switch (EspState) {
@@ -959,4 +959,5 @@ void ESP_Upkeep(void) {
       EspState = ESP_STATE_ERROR;
       break;
   }
+  return EspState;
 }

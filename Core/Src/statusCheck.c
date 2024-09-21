@@ -8,8 +8,10 @@
 #include "RealTimeClock.h"
 
 bool configSet = false;
-bool LEDGood = false;
-bool init = true;
+bool usbPluggedIn = false;
+bool userToggle = false;
+static bool init = true;
+static bool buttonHeld = false;
 uint32_t ConfigStamp;
 uint32_t PowerStamp = 0;
 
@@ -36,7 +38,7 @@ Battery_Status batteryChargeCheck(){
 }
 
 void SetStatusLED(uint16_t red, uint16_t green, uint16_t blue){
-  if(LEDGood || init){
+  if(usbPluggedIn || init || userToggle){
     TIM2 -> CCR1 = red;
     TIM2 -> CCR3 = green;
     TIM2 -> CCR4 = blue;
@@ -45,7 +47,7 @@ void SetStatusLED(uint16_t red, uint16_t green, uint16_t blue){
 // Sets dB LED to (RGB) color
 void SetDBLED(bool red, bool green, bool blue){
   // RED LED
-  if(LEDGood || init){
+  if(usbPluggedIn || init || userToggle){
     HAL_GPIO_WritePin(MCU_LED_C_R_GPIO_Port, MCU_LED_C_R_Pin, !red);
     HAL_GPIO_WritePin(MCU_LED_C_G_GPIO_Port, MCU_LED_C_G_Pin, !green);
     HAL_GPIO_WritePin(MCU_LED_C_B_GPIO_Port, MCU_LED_C_B_Pin, !blue);
@@ -53,39 +55,39 @@ void SetDBLED(bool red, bool green, bool blue){
 }
 // Sets VOC LED to (RGB) color
 void SetVocLED(uint16_t red, uint16_t green, uint16_t blue){
-  if(LEDGood || init){
+  if(usbPluggedIn || init || userToggle){
     TIM3 -> CCR1 = red;
     TIM3 -> CCR2 = green;
     TIM3 -> CCR3 = blue;
   }
 }
 void SetMeasurementIndicator(){
-  if(LEDGood){
+  if(usbPluggedIn||userToggle){
     TIM2 -> CCR3 = 3000;
   }
 }
 void ResetMeasurementIndicator(){
-  if(LEDGood){
+  if(usbPluggedIn||userToggle){
     TIM2 -> CCR3 = 4000;
   }
 }
 void SetMICIndicator(){
-  if(LEDGood){
+  if(usbPluggedIn||userToggle){
     TIM2 -> CCR1 = 3000;
   }
 }
 void ResetMICIndicator(){
-  if(LEDGood){
+  if(usbPluggedIn||userToggle){
     TIM2 -> CCR1 = 4000;
   }
 }
 void SetESPIndicator(){
-  if(LEDGood){
+  if(usbPluggedIn||userToggle){
     TIM2 -> CCR4 = 3000;
   }
 }
 void ResetESPIndicator(){
-  if(LEDGood){
+  if(usbPluggedIn||userToggle){
     TIM2 -> CCR4 = 4000;
   }
 }
@@ -103,12 +105,14 @@ Battery_Status powerCheck(){
   Battery_Status status;
   if(Check_USB_PowerOn()){
     status = USB_PLUGGED_IN;
-    LEDGood = true;
+    usbPluggedIn = true;
   }
   else{
     status = batteryChargeCheck();
-    SetLEDsOff();
-    LEDGood = false;
+    if(!userToggle && !init){
+      SetLEDsOff();
+    }
+    usbPluggedIn = false;
 
   }
   return status;
@@ -144,6 +148,14 @@ void configCheck(){
   if(configSet && TimestampIsReached(ConfigStamp)){
     SetConfigMode(); //Make config mode wifi
     SetDBLED(true, true, true);
+  }
+  if(!BootButton_Pressed() && UserButton_Pressed() && !buttonHeld){
+    SetLEDsOff();
+    userToggle = !userToggle;
+    buttonHeld = true;
+  }
+  if(!BootButton_Pressed() && !UserButton_Pressed()){
+    buttonHeld = false;
   }
 }
 
