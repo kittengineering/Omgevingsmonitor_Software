@@ -433,6 +433,16 @@ bool CWMODE3(){
     return false;
   }
 }
+bool CWSTATE(){
+  char* atCommand = "AT+CWSTATE?\r\n";
+  SetCommandBuffer(atCommand);
+  if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
+    return true;
+  }
+  else{
+    return false;
+  }
+}
 bool CWSAP(){
   char* atCommand = "AT+CWSAP=\"WOTS_Config\",\"\",11,0,1\r\n";
   SetCommandBuffer(atCommand);
@@ -611,6 +621,12 @@ bool AT_Send(AT_Commands state){
   case AT_CWINIT:
     Debug("Initializing Wi-Fi");
     ATCommandSend = CWINIT();
+    ESPTimeStamp = HAL_GetTick() + ESP_WIFI_INIT_TIME;
+    break;
+
+  case AT_CWSTATE:
+    Debug("Checking current SSID");
+    ATCommandSend = CWSTATE();
     ESPTimeStamp = HAL_GetTick() + ESP_WIFI_INIT_TIME;
     break;
 
