@@ -26,6 +26,7 @@ static bool InitIsDone = false;
 static bool WifiReset = false;
 static bool ReconfigSet = false;
 static bool ConnectionMade = false;
+static bool beursTest = false;
 static bool beurs = false;
 static uint32_t uid[3];
 
@@ -62,6 +63,7 @@ static const char API[] = "\"https://api.opensensemap.org/boxes/";
 static AT_Commands ATCommandArray[10];
 static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER, AT_CWINIT, AT_CWAUTOCONN, AT_CWMODE1, AT_CIPMUX};
 static AT_Commands AT_SEND[] = {AT_WAKEUP,  AT_HTTPCPOST, AT_SENDDATA};
+static AT_Commands AT_BEURSTEST[] = {AT_WAKEUP, AT_CWSTATE};
 static AT_Commands AT_WIFI_CONFIG[] = {AT_WAKEUP, AT_CWINIT, AT_CWMODE3, AT_CWAUTOCONN, AT_CWJAP, AT_CIPMUX};
 static AT_Commands AT_WIFI_RECONFIG[] = {AT_WAKEUP, AT_CWMODE3, AT_CWSAP, AT_CIPMUX, AT_WEBSERVER};
 uint8_t ATState;
@@ -277,6 +279,7 @@ void StartProg(){
   char * ParsePoint;
   char * ParsePoint2;
   char * ParsePoint3;
+  char * ParsePoint4;
   const char OK[] = AT_RESPONSE_OK;
   const char ERROR[] = AT_RESPONSE_ERROR;
   const char ready[] = AT_RESPONSE_READY;
@@ -293,6 +296,7 @@ void StartProg(){
   }
   ParsePoint2 = strstr(tempBuf, ERROR);
   ParsePoint3 = strstr(tempBuf, WIFI);
+  ParsePoint4 = strstr(tempBuf, SSIDBeurs);
   if(len > 1 ){
     TestChar = *ParsePoint;
     if(TestChar == 'O'){
@@ -311,6 +315,10 @@ void StartProg(){
     TestChar = *ParsePoint3;
     if(TestChar == 'W'){
       ConnectionMade = true;
+    }
+    TestChar = *ParsePoint4;
+    if(TestChar == '2'){
+      beurs = true;
     }
   }
   return(status);
@@ -399,6 +407,7 @@ bool CWAUTOCONN(){
   }
 }
 bool CWJAP(){
+  beursTest = true;
   char atCommandBuff[100];
   memset(atCommandBuff, '\0', 100);
   sprintf(atCommandBuff, "AT+CWJAP=\"%s\",\"%s\"\r\n", SSIDBeurs, PasswordBeurs);
@@ -522,7 +531,7 @@ uint8_t DMA_ProcessBuffer(uint8_t expectation) {
           status = RECEIVE_STATUS_UNPROGGED;
         }
         if(ATCommand == AT_CWJAP){
-          status = RECEIVE_STATUS_HOME;
+          EspState = ESP_STATE_MODE_SELECT;
         }
         else{
           status = RECEIVE_STATUS_TIMEOUT;
@@ -824,7 +833,15 @@ ESP_States ESP_Upkeep(void) {
         ATCommand = ATCommandArray[ATCounter];
         ATExpectation = RECEIVE_EXPECTATION_OK;
       }
-      if(InitIsDone && ConnectionMade && !WifiReset){
+      if(InitIsDone && ConnectionMade && !beursTest){
+        memcpy(ATCommandArray, AT_BEURSTEST, 2);
+        EspState = ESP_STATE_SEND;
+        ATCounter = 0;
+        Mode = AT_MODE_TEST;
+        ATCommand = ATCommandArray[ATCounter];
+        ATExpectation = RECEIVE_EXPECTATION_OK;
+      }
+      if(InitIsDone && ConnectionMade && beursTest){
         memcpy(ATCommandArray, AT_SEND, 3);
         EspState = ESP_STATE_SEND;
         ATCounter = 0;
@@ -929,6 +946,7 @@ ESP_States ESP_Upkeep(void) {
         }
         if(Mode == AT_MODE_CONFIG){
           ConnectionMade = true;
+          beurs = true;
           EspState = ESP_STATE_MODE_SELECT;
         }
         if(Mode == AT_MODE_SEND){
@@ -936,6 +954,10 @@ ESP_States ESP_Upkeep(void) {
         }
         if(Mode == AT_MODE_RECONFIG){
           EspState = ESP_STATE_CONFIG;
+        }
+        if(Mode == AT_MODE_TEST){
+          EspState = ESP_STATE_MODE_SELECT;
+          beursTest = true;
         }
       }
 

@@ -23,7 +23,8 @@ typedef enum {
 }Battery_Status;
 
 
-void status_Upkeep();
+void Status_Upkeep();
+Battery_Status Battery_Upkeep();
 void SetStatusLED(uint16_t red, uint16_t green, uint16_t blue);   // Sets Status LED to (RGB) color
 void SetDBLED(bool red, bool green, bool blue);       // Sets dB LED to (RGB) color
 void SetVocLED(uint16_t red, uint16_t green, uint16_t blue);      // Sets VOC LED to (RGB) color
@@ -35,4 +36,5 @@ void SetMICIndicator();
 void ResetMICIndicator();
 void SetESPIndicator();
 void ResetESPIndicator();
+void GoToSleep(uint32_t sleepTime);
 #endif /* INC_STATUSCHECK_H_ */

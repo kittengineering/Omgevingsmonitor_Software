@@ -62,10 +62,15 @@
 /* USER CODE BEGIN PV */
   bool testDone = false;
   bool ESP_Programming = false;
+  bool batteryEmpty = false;
+  bool MeasurementBusy;
   uint8_t RxData[UART_CDC_DMABUFFERSIZE] = {0};
   uint16_t IndexRxData = 0;
   uint32_t LastRxTime = 0;
+  uint32_t batteryReadTimer = 0;
+  uint32_t sleepTime = 0;
   uint16_t size = 0;
+  Battery_Status charge;
   ESP_States ESP_Status;
 /* USER CODE END PV */
 
@@ -195,7 +200,7 @@ int main(void)
   //uint32_t LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
   SetVerboseLevel(VERBOSE_ALL);
   BinaryReleaseInfo();
-  //InitClock(&hrtc);
+  InitClock(&hrtc);
   Gadget_Init(&hi2c1, &hi2s2, &huart4, &hadc);
   /* USER CODE END 2 */
 
@@ -203,14 +208,31 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
 	  // Upkeep gadget
-    if(testDone && !ESP_Programming){
-      UpkeepGadget();
+    if(testDone && !ESP_Programming && !batteryEmpty){
+      MeasurementBusy = UpkeepGadget();
       ESP_Status = ESP_Upkeep();
     }
-    if(!testDone && !ESP_Programming){
+    if(!testDone && !ESP_Programming && !batteryEmpty){
       Gadget_Test();
     }
-    status_Upkeep();
+    Status_Upkeep();
+    if(TimestampIsReached(batteryReadTimer)){
+      charge = Battery_Upkeep();
+      batteryReadTimer = HAL_GetTick + 60000;
+      //GoToSleep(2);
+    }
+    if(charge == BATTERY_LOW || charge == BATTERY_CRITICAL){
+
+    }
+    if(charge == BATTERY_CRITICAL && ESP_Status == ESP_STATE_RESET){
+      batteryEmpty = true;
+    }
+    else{
+      batteryEmpty = false;
+    }
+    if(charge == BATTERY_FULL){
+
+    }
 //    if(TimestampIsReached(LedBlinkTimestamp)) {
 //      // Red LED
 //

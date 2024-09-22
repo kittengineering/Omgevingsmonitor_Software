@@ -181,7 +181,7 @@ bool MeasurementsCompleted(void) {
   return true;
 }
 
-void Mic_Upkeep(){
+MicrophoneState Mic_Upkeep(){
   switch(MicState){
 
   case MIC_STATE_INIT:
@@ -212,6 +212,8 @@ void Mic_Upkeep(){
     MicState = MIC_STATE_INIT;
     break;
   }
+
+  return MicState;
 }
 
 //void VOC_Upkeep(){
@@ -246,7 +248,7 @@ void Mic_Upkeep(){
 //    }
 //}
 
-void Meas_Upkeep(void) {
+MeasurementState Meas_Upkeep(void) {
   switch(MeasState) {
   case MEAS_STATE_OFF:
 
@@ -295,6 +297,8 @@ void Meas_Upkeep(void) {
     MeasState = MEAS_STATE_INIT;
     break;
   }
+
+  return MeasState;
 }
 float getTemperature(){
   float Temperature = MeasurementCtx.temperature;

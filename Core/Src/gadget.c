@@ -7,6 +7,8 @@
 
 #include "gadget.h"
 //static uint32_t LastWakeupTime = 0;
+MeasurementState MeasurementStatus;
+MicrophoneState MicrophoneStatus;
 
 //static bool ShouldSleep(void){
 //  uint32_t awakeTime = TimerGetCurrentTime() - LastWakeupTime;
@@ -61,7 +63,8 @@ void Gadget_Test(){
   Meas_Test();
 }
 
-void UpkeepGadget() {
+bool UpkeepGadget() {
+  bool gadgetBusy;
   // State machine implementation?
   /*
    *
@@ -76,8 +79,10 @@ void UpkeepGadget() {
    * 	Close connection
    * 	Disable ESP
    */
-  Meas_Upkeep();
-  Mic_Upkeep();
+  MeasurementStatus = Meas_Upkeep();
+  MicrophoneStatus = Mic_Upkeep();
+  gadgetBusy = (MeasurementStatus != MEAS_STATE_WAIT_FOR_READY || MicrophoneStatus != MIC_STATE_WAIT);
+  return gadgetBusy;
 
 
   // Check if measurements aren't still running.

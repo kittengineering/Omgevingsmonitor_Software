@@ -6,6 +6,7 @@
  */
 #include "statusCheck.h"
 #include "RealTimeClock.h"
+#include "rtc.h"
 
 bool configSet = false;
 bool usbPluggedIn = false;
@@ -159,23 +160,24 @@ void configCheck(){
   }
 }
 
-void GoToSleep(){
+void GoToSleep(uint32_t sleepTime){
   HAL_Delay(1000);
   HAL_SuspendTick();
   //set wake up timer
-  //RTC_SetWakeUpTimer(RTC_Handler, 300000);
+  RTC_SetWakeUpTimer(&hrtc, sleepTime);
   HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON,PWR_SLEEPENTRY_WFI);
   HAL_ResumeTick();
 }
 
-void status_Upkeep(){
-  Battery_Status status;
+void Status_Upkeep(){
   configCheck();
-//  UpdateClock();
-  if(TimestampIsReached(PowerStamp)){
-    status = powerCheck();
-    powerDisplay(status);
-  }
+}
+
+Battery_Status Battery_Upkeep(){
+  Battery_Status status;
+  status = powerCheck();
+  powerDisplay(status);
+  return status;
 
 }
 

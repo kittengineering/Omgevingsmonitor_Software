@@ -52,13 +52,13 @@ typedef struct {
 
 
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_HandleTypeDef* ADC_HANDLER);
-void Meas_Upkeep(void);
+MeasurementState Meas_Upkeep(void);
 MeasurementState Meas_GetState(void);
 void Meas_SetEnabledSensors(EnabledMeasurements enabled);
 void Meas_DeInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s);
 void SetESPMeasurementDone();
 void SetMICMeasurementDone();
 void Meas_Test();
-void Mic_Upkeep();
+MicrophoneState Mic_Upkeep();
 #endif /* INC_MEASUREMENT_H_ */
 
