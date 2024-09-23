@@ -20,6 +20,7 @@ static volatile bool RxComplete = false;
 
 static uint8_t RxBuffer[ESP_MAX_BUFFER_SIZE] = {0};
 //static uint8_t LastATResponse[ESP_MAX_BUFFER_SIZE] = {0};
+static const char user[] = "Test";
 static bool testRound = true;
 static bool EspTurnedOn = false;
 static bool InitIsDone = false;
@@ -29,14 +30,14 @@ static bool ConnectionMade = false;
 static bool beursTest = false;
 static bool beurs = false;
 static uint32_t uid[3];
+static uint32_t start;
+static uint32_t stop;
 
 //static WifiConfig BeursConfig;
 //static APIConfig OpenSenseApi;
 //static APIConfig BeursApi;
 
 //static bool measurementDone = false;
-//char SSID[] = "KITT-guest";
-//char Password[] = "ZonderSnoerCommuniceren053";
 static const char SSIDBeurs[] = "25ac316853";
 static const char PasswordBeurs[] = "HalloDitIsDeWifi!2024";
 float Temperature = 0;
@@ -46,20 +47,8 @@ float solarCharge = 0;
 uint16_t VOCIndex = 0;
 float dBC = 0;
 static char message[1024];
-//static char messagePart1[128];
-//static char messagePart2[128];
-//static char messagePart3[128];
-//static char messagePart4[128];
-//static char messagePart5[128];
 static const char APIBeurs[] = "\"https://deomgevingsmonitor.nl//api/set_device_data.php\"";
 static const char API[] = "\"https://api.opensensemap.org/boxes/";
-//static char BoxConfig[] = "\"FFFFFFFFFFFFFFFFFFFFFFFf\"";
-//static char sensorID1[] = "\"66c7394026df8b0008c359a5\"";
-//static char sensorID2[] = "\"66c7394026df8b0008c359a6\"";
-//static char sensorID3[] = "\"66c7394026df8b0008c359a7\"";
-//static char sensorID4[] = "\"66c7394026df8b0008c359a8\"";
-//static char sensorID5[] = "\"66c7394026df8b0008c359a9\"";
-//static char user[] = "\"Super Mario de Pizzabakker\"";
 static AT_Commands ATCommandArray[10];
 static AT_Commands AT_INIT[] = {AT_WAKEUP, AT_SET_RFPOWER, AT_CHECK_RFPOWER, AT_CWINIT, AT_CWAUTOCONN, AT_CWMODE1, AT_CIPMUX};
 static AT_Commands AT_SEND[] = {AT_WAKEUP,  AT_HTTPCPOST, AT_SENDDATA};
@@ -74,8 +63,8 @@ static uint8_t retry = 0;
 
 
 //static char TempBuffer[ESP_MAX_BUFFER_SIZE];      // Buffer to build up the received message
-static char CommandBuffer[ESP_TX_BUFFER_SIZE]; // Buffer to store the last sent command
-static bool CommandEchoed = false;            // Flag to indicate if the command was echoed
+//static char CommandBuffer[ESP_TX_BUFFER_SIZE]; // Buffer to store the last sent command
+//static bool CommandEchoed = false;            // Flag to indicate if the command was echoed
 /* TODO: Add done function per ATCommand and save the response in there.
  * Response handle functions
 */
@@ -90,7 +79,28 @@ void setCharges(){
   batteryCharge = ReadBatteryVoltage();
   solarCharge = ReadSolarVoltage();
 }
-
+bool checkEEprom(){
+  static uint8_t tempConfig[IdSize];
+  static uint32_t configSum = 0;
+  static bool test;
+  ReadUint8ArrayEEprom(TempConfigAddr, tempConfig, IdSize);
+  for(uint8_t i = 0; i < IdSize; i++){
+    configSum += tempConfig[i];
+  }
+  test = (configSum == 0);
+  return test;
+}
+bool checkName(){
+  static uint8_t nameConfig[CustomNameMaxLength];
+  static uint32_t configSum = 0;
+  static bool test;
+  ReadUint8ArrayEEprom(CustomNameConfigAddr, nameConfig, CustomNameMaxLength);
+  for(uint8_t i = 0; i < IdSize; i++){
+    configSum += nameConfig[i];
+  }
+  test = (configSum != 0);
+  return test;
+}
 void ESP_GetHT(float temp, float humid){
   Temperature = temp;
   Humidity = humid;
@@ -135,6 +145,7 @@ void ESP_Init(UART_HandleTypeDef* espUart) {
   EspUart = espUart;
   EspState = ESP_STATE_INIT;
   ESP_GetUID();
+  beurs = checkEEprom();
 }
 
 static bool ESP_Send(uint8_t* command, uint16_t length) {
@@ -196,12 +207,17 @@ uint16_t CreateMessage(bool onBeurs){
   ReadUint8ArrayEEprom(VocIndexConfigAddr, vocConfig, IdSize);
   ReadUint8ArrayEEprom(BatVoltConfigAddr, batteryConfig, IdSize);
   ReadUint8ArrayEEprom(SolVoltConfigAddr, solarConfig, IdSize);
-  ReadUint8ArrayEEprom(CustomNameConfigAddr, nameConfig, CustomNameMaxLength);
+  if(checkName()){
+    ReadUint8ArrayEEprom(CustomNameConfigAddr, nameConfig, CustomNameMaxLength);
+  }
+  else{
+    strncpy(nameConfig, user, 4);
+  }
   //(char*)nameConfig
   //get name etc from EEprom
   setCharges();
 
-  memset(message, 0, sizeof(message));
+  memset(message, '\0', 1024);
   uint16_t index = 0;
   sprintf(&message[index], "[");
   index = strlen(message);
@@ -242,10 +258,10 @@ uint16_t CreateMessage(bool onBeurs){
   return strlen(message);
 }
 
-void SetCommandBuffer(const char* command) {
-    strncpy(CommandBuffer, command, ESP_TX_BUFFER_SIZE);
-    CommandEchoed = false; // Reset the flag when a new command is sent
-}
+//void //SetCommandBuffer(const char* command) {
+//    strncpy(CommandBuffer, command, ESP_TX_BUFFER_SIZE);
+//    CommandEchoed = false; // Reset the flag when a new command is sent
+//}
 void StartProg(){
   //InitWifiConfig();
   HAL_Delay(100);
@@ -259,7 +275,8 @@ void StartProg(){
   HAL_Delay(40);
 }
  uint8_t ParseBuffer(uint8_t* buffer, uint16_t len, uint8_t expectation) {
-  char tempBuf[len+1];
+  char tempBuf[250];
+  memset(tempBuf, '\0', 250);
   char status = RECEIVE_STATUS_INCOMPLETE;
   for(uint16_t i=0; i<len; i++){
     tempBuf[i] = (char)buffer[i];
@@ -317,7 +334,7 @@ void StartProg(){
  //PollAwake, RFPOWER and CheckRFPower necesarry when comming out of sleep mode.
 bool PollAwake(){
   char* atCommand = "ATE0\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -327,7 +344,7 @@ bool PollAwake(){
 }
 bool RFPower(){
   char* atCommand = "AT+RFPOWER=70\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -337,7 +354,7 @@ bool RFPower(){
 }
 bool CheckRFPower(){
   char* atCommand = "AT+RFPOWER?\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -348,7 +365,7 @@ bool CheckRFPower(){
 //Only necesarry on first init
 bool ATRestore(){
   char* atCommand = "AT+RESTORE\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -358,7 +375,7 @@ bool ATRestore(){
 }
 bool CWINIT(){
   char* atCommand = "AT+CWINIT=1\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -368,7 +385,7 @@ bool CWINIT(){
 }
 bool CWMODE1(){
   char* atCommand = "AT+CWMODE=1\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -378,7 +395,7 @@ bool CWMODE1(){
 }
 bool CWMODE2(){
   char* atCommand = "AT+CWMODE=2\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -388,7 +405,7 @@ bool CWMODE2(){
 }
 bool CWAUTOCONN(){
   char* atCommand = "AT+CWAUTOCONN=1\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -405,7 +422,7 @@ bool CWJAP(){
   char atCommand[len+1];
   memset(atCommand, '\0', len+1);
   strncpy(atCommand, atCommandBuff, len);
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, len)) {
     return true;
   }
@@ -415,7 +432,7 @@ bool CWJAP(){
 }
 bool CWMODE3(){
   char* atCommand = "AT+CWMODE=3\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -425,7 +442,7 @@ bool CWMODE3(){
 }
 bool CWSTATE(){
   char* atCommand = "AT+CWSTATE?\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -435,7 +452,7 @@ bool CWSTATE(){
 }
 bool CWSAP(){
   char* atCommand = "AT+CWSAP=\"WOTS_Config\",\"\",11,0,1\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -445,7 +462,7 @@ bool CWSAP(){
 }
 bool CIPMUX(){
   char* atCommand = "AT+CIPMUX=0\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -456,7 +473,7 @@ bool CIPMUX(){
 //This command sets the webserver, only necessary for first initialization.
 bool WEBSERVER(){
   char* atCommand = "AT+WEBSERVER=1,80,60\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -480,9 +497,6 @@ bool HTTPCPOST(){
     sprintf(atCommandBuff, "AT+HTTPCPOST=%s%s/data\",%d,1,\"content-type: application/json\"\r\n", API, Buffer, length);
   }
     uint16_t len = strlen(atCommandBuff);
-  //char atCommand[len+1];
-  //strncpy(atCommand, atCommandBuff, len);
-  SetCommandBuffer(atCommandBuff);
   if(ESP_Send((uint8_t*)atCommandBuff, len)){
     return true;
   }
@@ -491,14 +505,7 @@ bool HTTPCPOST(){
   }
 }
 bool SENDDATA(){
-  char atCommandBuff[656];
-  memset(atCommandBuff, '\0', 656);
-  //sprintf(atCommandBuff,"[{%s}, {%s}, {%s}, {%s}, {%s}]", messagePart1, messagePart2, messagePart3, messagePart4, messagePart5);
   uint16_t len = strlen(message);
-  //char atCommand[len+1];
-  //memset(atCommand, '\0', len+1);
-  //1strncpy(atCommand, atCommandBuff, len);
-  SetCommandBuffer(atCommandBuff);
   if(ESP_Send((uint8_t*)message, len)) {
     return true;
   }
@@ -508,7 +515,7 @@ bool SENDDATA(){
 }
 bool SLEEP(){
   char* atCommand = "AT+GSLP=30000\r\n";
-  SetCommandBuffer(atCommand);
+  //SetCommandBuffer(atCommand);
   if(ESP_Send((uint8_t*)atCommand, strlen(atCommand))) {
     return true;
   }
@@ -564,6 +571,9 @@ uint8_t DMA_ProcessBuffer(uint8_t expectation) {
     return status;
 }
 
+void clearDMABuffer(){
+  memset(RxBuffer, '/0', ESP_MAX_BUFFER_SIZE);
+}
 //Compares the received status to the expected status (OK, ready, >).
 bool ATCompare(uint8_t AT_Command_Received, uint8_t AT_Command_Expected){
   bool value = false;
@@ -657,19 +667,16 @@ bool AT_Send(AT_Commands state){
     break;
 
   case AT_CIPMUX:
-    Debug("SET multiple communication channels");
     ATCommandSend = CIPMUX();
     ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
     break;
 
   case AT_WEBSERVER:
-    Debug("SET in station/soft-ap mode");
     ATCommandSend = WEBSERVER();
     ESPTimeStamp = HAL_GetTick() + ESP_RESPONSE_TIME;
     break;
 
   case AT_HTTPCPOST:
-    Debug("SET in station/soft-ap mode");
     ATCommandSend = HTTPCPOST();
     ESPTimeStamp = HAL_GetTick() + ESP_WIFI_INIT_TIME;
     break;
@@ -852,6 +859,7 @@ ESP_States ESP_Upkeep(void) {
         EspState = ESP_STATE_SEND;
         ATCounter = 0;
         Mode = AT_MODE_SEND;
+        start = HAL_GetTick();
         SetESPIndicator();
         ATCommand = ATCommandArray[ATCounter];
         ATExpectation = RECEIVE_EXPECTATION_OK;
@@ -925,6 +933,9 @@ ESP_States ESP_Upkeep(void) {
         if(Mode == AT_MODE_SEND){
           ESPTimeStamp = HAL_GetTick() + 300000;
           ResetESPIndicator();
+          clearDMABuffer();
+          stop = HAL_GetTick();
+          Debug("Message send in %ul ms", (stop-start));
           EspState = ESP_STATE_DEINIT;
         }
         else{
