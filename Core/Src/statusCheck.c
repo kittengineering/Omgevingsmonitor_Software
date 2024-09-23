@@ -102,19 +102,12 @@ return;
 }
 
 Battery_Status powerCheck(){
-  PowerStamp = HAL_GetTick() + 10000;
   Battery_Status status;
-  if(Check_USB_PowerOn()){
-    status = USB_PLUGGED_IN;
-    usbPluggedIn = true;
+  if(!Check_USB_PowerOn()){
+    status = batteryChargeCheck();
   }
   else{
-    status = batteryChargeCheck();
-    if(!userToggle && !init){
-      SetLEDsOff();
-    }
-    usbPluggedIn = false;
-
+    status = USB_PLUGGED_IN;
   }
   return status;
 }
@@ -157,6 +150,15 @@ void configCheck(){
   }
   if(!BootButton_Pressed() && !UserButton_Pressed()){
     buttonHeld = false;
+  }
+  if(Check_USB_PowerOn()){
+    usbPluggedIn = true;
+  }
+  else{
+    if(!userToggle && !init){
+      SetLEDsOff();
+    }
+    usbPluggedIn = false;
   }
 }
 

@@ -180,7 +180,7 @@ void uint8ArrayToString(char *destination, uint8_t data[])
     sprintf(&destination[i * 2], "%02x", data[i]);
   }
 }
-uint16_t CreateMessage(){
+uint16_t CreateMessage(bool onBeurs){
   uint16_t messageLength = 0;
   static char Buffer[25];
   static uint8_t tempConfig[IdSize];
@@ -200,23 +200,6 @@ uint16_t CreateMessage(){
   //(char*)nameConfig
   //get name etc from EEprom
   setCharges();
-//  uint8ArrayToString(Buffer, tempConfig);
-//  sprintf(messagePart1, "\"name\":\"temp\", \"id\": \"%lu\", \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, Temperature);
-//  messageLength += strlen(messagePart1);
-//  uint8ArrayToString(Buffer, humidConfig);
-//  sprintf(messagePart2, "\"name\":\"humid\", \"id\": \"%lu\", \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, Humidity);
-//  messageLength += strlen(messagePart2);
-//  uint8ArrayToString(Buffer, soundConfig);
-//  sprintf(messagePart3, "\"name\":\"Sound\", \"id\": \"%lu\", \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, dBC);
-//  messageLength += strlen(messagePart3);
-//  uint8ArrayToString(Buffer, vocConfig);
-//  sprintf(messagePart4, "\"name\":\"voc\", \"id\": \"%lu\", \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%d", uid[2], (char*)nameConfig, Buffer, VOCIndex);
-//  messageLength += strlen(messagePart4);
-//  uint8ArrayToString(Buffer, batteryConfig);
-//  sprintf(messagePart5, "\"name\":\"battery\", \"id\": \"%lu\", \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%3.2f", uid[2], (char*)nameConfig, Buffer, batteryCharge);
-//  messageLength += strlen(messagePart5);
-//  messageLength += 20;
-//  return(messageLength);
 
   memset(message, 0, sizeof(message));
   uint16_t index = 0;
@@ -239,13 +222,20 @@ uint16_t CreateMessage(){
   sprintf(&message[index], "{\"name\":\"voc\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%d, \"unit\":\"VOCi\"},", uid[2], (char*)nameConfig, Buffer, VOCIndex);
   index = strlen(message);
 
-  uint8ArrayToString(Buffer, batteryConfig);
-  sprintf(&message[index], "{\"name\":\"battery voltage\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%.2f, \"unit\":\"V\"},", uid[2], (char*)nameConfig, Buffer, batteryCharge);
-  index = strlen(message);
+  if(!onBeurs){
+    uint8ArrayToString(Buffer, batteryConfig);
+    sprintf(&message[index], "{\"name\":\"battery voltage\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%.2f, \"unit\":\"V\"},", uid[2], (char*)nameConfig, Buffer, batteryCharge);
+    index = strlen(message);
 
-  uint8ArrayToString(Buffer, solarConfig);
-  sprintf(&message[index], "{\"name\":\"solar voltage\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%.2f, \"unit\":\"V\"}", uid[2], (char*)nameConfig, Buffer, solarCharge);
-  index = strlen(message);
+    uint8ArrayToString(Buffer, solarConfig);
+    sprintf(&message[index], "{\"name\":\"solar voltage\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%.2f, \"unit\":\"V\"}", uid[2], (char*)nameConfig, Buffer, solarCharge);
+    index = strlen(message);
+  }
+  else{
+    uint8ArrayToString(Buffer, batteryConfig);
+    sprintf(&message[index], "{\"name\":\"battery\", \"id\": %ld, \"user\": \"%s\", \"sensor\": \"%s\", \"value\":%.2f, \"unit\":\"V\"}", uid[2], (char*)nameConfig, Buffer, batteryCharge);
+    index = strlen(message);
+  }
 
   index = sprintf(&message[index], "]");
 
@@ -478,7 +468,7 @@ bool WEBSERVER(){
 bool HTTPCPOST(){
   char atCommandBuff[256];
   memset(atCommandBuff, '\0', 256);
-  uint16_t length = CreateMessage();
+  uint16_t length = CreateMessage(beurs);
   if(beurs){
     sprintf(atCommandBuff, "AT+HTTPCPOST=%s,%d,1,\"content-type: application/json\"\r\n", APIBeurs, length);
   }
