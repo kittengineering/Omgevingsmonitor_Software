@@ -57,7 +57,6 @@ static AT_Commands AT_WIFI_CONFIG[] = {AT_WAKEUP, AT_CWINIT, AT_CWMODE3, AT_CWAU
 static AT_Commands AT_WIFI_RECONFIG[] = {AT_WAKEUP, AT_CWMODE3, AT_CWSAP, AT_CIPMUX, AT_WEBSERVER};
 uint8_t ATState;
 uint8_t ATCounter = 0;
-static volatile uint8_t OldPos = 0;
 static uint32_t ESPTimeStamp = 0;
 static uint8_t retry = 0;
 
@@ -119,13 +118,13 @@ void SetConfigMode(){
 }
 // Taken from firmware https://github.com/opendata-stuttgart/sensors-software/blob/master/airrohr-firmware/airrohr-firmware.ino
 
-struct struct_wifiInfo
-{
-  char ssid[35];
-  uint8_t encryptionType;
-  int32_t RSSI;
-  int32_t channel;
-};
+//struct struct_wifiInfo
+//{
+//  char ssid[35];
+//  uint8_t encryptionType;
+//  int32_t RSSI;
+//  int32_t channel;
+//};
 
 static AT_Expectation ATExpectation = RECEIVE_EXPECTATION_OK;
 static AT_Commands ATCommand = AT_WAKEUP;
@@ -169,12 +168,12 @@ static bool ESP_Receive(uint8_t* reply, uint8_t length) {
 }
 
 // Callback for reception complete
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-  if (huart == EspUart) {
-    RxComplete = true;
-    Debug("RxComplete");
-  }
-}
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+//  if (huart == EspUart) {
+//    RxComplete = true;
+//    Debug("RxComplete");
+//  }
+//}
 
 // Callback for UART error
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart) {
@@ -282,11 +281,7 @@ void StartProg(){
     tempBuf[i] = (char)buffer[i];
   }
   tempBuf[len] = '\0';
-  char TestChar = 'N';
-  char * ParsePoint;
-  char * ParsePoint2;
-  char * ParsePoint3;
-  char * ParsePoint4;
+  char * ParsePoint = 0;
   const char OK[] = AT_RESPONSE_OK;
   const char ERROR[] = AT_RESPONSE_ERROR;
   const char ready[] = AT_RESPONSE_READY;
@@ -301,30 +296,26 @@ void StartProg(){
   if(expectation == RECEIVE_EXPECTATION_START){
     ParsePoint = strstr(tempBuf, start);
   }
-  ParsePoint2 = strstr(tempBuf, ERROR);
-  ParsePoint3 = strstr(tempBuf, WIFI);
-  ParsePoint4 = strstr(tempBuf, SSIDBeurs);
+  char *ParsePoint2 = strstr(tempBuf, ERROR);
+  char *ParsePoint3 = strstr(tempBuf, WIFI);
+  char *ParsePoint4 = strstr(tempBuf, SSIDBeurs);
   if(len > 1 ){
-    TestChar = *ParsePoint;
-    if(TestChar == 'O'){
+    if(ParsePoint != 0 && *ParsePoint == 'O'){
       status = RECEIVE_STATUS_OK;
     }
-    if(TestChar == 'r'){
+    if(ParsePoint != 0 && *ParsePoint == 'r'){
       status = RECEIVE_STATUS_READY;
     }
-    if(TestChar == '>'){
+    if(ParsePoint != 0 && *ParsePoint == '>'){
       status = RECEIVE_STATUS_START;
     }
-    TestChar = *ParsePoint2;
-    if(TestChar == 'E'){
+    if(ParsePoint2 != 0 && *ParsePoint2 == 'E'){
       status = RECEIVE_STATUS_ERROR;
     }
-    TestChar = *ParsePoint3;
-    if(TestChar == 'W'){
+    if(ParsePoint3 != 0 && *ParsePoint3 == 'W'){
       ConnectionMade = true;
     }
-    TestChar = *ParsePoint4;
-    if(TestChar == '2'){
+    if(ParsePoint4 != 0 && *ParsePoint4 == '2'){
       beurs = true;
     }
   }
@@ -524,9 +515,11 @@ bool SLEEP(){
   }
 }
 
-uint8_t DMA_ProcessBuffer(uint8_t expectation) {
+Receive_Status DMA_ProcessBuffer(uint8_t expectation) {
     uint8_t pos = ESP_MAX_BUFFER_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart4_rx);
-    uint8_t status = RECEIVE_STATUS_INCOMPLETE;
+    static volatile uint8_t OldPos = 0;
+    static volatile uint8_t TempPos = 0;
+    Receive_Status status = RECEIVE_STATUS_INCOMPLETE;
     if(pos > ESP_MAX_BUFFER_SIZE) {
       pos = ESP_MAX_BUFFER_SIZE;
     }
@@ -552,27 +545,35 @@ uint8_t DMA_ProcessBuffer(uint8_t expectation) {
     }
     if (pos != OldPos) {
       retry = 0;
-        if (pos > OldPos) {
-            // Direct parsing
-            status = ParseBuffer(&RxBuffer[OldPos], (pos - OldPos), expectation);
-            if(status != RECEIVE_STATUS_INCOMPLETE){
-              //memset(RxBuffer, 0, ESP_MAX_BUFFER_SIZE);
-              //pos = 0;
-            }
-        } else {
-            // Buffer wrap-around
-            status = ParseBuffer(&RxBuffer[OldPos], ESP_MAX_BUFFER_SIZE - OldPos, expectation);
-            if (pos > 0) {
-                status = ParseBuffer(&RxBuffer[0], pos, expectation);
-            }
+      if(TempPos == OldPos){
+        TempPos = pos;
+        status = RECEIVE_STATUS_LOOP;
+      }
+      else{
+        if(TempPos != pos){
+          TempPos = pos;
+          status = RECEIVE_STATUS_LOOP;
         }
+        else{
+          if (pos > OldPos) {
+              status = ParseBuffer(&RxBuffer[OldPos], (pos - OldPos), expectation);
+          }
+          else {
+              // Buffer wrap-around
+              status = ParseBuffer(&RxBuffer[OldPos], ESP_MAX_BUFFER_SIZE - OldPos, expectation);
+              if (pos > 0) {
+                  status = ParseBuffer(&RxBuffer[0], pos, expectation);
+              }
+          }
+          OldPos = pos;
+        }
+      }
     }
-    OldPos = pos;
     return status;
 }
 
 void clearDMABuffer(){
-  memset(RxBuffer, '/0', ESP_MAX_BUFFER_SIZE);
+  memset(RxBuffer, '\0', ESP_MAX_BUFFER_SIZE);
 }
 //Compares the received status to the expected status (OK, ready, >).
 bool ATCompare(uint8_t AT_Command_Received, uint8_t AT_Command_Expected){
@@ -758,9 +759,9 @@ void ESP_WakeTest(void) {
 
     case ESP_TEST_VALIDATE:
       //Set measurement completed
-      TIM3 -> CCR1 = 4000;
-      TIM3 -> CCR2 = 0;
-      TIM3 -> CCR3 = 4000;
+      TIM3 -> CCR1 = LED_OFF;
+      TIM3 -> CCR2 = LED_ON;
+      TIM3 -> CCR3 = LED_OFF;
       TestState = ESP_TEST_DEINIT;
 
       break;
@@ -792,6 +793,7 @@ void ESP_WakeTest(void) {
 
 ESP_States ESP_Upkeep(void) {
   bool ATSend = false;
+  static uint32_t timeoutTimer = 0;
   static Receive_Status ATReceived = RECEIVE_STATUS_INCOMPLETE;
   switch (EspState) {
     case ESP_STATE_OFF:
@@ -824,9 +826,18 @@ ESP_States ESP_Upkeep(void) {
       // Wait for ESP to be ready
       // Start reading DMA buffer for AT commands
       if(ESP_Receive(RxBuffer, ESP_MAX_BUFFER_SIZE)) {
-        EspState = ESP_STATE_MODE_SELECT;
+        EspState = ESP_STATE_WAIT_AWAKE;
+        timeoutTimer = HAL_GetTick() + 2000;
       }
       break;
+
+    case ESP_STATE_WAIT_AWAKE:
+        ATReceived = DMA_ProcessBuffer(RECEIVE_EXPECTATION_READY);
+        bool proceed = ATCompare(ATReceived, RECEIVE_EXPECTATION_READY);
+        if(proceed || TimestampIsReached(timeoutTimer)){
+          EspState = ESP_STATE_MODE_SELECT;
+        }
+        break;
 
     case ESP_STATE_MODE_SELECT:
       memset(ATCommandArray, AT_END, 9);
@@ -876,6 +887,8 @@ ESP_States ESP_Upkeep(void) {
 
     break;
 
+
+
     case ESP_STATE_SEND:
         ATSend = AT_Send(ATCommand);
         if(ATSend){
@@ -897,6 +910,9 @@ ESP_States ESP_Upkeep(void) {
           EspState = ESP_STATE_SEND;
         }
         if(ATReceived == RECEIVE_STATUS_INCOMPLETE){
+          ESPTimeStamp = HAL_GetTick() + 10;
+        }
+        if(ATReceived == RECEIVE_STATUS_LOOP){
           ESPTimeStamp = HAL_GetTick() + 10;
         }
         if(ATReceived == RECEIVE_STATUS_TIMEOUT){
@@ -931,7 +947,7 @@ ESP_States ESP_Upkeep(void) {
       EspState = ESP_STATE_SEND;
       if(ATCommand == AT_END){
         if(Mode == AT_MODE_SEND){
-          ESPTimeStamp = HAL_GetTick() + 300000;
+          ESPTimeStamp = HAL_GetTick() + ESP_UNTIL_NEXT_SEND;
           ResetESPIndicator();
           clearDMABuffer();
           stop = HAL_GetTick();

@@ -1,5 +1,0 @@
-../Core/Src/gadget.c:40:6:Gadget_Init	1
-../Core/Src/gadget.c:52:6:Gadget_DeInit	1
-../Core/Src/gadget.c:58:6:Gadget_ReInit	1
-../Core/Src/gadget.c:62:6:Gadget_Test	1
-../Core/Src/gadget.c:66:6:UpkeepGadget	3

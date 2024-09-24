@@ -40,8 +40,6 @@ static MeasurementContext MeasurementCtx;
 static MeasurementParameters Measurements[MEAS_MEASUREMENT_COUNT];
 static EnabledMeasurements MeasEnabled;
 static MeasurementTested MeasTest;
-static MeasurementState MeasState = MEAS_STATE_INIT;
-static MicrophoneState MicState = MIC_STATE_INIT;
 static uint8_t CurrentMeasurementIndex = 0;
 static uint32_t MeasStamp;
 static uint32_t MicStamp;
@@ -89,7 +87,7 @@ void testInit(){
   MeasTest.VOC_Tested = false;
 }
 void Meas_Init(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s, ADC_HandleTypeDef* ADC_HANDLER) {
-  MeasState = MEAS_STATE_INIT;
+  //MeasState = MEAS_STATE_INIT;
   testInit();
   if(MeasEnabled.HT_measurementEnabled || MeasEnabled.VOC_measurementEnabled) {
     I2CSensors_Init(sensorI2C);
@@ -147,10 +145,10 @@ void Meas_Test(){
   if(!MeasTest.MIC_Tested){
     if(MIC_IsTestMeasurementDoneWrapper()){
       MeasTest.MIC_Tested = true;
-      SetStatusLED(4000, 3000, 4000);
+      SetStatusLED(LED_OFF, LED_ON, LED_OFF);
     }
     else{
-      SetStatusLED(3000, 4000, 4000);
+      SetStatusLED(LED_ON, LED_OFF, LED_OFF);
     }
   }
   if(MeasTest.HT_Tested && MeasTest.VOC_Tested && MeasTest.ESP_Tested && MeasTest.MIC_Tested){
@@ -182,6 +180,7 @@ bool MeasurementsCompleted(void) {
 }
 
 MicrophoneState Mic_Upkeep(){
+  static MicrophoneState MicState = MIC_STATE_INIT;
   switch(MicState){
 
   case MIC_STATE_INIT:
@@ -249,6 +248,7 @@ MicrophoneState Mic_Upkeep(){
 //}
 
 MeasurementState Meas_Upkeep(void) {
+  static MeasurementState MeasState = MEAS_STATE_INIT;
   switch(MeasState) {
   case MEAS_STATE_OFF:
 
@@ -320,7 +320,6 @@ void Meas_SetEnabledSensors(EnabledMeasurements enabled) {
 }
 
 static void Meas_TurnOff(void) {
-  MeasState = MEAS_STATE_OFF;
   // Disabling all sensors
   uint8_t offset = 0;
   Measurements[offset++].enabled = false;
@@ -331,10 +330,6 @@ static void Meas_TurnOff(void) {
 
 void SetESPMeasurementDone(){
   MeasTest.ESP_Tested = true;
-}
-
-MeasurementState Meas_GetState(void) {
-    return MeasState;
 }
 
 void Meas_DeInit(I2C_HandleTypeDef* sensorI2C, I2S_HandleTypeDef* micI2s) {

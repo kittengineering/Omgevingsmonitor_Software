@@ -14,6 +14,9 @@
 #include "stm32l0xx_hal.h"
 #include "stm32l0xx_hal_gpio.h"
 
+
+#define LED_OFF 4000
+#define LED_ON 3000
 typedef enum {
   BATTERY_CRITICAL,
   USB_PLUGGED_IN,

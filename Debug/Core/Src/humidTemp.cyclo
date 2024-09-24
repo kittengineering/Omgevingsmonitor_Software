@@ -1,5 +1,0 @@
-../Core/Src/humidTemp.c:16:6:HT_Init	1
-../Core/Src/humidTemp.c:20:6:HT_StartMeasurement	1
-../Core/Src/humidTemp.c:24:6:HT_SetMeasurementDuration	1
-../Core/Src/humidTemp.c:28:6:HT_GetMeasurementValues	1
-../Core/Src/humidTemp.c:32:6:HT_DeviceConnected	1

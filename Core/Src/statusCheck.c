@@ -64,40 +64,40 @@ void SetVocLED(uint16_t red, uint16_t green, uint16_t blue){
 }
 void SetMeasurementIndicator(){
   if(usbPluggedIn||userToggle){
-    TIM2 -> CCR3 = 3000;
+    TIM2 -> CCR3 = LED_ON;
   }
 }
 void ResetMeasurementIndicator(){
   if(usbPluggedIn||userToggle){
-    TIM2 -> CCR3 = 4000;
+    TIM2 -> CCR3 = LED_OFF;
   }
 }
 void SetMICIndicator(){
   if(usbPluggedIn||userToggle){
-    TIM2 -> CCR1 = 3000;
+    TIM2 -> CCR1 = LED_ON;
   }
 }
 void ResetMICIndicator(){
   if(usbPluggedIn||userToggle){
-    TIM2 -> CCR1 = 4000;
+    TIM2 -> CCR1 = LED_OFF;
   }
 }
 void SetESPIndicator(){
   if(usbPluggedIn||userToggle){
-    TIM2 -> CCR4 = 3000;
+    TIM2 -> CCR4 = LED_ON;
   }
 }
 void ResetESPIndicator(){
   if(usbPluggedIn||userToggle){
-    TIM2 -> CCR4 = 4000;
+    TIM2 -> CCR4 = LED_OFF;
   }
 }
 
 // Sets all LEDs Off
 void SetLEDsOff(void){
-  SetStatusLED(4000,4000,4000);
+  SetStatusLED(LED_OFF,LED_OFF,LED_OFF);
   SetDBLED(false,false,false);
-  SetVocLED(4000,4000,4000);
+  SetVocLED(LED_OFF,LED_OFF,LED_OFF);
 return;
 }
 

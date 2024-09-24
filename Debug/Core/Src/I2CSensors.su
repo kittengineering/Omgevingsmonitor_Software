@@ -1,3 +1,0 @@
-../Core/Src/I2CSensors.c:23:6:I2CSensors_Init	16	static
-../Core/Src/I2CSensors.c:29:13:ReadI2C	32	static
-../Core/Src/I2CSensors.c:37:13:WriteI2C	32	static

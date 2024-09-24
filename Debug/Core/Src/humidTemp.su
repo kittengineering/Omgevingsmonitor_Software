@@ -1,5 +1,0 @@
-../Core/Src/humidTemp.c:16:6:HT_Init	16	static
-../Core/Src/humidTemp.c:20:6:HT_StartMeasurement	8	static
-../Core/Src/humidTemp.c:24:6:HT_SetMeasurementDuration	16	static
-../Core/Src/humidTemp.c:28:6:HT_GetMeasurementValues	16	static
-../Core/Src/humidTemp.c:32:6:HT_DeviceConnected	8	static
