@@ -257,6 +257,45 @@ uint16_t CreateMessage(bool onBeurs){
   return strlen(message);
 }
 
+uint16_t CreateMessageSmall(bool onBeurs){
+
+  //get name etc from EEprom
+  setCharges();
+
+  memset(message, '\0', 255);
+  uint16_t index = 0;
+  sprintf(&message[index], "[");
+  index = strlen(message);
+
+
+  sprintf(&message[index], "{\"Temperature\":%.2f},", Temperature);
+  index = strlen(message);
+
+
+  sprintf(&message[index], "{\"Humidity\":%.1f},", Humidity);
+  index = strlen(message);
+
+
+  sprintf(&message[index], "{\"Sound\":%.2f},", dBC);
+  index = strlen(message);
+
+
+  sprintf(&message[index], "{\"VOC\":%d},", VOCIndex);
+  index = strlen(message);
+
+
+  sprintf(&message[index], "{\"BatteryVoltage\":%.2f},", batteryCharge);
+  index = strlen(message);
+
+
+  sprintf(&message[index], "{\"SolarVoltage\":%.2f}", solarCharge);
+  index = strlen(message);
+
+  index = sprintf(&message[index], "]");
+
+  return strlen(message);
+}
+
 //void //SetCommandBuffer(const char* command) {
 //    strncpy(CommandBuffer, command, ESP_TX_BUFFER_SIZE);
 //    CommandEchoed = false; // Reset the flag when a new command is sent
