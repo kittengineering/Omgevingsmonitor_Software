@@ -218,7 +218,7 @@ int main(void)
     Status_Upkeep();
     if(TimestampIsReached(batteryReadTimer)){
       charge = Battery_Upkeep();
-      batteryReadTimer = HAL_GetTick + 60000;
+      batteryReadTimer = HAL_GetTick() + 60000;
       //GoToSleep(2);
     }
     if(charge == BATTERY_LOW || charge == BATTERY_CRITICAL){
