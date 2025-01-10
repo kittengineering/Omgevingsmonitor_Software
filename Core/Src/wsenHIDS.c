@@ -9,6 +9,9 @@
 #include "sgp40.h"
 #include "ESP.h"
 
+static float humid = 0.0;
+static float temp = 0.0;
+
 
 static HIDSHeaterModes HeaterMode = HHM_HIGH_PRECISION_1S_200MW;
 static HIDSMeasureModes MeasureMode = HMM_HIGH_PRECISION;
@@ -23,6 +26,7 @@ static uint32_t HIDS_Interval_ms = HIDS_SENSOR_INITIAL_INTERVAL;
 static uint32_t HIDS_MeasurementDuration = HIDS_SENSOR_INITIAL_INTERVAL;
 static bool MeasurementDone = false;
 
+static uint32_t HIDSTimeStamp;
 //static uint32_t SensorNextRunTime = HIDS_SENSOR_WAIT_TIME_HIGH;
 //static uint32_t SensorWaitTime_ms = HIDS_SENSOR_WAIT_TIME_HIGH;
 
@@ -79,7 +83,7 @@ void HIDS_Init(I2CReadCb readFunction, I2CWriteCB writeFunction) {
 }
 
 void HIDS_StartMeasurement(void) {
-  HIDS_NextRunTime = GetCurrentHalTicks() + HIDS_Interval_ms;
+  HIDS_NextRunTime = HAL_GetTick() + HIDS_Interval_ms;
   WriteRegister(HIDS_I2C_ADDRESS, &MeasureMode, 1);
   MeasurementDone = false;
 }
@@ -92,6 +96,14 @@ void HIDS_SetHeaterMode(HIDSHeaterModes modeHeater) {
   HeaterMode = modeHeater;
 }
 
+void HIDS_SetMeasurementMode(HIDSMeasureModes modeMeasure) {
+  MeasureMode = modeMeasure;
+}
+
+void setHIDSTimeStamp(uint32_t ticks) {
+  HIDSTimeStamp = HAL_GetTick() + ticks;
+}
+
 static bool CheckCRC(uint8_t* data) {
   // Data format: 2 bytes for data, followed by an 8-bit CRC
 
@@ -100,6 +112,7 @@ static bool CheckCRC(uint8_t* data) {
 	uint8_t crc1 = data[2];
 	if (CalculateCRC(crcData1, 2) != crc1) {
 		Error("CRC check failed for the first segment.");
+//		errorHandler(__func__, __LINE__, __FILE__);
 		return false;
 	}
 
@@ -108,6 +121,7 @@ static bool CheckCRC(uint8_t* data) {
 	uint8_t crc2 = data[5];
 	if (CalculateCRC(crcData2, 2) != crc2) {
 		Error("CRC check failed for the second segment.");
+		errorHandler(__func__, __LINE__, __FILE__);
 		return false;
 	}
 	return true;
@@ -123,10 +137,6 @@ bool HIDS_DeviceConnected(void) {
 		Info("HIDS_Device serial ID[%d]: 0x%X", i, SerialBuffer[i]);
 	}
 	return CheckCRC(SerialBuffer);
-}
-
-void HIDS_SetMeasurementMode(HIDSMeasureModes modeMeasure) {
-	MeasureMode = modeMeasure;
 }
 
 bool HIDS_MeasurementReady(void) {
@@ -171,15 +181,17 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
   // TODO: Store last measurement humidity for sgp40 measurement.
   if(MeasurementDone) return true;
   if(!HIDS_MeasurementReady()) return false;
-  uint32_t amountOfMeasurements = HIDS_MeasurementDuration / HIDS_Interval_ms;
-  static uint32_t measurements = 0;
+//  uint32_t amountOfMeasurements = HIDS_MeasurementDuration / HIDS_Interval_ms;
+//  static uint32_t measurements = 0;
   float currentTemperature;
   float currentHumidity;
 //  static float temperatures[HIDS_MAX_MEASUREMENTS];
 //  static float humidities[HIDS_MAX_MEASUREMENTS];
 
   //Debug("HT measurements: %d out of %d completed.", measurements + 1, amountOfMeasurements);
-  bool read = ReadRegister(HIDS_I2C_ADDRESS, MeasureBuffer, HIDS_MEASURE_BUFFER_LENGTH);
+  if (!ReadRegister(HIDS_I2C_ADDRESS, MeasureBuffer, HIDS_MEASURE_BUFFER_LENGTH)) {
+    Error("Error during reading the wsenHIDS result register");
+  }
 	if(!CheckCRC(MeasureBuffer)) {
 		//Error("HIDS measurements CRC check failed.");
 		//Info("Measure buffer structure:");
@@ -198,9 +210,9 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
   // Temperature formula in degrees Celsius:
   //  T = ((-45 + (175 * ST) / (2^16 - 1)))
 	currentTemperature = (((175 * ((MeasureBuffer[0] << 8) | MeasureBuffer[1]))) / HIDS_POW_2_16_MINUS_1);
-	currentTemperature += -45;
+	currentTemperature -= 45;
 	currentHumidity = ((125 * ((MeasureBuffer[3] << 8) | MeasureBuffer[4]) / HIDS_POW_2_16_MINUS_1));
-	currentHumidity += -6;
+	currentHumidity -= 6;
 
 //	if(measurements < amountOfMeasurements) {
 //	  temperatures[measurements] = currentTemperature;
@@ -223,7 +235,7 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
    SGP_GetHT(temperature, humidity);
    ESP_GetHT(currentTemperature, currentHumidity);
 
-   measurements = 0;
+//   measurements = 0;
    MeasurementDone = true;
    //HIDS_StartMeasurement();
     //Debug("HIDS measurement is done.");
@@ -231,4 +243,61 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature) {
 	// Starting another measurement, still not done with all measurements.
 
 	//return false;
+}
+void ResetHIDSresults() {
+  humid = 0.0;
+  temp = 0.0;
+}
+
+wsenHIDSState HIDS_Upkeep(void) {
+  static wsenHIDSState HIDSState = HIDS_STATE_INIT;
+  switch(HIDSState) {
+    case HIDS_STATE_OFF:
+      Debug("Measurements are turned off for wsenHIDS sensor.");
+      break;
+
+    case HIDS_STATE_INIT:
+//      Debug("entered HIDS_STATE_INIT");
+      ResetHIDSresults();
+      HIDSState = HIDS_STATE_START_MEASUREMENTS;
+      break;
+
+    case HIDS_STATE_START_MEASUREMENTS:
+//      Debug("entered HIDS_STATE_START_MEASUREMENTS");
+      SetMeasurementIndicator();
+      HIDS_StartMeasurement();
+      HIDSState = HIDS_STATE_WAIT_FOR_COMPLETION;
+      break;
+
+    case HIDS_STATE_WAIT_FOR_COMPLETION:
+//      Debug("entered HIDS_STATE_WAIT_FOR_COMPLETION");
+      if(HIDS_GetMeasurementValues(&humid, &temp)) {
+        HIDSState = HIDS_STATE_PROCESS_RESULTS;
+      }
+      break;
+
+    case HIDS_STATE_PROCESS_RESULTS:
+//      Debug("entered HIDS_STATE_PROCESS_RESULTS");
+//      Debug("Processing results.");
+      Debug("Humidity value: %3.2f%%, Temperature value: %3.2fC", humid, temp);
+      setHIDS(temp, humid);
+      ResetMeasurementIndicator();
+      HIDSTimeStamp = HAL_GetTick() + (powerCheck() == USB_PLUGGED_IN?10000:1000);  // about every ten seconds when power is plugged
+      HIDSState = HIDS_STATE_WAIT;
+      break;
+
+    case HIDS_STATE_WAIT:
+//      Debug("entered HIDS_STATE_WAIT");
+      if(TimestampIsReached(HIDSTimeStamp)) {
+        HIDSState = HIDS_STATE_INIT;
+      }
+      break;
+
+    default:
+    // Handle unexpected state
+      HIDSState = HIDS_STATE_INIT;
+      break;
+  }
+
+  return HIDSState;
 }

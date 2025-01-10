@@ -30,9 +30,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "gadget.h"
-#include "utils.h"
 #include "microphone.h"
+#include "I2CSensors.h"
+#include "utils.h"
 #include "measurement.h"
 #include "globals.h"
 #include "ESP.h"
@@ -40,10 +40,17 @@
 #include "usbd_cdc_if.h"
 #include "statusCheck.h"
 #include "RealTimeClock.h"
+#include "sound_measurement.h"
+#include "print_functions.h"
+#include "sen5x.h"
+#include "sgp40.h"
+#include "wsenHIDS.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+
 
 /* USER CODE END PTD */
 
@@ -63,22 +70,36 @@
   bool testDone = false;
   bool ESP_Programming = false;
   bool batteryEmpty = false;
-  bool MeasurementBusy;
-  uint8_t RxData[UART_CDC_DMABUFFERSIZE] = {0};
+  static bool priorUSBpluggedIn = false;
+  static bool stlinkpwr = true;
+  uint8_t SGPstate;
+  uint8_t HIDSstate;
+  uint8_t MICstate;
+  uint8_t ESPstate;
+  bool waitforSamples = false;
+  uint8_t hidscount = 0;
+  uint8_t u1_rx_buff[16];  // rxbuffer for serial logger
+  uint8_t RxData[UART_CDC_DMABUFFERSIZE] = {0};  //rx buffer for USB
   uint16_t IndexRxData = 0;
+  uint32_t deviceTimeOut = 0;
   uint32_t LastRxTime = 0;
   uint32_t batteryReadTimer = 0;
+  uint32_t timeReadTimer = 0;
   uint32_t sleepTime = 0;
   uint16_t size = 0;
+
   Battery_Status charge;
-  ESP_States ESP_Status;
+  extern DMA_HandleTypeDef hdma_spi2_rx;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+
 void SetTestDone(){
   testDone = true;
+//  Info("testDone true in SetTestDone\r\n");
   HAL_Delay(1000);
   SetDBLED(false, false, true);
   SetStatusLED(4000, 4000, 3000);
@@ -89,6 +110,18 @@ void SetTestDone(){
   SetVocLED(4000, 4000, 4000);
   InitDone();
 }
+
+void FlashLEDs(){
+  for (uint8_t i=0; i<5 ; i++){
+    SetDBLED(true, true, true);
+    SetStatusLED(4000, 4000, 3000);
+    SetVocLED(4000, 4000, 3000);
+    HAL_Delay(250);
+    SetLEDsOff();
+    HAL_Delay(250);
+  }
+}
+
 void ESP_Programming_Read_Remaining_DMA()
 {
   //ESP programmer section
@@ -136,6 +169,7 @@ void ESP_Programming_Read_Remaining_DMA()
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+
 /* USER CODE END 0 */
 
 /**
@@ -179,16 +213,15 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_RTC_Init();
   MX_LPUART1_UART_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   // General TODO 's
 	/*
 	 * : Put SSID in EEPROM
 	 * : Turn on heater if humidity is too high
-	 * : NTP sets RTC
-	 * : FFT Processing bins
 	 * : LEDs indicator for air quality
 	 * : Default network: Sensor community
-	 * : Different modes for outside and inside (check solar?)
+	 * : Different modes for outside and inside (check solar or check LED on/off mode?)
 	 * : Add CLI via usb-c
 	 * : Network not found? Sleep
 	 */
@@ -197,50 +230,92 @@ int main(void)
     EnableESPProg();
     ESP_Programming = true;
   }
-  //uint32_t LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
   SetVerboseLevel(VERBOSE_ALL);
   BinaryReleaseInfo();
+  HAL_UART_Receive_IT(&huart1, u1_rx_buff, 1);
   InitClock(&hrtc);
-  Gadget_Init(&hi2c1, &hi2s2, &huart4, &hadc);
+  Debug("Clock init done");
+
+  if (!soundInit(&hdma_spi2_rx, &hi2s2, &htim6, DMA1_Channel4_5_6_7_IRQn)) {
+    errorHandler(__func__, __LINE__, __FILE__);
+  }
+  Device_Init(&hi2c1, &hi2s2, &hadc, &huart4);
+  deviceTimeOut = HAL_GetTick() + 5000;
+  priorUSBpluggedIn = !Check_USB_PowerOn(); // force the status of the SGP40
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1) {
-	  // Upkeep gadget
-    if(testDone && !ESP_Programming && !batteryEmpty){
-      MeasurementBusy = UpkeepGadget();
-      ESP_Status = ESP_Upkeep();
-    }
-    if(!testDone && !ESP_Programming && !batteryEmpty){
-      Gadget_Test();
-    }
-    Status_Upkeep();
     if(TimestampIsReached(batteryReadTimer)){
       charge = Battery_Upkeep();
-      batteryReadTimer = HAL_GetTick() + 60000;
-      //GoToSleep(2);
+      batteryReadTimer  = HAL_GetTick() + 50000;
+        showTime();
     }
-    if(charge == BATTERY_LOW || charge == BATTERY_CRITICAL){
-
+    configCheck();
+#ifndef STLINK_V3PWR
+    //==== disable for power measurements in test condition
+        stlinkpwr = false;
+        if(charge == BATTERY_LOW || charge == BATTERY_CRITICAL){
+          FlashLEDs();
+          Sensor.PM_measurementEnabled = false;
+        }
+        if(charge == BATTERY_CRITICAL && ESPstate == ESP_STATE_RESET){
+          batteryEmpty = true;
+          Enter_Standby_Mode(); // we are going in deep sleep, nearly off and no wakeup from RTC
+        }
+        else{
+          batteryEmpty = false;
+        }
+    //====
+#endif
+    if (testDone && !ESP_Programming && !batteryEmpty) {
+      if (priorUSBpluggedIn != usbPluggedIn) {
+        Debug("USB power state change detected");
+        if (IsSGPPresent() && !usbPluggedIn) {
+//        if (IsSGPPresent() && ((product_name[4] == '4') || (product_name[4] == '5')) && !usbPluggedIn) {
+          SetVOCSensorDIS_ENA(true);
+        }
+        if (((product_name[4] == '4') || (product_name[4] == '5')) && usbPluggedIn) {
+          SetVOCSensorDIS_ENA(false);
+        }
+        priorUSBpluggedIn = usbPluggedIn;
+      }
+      if (SGPstate != SGP_STATE_START_MEASUREMENTS && SGPstate != SGP_STATE_WAIT_FOR_COMPLETION && Sensor.HT_measurementEnabled) {
+        HIDSstate = HIDS_Upkeep();
+      }
+      if (HIDSstate != HIDS_STATE_START_MEASUREMENTS && HIDSstate != HIDS_STATE_WAIT_FOR_COMPLETION && Sensor.VOC_measurementEnabled) {
+        SGPstate = SGP_Upkeep();
+      }
+      if (Sensor.MIC_measurementEnabled) {
+        MICstate = Mic_Upkeep();
+      }
+      if ( ((charge >= BATTERY_GOOD) || stlinkpwr) && Sensor.PM_measurementEnabled) {
+        if (!sen5x_Get_sen5x_enable_state()&& usbPluggedIn ) {
+          Debug("sen5x_enable called from line 287 main.c");
+          sen5x_enable(0);
+        }
+        sen5x_statemachine();
+      }
+      else if ((charge <= BATTERY_LOW) && !stlinkpwr && Sensor.PM_measurementEnabled) {
+        Info("Battery level insufficient for sen5x operation");
+        Sensor.PM_measurementEnabled = false;
+        VOCNOx = false;
+        if (sen5x_On) {
+          sen5x_Power_Off();
+        }
+      }
+      ESPstate = ESP_Upkeep();
     }
-    if(charge == BATTERY_CRITICAL && ESP_Status == ESP_STATE_RESET){
-      batteryEmpty = true;
+    if(!testDone && !ESP_Programming && !batteryEmpty){
+      Device_Test();  // for device with startup time
     }
-    else{
-      batteryEmpty = false;
+    if (!usbPluggedIn) {
+      if (!userToggle && AllDevicesReady() && ESPTransmitDone) {     // check if all sensors are ready
+        EnabledConnectedDevices();
+        Enter_Stop_Mode(SensorProbe.PM_Present?WAIT_WITH_PM:WAIT_WITHOUT_PM);
+      }
     }
-    if(charge == BATTERY_FULL){
-
-    }
-//    if(TimestampIsReached(LedBlinkTimestamp)) {
-//      // Red LED
-//
-//      LedBlinkTimestamp = HAL_GetTick() + LED_BLINK_INTERVAL;
-//    }
-
-    // Optional colours:
-    // Red, Yellow, Magenta, White, Cyan, Blue, Green.
 
     /* USER CODE END WHILE */
 
@@ -266,7 +341,7 @@ void SystemClock_Config(void)
   /** Configure LSE Drive Capability
   */
   HAL_PWR_EnableBkUpAccess();
-  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_MEDIUMHIGH);
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -311,6 +386,69 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+// Provide a print interface for print_functions.
+void printString(const char * str, uint16_t length)
+{
+    HAL_UART_Transmit(&huart1, (uint8_t*) str, length, 0xFFFF);
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+  HAL_UART_Receive_IT(&huart1, u1_rx_buff, 1);
+  switch (u1_rx_buff[0]){
+    case (uint8_t)'a':
+      printf("VerboseLevel set to all\r\n");
+      SetVerboseLevel(VERBOSE_ALL);
+      break;
+    case (uint8_t)'f':
+      forceNTPupdate();  // sync the time now
+    break;
+    case (uint8_t)'i':
+      printf("VerboseLevel set to info\r\n");
+      SetVerboseLevel(VERBOSE_INFO);
+      break;
+    case (uint8_t)'m':
+      printf("VerboseLevel set to minimal\r\n");
+      SetVerboseLevel(VERBOSE_MINIMAL);
+      break;
+    case (uint8_t)'n':
+      printf("VerboseLevel set to none\r\n");
+      SetVerboseLevel(VERBOSE_NONE);
+      break;
+    case (uint8_t)'s':
+      sen5xReadTimer = HAL_GetTick();  // on request fire up the sen5x
+      break;
+    case (uint8_t)'t':
+      showTime(); // show me the current time
+      break;
+    default:
+      Error("Error unknown request from Serial UART1 (TTY)\r\n");
+      printf("Possible commands:\r\n\r\n");
+      printf("a - VerboseLevel set to all\r\n");
+      printf("f - Force NTP time synchronization\r\n");
+      printf("i - VerboseLevel set to info\r\n");
+      printf("m - VerboseLevel set to minimal\r\n");
+      printf("n - VerboseLevel set to none\r\n");
+      printf("s - Start particle measurement\r\n");
+      printf("t - Show actual systemtime\r\n");
+  break;
+  }
+  HAL_UART_Receive_IT(&huart1, u1_rx_buff, 1); //Re-arm the interrupt
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  /* Prevent unused argument(s) compilation warning */
+  UNUSED(GPIO_Pin);
+  if (GPIO_Pin == BOOT0_Pin) {
+    setuserToggle();
+    if (GetPMSensorPresence()) {
+      Sensor.PM_measurementEnabled = true;
+      setsen5xReadTimer(100);
+    }
+
+  }
+}
 
 /* USER CODE END 4 */
 
@@ -325,6 +463,8 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+    Error("Trapped in Error_Handler, wait for reset");
+    HAL_Delay(2500);
   }
   /* USER CODE END Error_Handler_Debug */
 }

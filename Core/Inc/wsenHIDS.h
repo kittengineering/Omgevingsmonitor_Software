@@ -49,6 +49,16 @@ typedef enum {
   HMM_LOW_PRECISION = 0xE0
 } HIDSMeasureModes;
 
+typedef enum {
+    HIDS_STATE_INIT,
+    HIDS_STATE_START_MEASUREMENTS,
+    HIDS_STATE_WAIT_FOR_COMPLETION,
+    HIDS_STATE_PROCESS_RESULTS,
+    HIDS_STATE_WAIT_FOR_READY,
+    HIDS_STATE_OFF,
+    HIDS_STATE_WAIT
+} wsenHIDSState;
+
 typedef bool (*I2CReadCb)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 typedef bool (*I2CWriteCB)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 
@@ -61,5 +71,7 @@ bool HIDS_GetMeasurementValues(float* humidity, float* temperature);
 bool HIDS_DeviceConnected(void);
 void HIDS_SetHeaterMode(HIDSHeaterModes modeHeater);
 void HIDS_SoftReset(void);
+wsenHIDSState HIDS_Upkeep(void);
+void setHIDSTimeStamp(uint32_t ticks);
 
 #endif /* INC_WSENHIDS_H_ */

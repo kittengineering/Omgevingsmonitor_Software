@@ -23,7 +23,7 @@
 #define BoxConfigCmd 0
 #define TempConfigCmd 1
 #define HumidConfigCmd 2
-#define VocRawConfigCmd 3
+#define NOxIndexConfigCmd 3
 #define VocIndexConfigCmd 4
 #define dBaConfigCmd 5
 #define dBcConfigCmd 6

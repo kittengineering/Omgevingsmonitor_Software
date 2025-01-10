@@ -31,6 +31,7 @@
 
 #include "sensirion_gas_index_algorithm.h"
 #include <math.h>
+#include "utils.h"
 
 static void GasIndexAlgorithm__init_instances(GasIndexAlgorithmParams* params);
 static void GasIndexAlgorithm__mean_variance_estimator__set_parameters(

@@ -24,7 +24,7 @@
 #define SGP_MEASURE_BUFFER_LENGTH 6
 #define SGP_MEASURE_BUFFER_RESPONSE_LENGTH 3
 #define SGP_SERIAL_NUMBER_SEGMENT_SIZE 3 // 2 bytes + 1 crc byte
-#define SGP_SENSOR_DUTYCYCLE (SGP_SENSOR_HEATUP_TIME + SGP_SENSOR_IDLE_TIME) * (100 / 20) // Duty cycle of 20%
+#define SGP_SENSOR_DUTYCYCLE (SGP_SENSOR_HEATUP_TIME + SGP_SENSOR_IDLE_TIME) * (100 / 20) // Duty cycle of 20% (100 / 20)
 #define SGP_SENSOR_HEATUP_TIME 170
 #define SGP_SENSOR_IDLE_TIME 30
 #define SGP_SELF_TEST_WAIT_TIME 320 // 320ms before the self test is ready
@@ -35,6 +35,18 @@
 typedef bool (*I2CReadCb)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 typedef bool (*I2CWriteCB)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
 
+typedef enum {
+    SGP_STATE_INIT,
+    SGP_STATE_START_MEASUREMENTS,
+    SGP_STATE_WAIT_FOR_COMPLETION,
+    SGP_STATE_PROCESS_RESULTS,
+    SGP_STATE_WAIT_FOR_READY,
+    SGP_STATE_OFF,
+    SGP_WAIT_STATE_MODE,
+    SGP_STATE_WAIT
+} SGP40State;
+
+void forceVOCstart(void);
 void SGP_Init(I2CReadCb readFunction, I2CWriteCB writeFunction);
 void SGP_StartMeasurement(void);
 bool SGP_GetMeasurementValues(int32_t* vocIndex);
@@ -42,5 +54,7 @@ bool SGP_DeviceConnected(void);
 bool SGP_SelfTest(void);
 void SGP_SoftReset(void);
 void SGP_GetHT(float* temperature, float* humidity);
-
+SGP40State SGP_Upkeep(void);
+void setSGP40TimeStamp(uint32_t ticks);
+void ResetSGP40samplecounter();
 #endif /* INC_SGP40_H_ */

@@ -21,7 +21,8 @@ typedef enum {
 } ChargeStatus;
 
 float      ReadBatteryVoltage(void);   // Returns battery voltage in mV
-float      ReadSolarVoltage(void);     // Returns solarpanel voltage in mV
+//float      ReadSolarVoltage(void);     // Returns solarpanel voltage in mV
+uint16_t ReadSolarVoltage(void);     // Returns solarpanel voltage in mV
 bool          Check_USB_PowerOn(void);    // True if 5V on USB Connector
 ChargeStatus  Read_Charge_Status(void);   // Returns Chargestatus
 
