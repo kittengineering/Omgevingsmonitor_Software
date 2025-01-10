@@ -1,7 +1,6 @@
 #include "../Inc/PC_Config.h"
 #include "../Inc/EEProm.h"
 #include "../Inc/Config.h"
-#include "utils.h"
 
 Receive_MSG received;
 
@@ -65,8 +64,8 @@ void ProcessCmd(Receive_MSG msg)
         case HumidConfigCmd:
             WriteUint8ArrayEepromSafe(HumidConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
-        case NOxIndexConfigCmd:
-            WriteUint8ArrayEepromSafe(NOxIndexConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
+        case VocRawConfigCmd:
+            WriteUint8ArrayEepromSafe(VocRawConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case VocIndexConfigCmd:
             WriteUint8ArrayEepromSafe(VocIndexConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
@@ -75,7 +74,7 @@ void ProcessCmd(Receive_MSG msg)
             WriteUint8ArrayEepromSafe(dBaConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case dBcConfigCmd:
-            WriteUint8ArrayEepromSafe(dBAConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
+            WriteUint8ArrayEepromSafe(dBcConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case CustomNameConfigCmd:
             WriteUint8ArrayEepromSafe(CustomNameConfigAddr, msg.Payload, msg.PayloadLength, CustomNameMaxLength);

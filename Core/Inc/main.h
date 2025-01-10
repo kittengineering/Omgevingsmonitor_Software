@@ -31,7 +31,6 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stdbool.h>
 
 /* USER CODE END Includes */
 
@@ -47,17 +46,13 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
+#define UART_CDC_DMABUFFERSIZE 16
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-extern uint32_t deviceTimeOut;
-extern uint8_t HIDSstate;
-extern uint8_t SGPstate;
-extern uint8_t MICstate;
-extern uint8_t ESPstate;
 
 /* USER CODE END EFP */
 
@@ -92,7 +87,6 @@ extern uint8_t ESPstate;
 #define Wireless_PSU_PG_GPIO_Port GPIOA
 #define BOOT0_Pin GPIO_PIN_15
 #define BOOT0_GPIO_Port GPIOA
-#define BOOT0_EXTI_IRQn EXTI4_15_IRQn
 #define Wireless_PSU_EN_Pin GPIO_PIN_11
 #define Wireless_PSU_EN_GPIO_Port GPIOC
 #define Boost_Enable_Pin GPIO_PIN_12
@@ -105,19 +99,9 @@ extern uint8_t ESPstate;
 #define MCU_LED_C_B_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-#define SRC_VERSION "3.72 BH"
-#define CURRENT_WEEK "2025w2-2"  // -x is daynumber of week i.e. monday = 1
-
-#define WAIT_WITH_PM 860
-#define WAIT_WITHOUT_PM 880
-
-//#define STLINK_V3PWR true
-
-#define UART_CDC_DMABUFFERSIZE 16
-#define PUBLIC
+#define SRC_VERSION "1.00"
 #define LED_BLINK_INTERVAL 1000
 void SetTestDone();
-void SystemClock_Config(void);
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

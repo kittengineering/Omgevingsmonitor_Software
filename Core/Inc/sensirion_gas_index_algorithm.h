@@ -61,10 +61,7 @@ extern "C" {
 
 #define GasIndexAlgorithm_ALGORITHM_TYPE_VOC (0)
 #define GasIndexAlgorithm_ALGORITHM_TYPE_NOX (1)
-//#define GasIndexAlgorithm_DEFAULT_SAMPLING_INTERVAL (1.f)  //this is the default from sensirion
-#define GasIndexAlgorithm_DEFAULT_SAMPLING_INTERVAL (900.f)  //this is the value for a sample every 15 minutes
-// Replaced by power dependent var GasIndexAlgorithm_Sampling_Interval
-// supported by function SetSGP40_GasIndexAlgorithm_Sampling_Interval in sgp40.c
+#define GasIndexAlgorithm_DEFAULT_SAMPLING_INTERVAL (1.f)
 #define GasIndexAlgorithm_INITIAL_BLACKOUT (45.f)
 #define GasIndexAlgorithm_INDEX_GAIN (230.f)
 #define GasIndexAlgorithm_SRAW_STD_INITIAL (50.f)
