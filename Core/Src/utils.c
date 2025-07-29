@@ -9,7 +9,7 @@
 
 // Default verbose level
 VerboseLevel CurrentVerboseLevel = VERBOSE_ALL;
-#define TEXTBUFFER_LEN 50
+#define TEXTBUFFER_LEN 128
 
 extern UART_HandleTypeDef huart1;
 
@@ -70,17 +70,29 @@ int _write(int fd, const void *buf, size_t count) {
   return count;
 }
 
-void SetVerboseLevel(VerboseLevel level) { CurrentVerboseLevel = level; }
-
-uint32_t GetCurrentHalTicks(void) {
-  return HAL_GetTick();
+void SetVerboseLevel(VerboseLevel level) {
+  CurrentVerboseLevel = level;
 }
+
+uint8_t GetVerboseLevel() {
+  return CurrentVerboseLevel; }
+
 
 void BinaryReleaseInfo() {
   Info("=-=-=-=-=-=WOTS Gadget started.=-=-=-=-=-=");
   Info("Build on: %s at %s", __DATE__, __TIME__);
   // Format: YY'w'WWv
-  Info("Git: 24w33a");
+  Info("Git: %s", CURRENT_WEEK);
   Info("Software version: %s", SRC_VERSION);
 }
+
+// Call this as: errorHandler(__func__, __LINE__, __FILE__);
+void errorHandler(const char * func, const uint32_t line, const char * file)
+{
+    printf("Error in %s at line %lu in file: %s\r\n", func, line, file);
+//    while (true)
+//    {
+//    }
+}
+
 

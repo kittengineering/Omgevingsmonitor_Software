@@ -31,6 +31,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdbool.h>
 
 /* USER CODE END Includes */
 
@@ -46,7 +47,6 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-#define UART_CDC_DMABUFFERSIZE 16
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -87,21 +87,55 @@ void Error_Handler(void);
 #define Wireless_PSU_PG_GPIO_Port GPIOA
 #define BOOT0_Pin GPIO_PIN_15
 #define BOOT0_GPIO_Port GPIOA
+#define BOOT0_EXTI_IRQn EXTI4_15_IRQn
 #define Wireless_PSU_EN_Pin GPIO_PIN_11
 #define Wireless_PSU_EN_GPIO_Port GPIOC
 #define Boost_Enable_Pin GPIO_PIN_12
 #define Boost_Enable_GPIO_Port GPIOC
 #define User_Button_Pin GPIO_PIN_2
 #define User_Button_GPIO_Port GPIOD
+#define User_Button_EXTI_IRQn EXTI2_3_IRQn
 #define MCU_LED_C_G_Pin GPIO_PIN_8
 #define MCU_LED_C_G_GPIO_Port GPIOB
 #define MCU_LED_C_B_Pin GPIO_PIN_9
 #define MCU_LED_C_B_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-#define SRC_VERSION "1.00"
+#define SRC_VERSION "3.72 BH"
+#define CURRENT_WEEK "2025w2-2"  // -x is daynumber of week i.e. monday = 1
+
+#define WAIT_WITH_PM 860
+#define WAIT_WITHOUT_PM 880
+
+//#define STLINK_V3PWR true
+
+#define UART_CDC_DMABUFFERSIZE 16
+#define PUBLIC
 #define LED_BLINK_INTERVAL 1000
+
+typedef enum {
+  ESP_PROGRAM_INIT,
+  ESP_PROGRAM_SEND,
+  ESP_PROGRAM_RTC,
+  ESP_PROGRAM_TEST,
+  ESP_PROGRAM_SET_CONN,
+  ESP_PROGRAM_RECONFIG
+} ESPProgram;
+
+typedef struct {
+  bool resume;
+  bool done;
+  bool ready;
+  bool startSend;
+  bool connectionMade;
+  uint8_t errorCounter;
+  uint32_t timeOutStamp;
+  ESPProgram mode;
+  uint8_t state;
+}ESPHandler;
+
 void SetTestDone();
+void SystemClock_Config(void);
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

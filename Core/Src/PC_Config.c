@@ -1,6 +1,7 @@
 #include "../Inc/PC_Config.h"
 #include "../Inc/EEProm.h"
 #include "../Inc/Config.h"
+#include "utils.h"
 
 Receive_MSG received;
 
@@ -56,6 +57,9 @@ void ProcessCmd(Receive_MSG msg)
     switch (msg.Command)
     {
         case BoxConfigCmd:
+            ClearEEprom(PM10ConfigAddr, IdSize);
+            ClearEEprom(PM2ConfigAddr, IdSize);
+            ClearEEprom(NOxIndexConfigAddr, IdSize);
             WriteUint8ArrayEepromSafe(BoxConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case TempConfigCmd:
@@ -64,8 +68,8 @@ void ProcessCmd(Receive_MSG msg)
         case HumidConfigCmd:
             WriteUint8ArrayEepromSafe(HumidConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
-        case VocRawConfigCmd:
-            WriteUint8ArrayEepromSafe(VocRawConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
+        case NOxIndexConfigCmd:
+            WriteUint8ArrayEepromSafe(NOxIndexConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case VocIndexConfigCmd:
             WriteUint8ArrayEepromSafe(VocIndexConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
@@ -74,7 +78,7 @@ void ProcessCmd(Receive_MSG msg)
             WriteUint8ArrayEepromSafe(dBaConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case dBcConfigCmd:
-            WriteUint8ArrayEepromSafe(dBcConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
+            WriteUint8ArrayEepromSafe(dBAConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
         case CustomNameConfigCmd:
             WriteUint8ArrayEepromSafe(CustomNameConfigAddr, msg.Payload, msg.PayloadLength, CustomNameMaxLength);
@@ -91,6 +95,14 @@ void ProcessCmd(Receive_MSG msg)
         case PM2ConfigCmd:
             WriteUint8ArrayEepromSafe(PM2ConfigAddr, msg.Payload, msg.PayloadLength, IdSize);
         break;
+        case SSIDConfigCmd:
+            ClearEEprom(SSIDStartAddr, SSIDAddrMaxSize);
+            WriteUint8ArrayEepromSafe(SSIDStartAddr, msg.Payload, msg.PayloadLength, SSIDAddrMaxSize);
+            break;
+        case PasswordConfigCmd:
+            ClearEEprom(PasswordStartAddr, PasswordAddrMaxSize);    
+            WriteUint8ArrayEepromSafe(PasswordStartAddr, msg.Payload, msg.PayloadLength, PasswordAddrMaxSize);
+            break;
         case ClearConfigCmd:
             ClearEEprom(EEPromStartAddr, ConfigSize);
         break;

@@ -14,7 +14,7 @@ uint32_t WriteUint8ArrayEeprom(uint32_t startAddr, uint8_t data[], uint16_t size
     return addr;
 }
 
-uint32_t WriteUint8ArrayEepromSafe(uint32_t startAddr, uint8_t data[], uint16_t size, uint16_t maxSize)
+void WriteUint8ArrayEepromSafe(uint32_t startAddr, uint8_t data[], uint16_t size, uint16_t maxSize)
 {
     if (size <= maxSize)
     {
@@ -22,7 +22,7 @@ uint32_t WriteUint8ArrayEepromSafe(uint32_t startAddr, uint8_t data[], uint16_t 
     }
 }
 
-void ReadUint8ArrayEEprom(uint32_t startAddr, uint8_t data[], uint16_t size)
+void ReadUint8ArrayEEprom(uint32_t startAddr, uint8_t data[], uint8_t size)
 {
     for (uint16_t i = 0; i < size; i++)
     {

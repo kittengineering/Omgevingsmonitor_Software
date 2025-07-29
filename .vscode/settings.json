@@ -1,0 +1,19 @@
+{
+    "cortex-debug.openocdPath": "C:\\VSARM\\OPENOCD\\BIN\\OPENOCD.EXE",
+    "files.associations": {
+        "arm_const_structs.h": "c",
+        "sound_lut_select.h": "c",
+        "microphone.h": "c",
+        "statuscheck_teun.h": "c",
+        "realtimeclock.h": "c",
+        "wsenhids.h": "c",
+        "sgp40_teun.h": "c",
+        "setled_teun.h": "c",
+        "i2csensors.h": "c",
+        "wsenhids_teun.h": "c",
+        "utils.h": "c",
+        "statuscheck.h": "c",
+        "main.h": "c"
+    },
+    "cortex-debug.variableUseNaturalFormat": false
+}

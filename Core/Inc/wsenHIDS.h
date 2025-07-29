@@ -5,8 +5,8 @@
  *      Author: Joris Blankestijn
  */
 
-#ifndef INC_WSENHIDS_H_
-#define INC_WSENHIDS_H_
+#ifndef INC_WSENHIDS_TEUN_H_
+#define INC_WSENHIDS_TEUN_H_
 
 #include <stdbool.h>
 #include <stdio.h>
@@ -30,36 +30,63 @@
 #define HIDS_CRC_BIT_LENGTH 16
 #define HIDS_CRC_POLYNOMIAL 0x31 // CRC-8 polynomial: x^8 + x^5 + x^4 + 1
 #define HIDS_CRC_INIT_VALUE 0xff
-#define HIDS_POW_2_16_MINUS_1 65535.0
 #define HIDS_SENSOR_INITIAL_INTERVAL 1000
+#define HIDS_MEASUREMENT_TIME 1500
 #define HIDS_MAX_MEASUREMENTS 256
 
-typedef enum {
-  HHM_HIGH_PRECISION_1S_200MW = 0x39,
-  HHM_HIGH_PRECISION_100MS_200MW = 0x32,
-  HHM_HIGH_PRECISION_1S_110MW = 0x2F,
-  HHM_HIGH_PRECISION_100MS_110MW = 0x24,
-  HHM_HIGH_PRECISION_1S_20MW = 0x1E,
-  HHM_HIGH_PRECISION_100MS_20MW = 0x15
+typedef enum
+{
+	HHM_HIGH_PRECISION_1S_200MW = 0x39,
+	HHM_HIGH_PRECISION_100MS_200MW = 0x32,
+	HHM_HIGH_PRECISION_1S_110MW = 0x2F,
+	HHM_HIGH_PRECISION_100MS_110MW = 0x24,
+	HHM_HIGH_PRECISION_1S_20MW = 0x1E,
+	HHM_HIGH_PRECISION_100MS_20MW = 0x15
 } HIDSHeaterModes;
 
-typedef enum {
-  HMM_HIGH_PRECISION = 0xFD,
-  HMM_MEDIUM_PRECISION = 0xF6,
-  HMM_LOW_PRECISION = 0xE0
+typedef enum
+{
+	HMM_HIGH_PRECISION = 0xFD,
+	HMM_MEDIUM_PRECISION = 0xF6,
+	HMM_LOW_PRECISION = 0xE0
 } HIDSMeasureModes;
 
-typedef bool (*I2CReadCb)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
-typedef bool (*I2CWriteCB)(uint8_t address, uint8_t* buffer, uint8_t nrBytes);
+typedef enum
+{
+	HIDS_STATE_INIT,
+	HIDS_STATE_START_MEASUREMENTS,
+	HIDS_STATE_WAIT_FOR_COMPLETION,
+	HIDS_STATE_PROCESS_RESULTS,
+	HIDS_STATE_WAIT_FOR_READY,
+	HIDS_STATE_OFF,
+	HIDS_STATE_WAIT,
+	HIDS_STATE_DONE,
+	HIDS_STATE_WAIT_FOR_HEATER,
+	HIDS_STATE_WAIT_FOR_COMPLETION_RH
+} wsenHIDSState;
 
-void HIDS_Init(I2CReadCb readFunction, I2CWriteCB writeFunction);
+typedef struct {
+	//SensorType TH;
+	wsenHIDSState state;
+}humidTempSens;
+
+typedef bool (*I2CReadCb)(uint8_t address, uint8_t *buffer, uint8_t nrBytes);
+typedef bool (*I2CWriteCB)(uint8_t address, uint8_t *buffer, uint8_t nrBytes);
+typedef bool (*I2CTransmissionDoneCB)();
+
+void HIDS_Init(I2CReadCb readFunction, I2CWriteCB writeFunction, I2CTransmissionDoneCB statusFunction);
 void HIDS_SetMeasurementMode(HIDSMeasureModes modeMeasure);
 void HIDS_StartMeasurement(void);
 void HIDS_SetMeasurementDuration(uint32_t duration);
 bool HIDS_MeasurementReady(void);
-bool HIDS_GetMeasurementValues(float* humidity, float* temperature);
+bool HIDS_GetMeasurementValues(float *humidity, float *temperature);
 bool HIDS_DeviceConnected(void);
-void HIDS_SetHeaterMode(HIDSHeaterModes modeHeater);
+void HIDS_EnableHeater(HIDSHeaterModes heaterMode);
 void HIDS_SoftReset(void);
+void hydroTempInit(SensorType2* HT);
+wsenHIDSState HIDS_Upkeep();
+void setHIDSTimeStamp(uint32_t ticks);
+void HIDS_Interval(uint32_t interval);
+void HIDS_Resume(bool value);
 
 #endif /* INC_WSENHIDS_H_ */

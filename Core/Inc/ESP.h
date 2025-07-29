@@ -17,18 +17,22 @@
 #include "PC_Config.h"
 #include "statusCheck.h"
 
-
+//#define LONGMESSAGES true  // show long messages f.i. the datagram on debug UART
+#define LONGDATAGRAM
 #define ESP_MAX_UART_RETRIES 2
-#define ESP_MAX_BUFFER_SIZE 255
+#define ESP_MAX_BUFFER_SIZE 256
 #define ESP_TX_BUFFER_SIZE 512
 #define ESP_START_UP_TIME 700
 #define ESP_RESPONSE_TIME 10
 #define ESP_RESPONSE_LONG 50
-#define ESP_WIFI_INIT_TIME 500
+#define ESP_WIFI_INIT_TIME 1000
 #define ESP_DMA_TIMEOUT 100
-#define ESP_AT_COMMANDS_COUNT 4
-#define ESP_UNTIL_NEXT_SEND 300000
-
+//#define ESP_AT_COMMANDS_COUNT 4
+#define ESP_WIFI_RETRY_TIME 750
+#define ESP_WIFI_WAIT_RESPONSE_TIME_FACTOR 3
+#define ESP_UNTIL_NEXT_SEND 10000//120000 //240000  // about every 5 minutes (to keep from sending every run, when not in sleep mode)
+#define ESP_UNTIL_NEXT_NTP 75398223  //about every 24 hours
+#define ESP_MAX_RETRANSMITIONS 3
 #define ESP_SEND_TEMP "\"temp\""
 #define ESP_SEND_HUMID "\"humid\""
 #define ESP_SEND_SOUND "\"sound\""
@@ -38,27 +42,22 @@
 
 #define AT_RESPONSE_OK "OK"
 #define AT_RESPONSE_ERROR "ERROR"
+#define AT_RESPONSE_FAIL "FAIL"
 #define AT_RESPONSE_READY "ready"
 #define AT_RESPONSE_START ">"
 #define AT_RESPONSE_WIFI "WIFI CONNECTED"
+#define AT_RESPONSE_TIME_UPDATED "+TIME_UPDATED"
+#define AT_RESPONSE_CIPSNTPTIME "+CIPSNTPTIME:"
 
-#define AT_COMMANDS_SIZE 18
-
-typedef enum {
-  ESP_TEST_INIT,
-  ESP_TEST_SEND,
-  ESP_TEST_RECEIVE,
-  ESP_TEST_VALIDATE,
-  ESP_TEST_DEINIT,
-  ESP_TEST_BOOT
-}ESP_Test;
+#define AT_COMMANDS_SIZE 21
 
 typedef enum {
   AT_MODE_INIT,
   AT_MODE_CONFIG,
   AT_MODE_SEND,
   AT_MODE_RECONFIG,
-  AT_MODE_TEST
+  AT_MODE_TEST,
+  AT_MODE_GETTIME
 }AT_Mode;
 
 typedef enum {
@@ -72,35 +71,15 @@ typedef enum {
   RECEIVE_STATUS_UNPROGGED,
   RECEIVE_STATUS_HOME,
   RECEIVE_STATUS_SSID,
-  RECEIVE_STATUS_LOOP
+  RECEIVE_STATUS_TIME
 }Receive_Status;
 
 typedef enum {
   RECEIVE_EXPECTATION_OK,
   RECEIVE_EXPECTATION_READY,
   RECEIVE_EXPECTATION_START,
-  RECEIVE_EXPECTATION_WIFI,
-  RECEIVE_EXPECTATION_SSID,
+  RECEIVE_EXPECTATION_TIME
 } AT_Expectation;
-
-typedef enum {
-  ESP_STATE_OFF,
-  ESP_STATE_IDLE,
-  ESP_STATE_INIT,
-  ESP_STATE_WAIT_FOR_REPLY,
-  ESP_STATE_SEND,
-  ESP_STATE_NEXT_AT,
-  ESP_STATE_PROCESS_AT,
-  ESP_STATE_ERROR,
-  ESP_STATE_WAIT_TO_SEND,
-  ESP_STATE_RESET,
-  ESP_STATE_RECEIVE_DATA,
-  ESP_STATE_MODE_SELECT,
-  ESP_STATE_FAULT,
-  ESP_STATE_DEINIT,
-  ESP_STATE_CONFIG,
-  ESP_STATE_WAIT_AWAKE
-} ESP_States;
 
 typedef enum {
   AT_WAKEUP,
@@ -119,13 +98,18 @@ typedef enum {
   AT_WEBSERVER,
   AT_HTTPCPOST,
   AT_SENDDATA,
-  AT_SLEEP,
-  AT_END
+  AT_CIPSNTPCFG,
+  AT_CIPSNTPTIME,
+  AT_CIPSNTPINTV,
+  AT_END,
+  /// @brief AT commands for debugging /////////////////////////
+  // AT_ECHO,
+  // AT_SYSLOG
 } AT_Commands;
 
-typedef struct BeursConfig {
-  char SSID[50];
-  char Password[50];
+typedef struct {
+  char SSID[32];
+  char Password[64];
 }WifiConfig;
 
 typedef struct {
@@ -139,16 +123,38 @@ typedef struct {
   char BatteryChargeAddress[30];
 }APIConfig;
 
+typedef enum {
+	ESP_STATE_IDLE,
+	ESP_STATE_INIT,
+	ESP_STATE_WAIT_FOR_REPLY,
+	ESP_STATE_SEND,
+	ESP_STATE_NEXT_AT,
+	ESP_STATE_PROCESS_AT,
+	ESP_STATE_ERROR,
+	ESP_STATE_WAIT_TO_SEND,
+	ESP_STATE_RESET,
+	ESP_STATE_RECEIVE_DATA,
+	ESP_STATE_MODE_SELECT,
+	ESP_STATE_FAULT,
+	ESP_STATE_DEINIT,
+	ESP_STATE_WAIT_AWAKE,
+	ESP_STATE_SEND_DONE,
+	ESP_STATE_WAIT_RESET
+} ESP_States;
+
+
 void ESP_Init(UART_HandleTypeDef* espUart);
-ESP_States ESP_Upkeep(void);
+ESP_States ESP_Upkeep();
+void initESPHandler(ESPHandler* ESPHand);
+void initUart(UART_HandleTypeDef* espUart);
 void ESP_Reset(void);
 void ESP_Sleep(void);
-void ESP_DeInit(void);
+void DisableESP(void);
 void ESP_WakeTest();
-void setMeasurement(float temp, float humid, uint16_t voc);
-void setMic(float dB);
+void getWifiCred(void);
+void initVariableLink(SensorType2* HT, SensorType1* VOC, SensorType1* DB, SensorType3* Sens);
 void SetConfigMode();
-void ESP_GetHT(float temp, float humid);
+void forceNTPupdate();
 
 #endif /* INC_ESP_H_ */
 
